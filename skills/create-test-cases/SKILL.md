@@ -84,11 +84,11 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 
 ### Hacer (obligatorio)
 
-- **Máximo ~15 pasos por TC** — si son más, dividir en TCs separados
+- **Flujo narrativo continuo por pantalla/funcionalidad** — todos los escenarios que ocurren en la misma pantalla/popup van en 1 solo TC secuencial, sin salir de ella
+- **Dividir en TCs separados SOLO cuando** el flujo requiere cambiar de pantalla, de módulo, o cuando las precondiciones son incompatibles entre sí
 - **Cada paso = 1 acción + 1 resultado esperado observable**
 - **Resultados específicos**: qué texto aparece, qué elementos se habilitan/deshabilitan, qué cambia en pantalla
 - **Español correcto** con tildes y ortografía impecable (á, é, í, ó, ú, ñ)
-- **Un solo concepto/escenario por TC** (principio de atomización)
 - **Nombrar elementos UI exactamente** como aparecen en pantalla (botones, campos, labels)
 
 ### NO hacer (prohibido)
@@ -96,8 +96,8 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 - ❌ `"Vuelve al paso X"` — no es observable, no sirve como resultado esperado
 - ❌ Copiar/pegar criterios de aceptación como pasos del TC
 - ❌ Pasos sin resultado esperado (excepto PRECONDs)
-- ❌ Combinar varias acciones distintas en un solo paso
-- ❌ Mezclar más de 2 escenarios en un mismo TC
+- ❌ Combinar varias acciones distintas en un solo paso cuando cada una tiene resultado esperado diferente
+- ❌ Crear TCs separados para escenarios que ocurren en la misma pantalla/popup y comparten el mismo flujo de navegación
 - ❌ Resultados vagos como "funciona correctamente" o "se actualiza la página"
 - ❌ Usar comillas dobles `"` dentro del texto de pasos (causa problemas de escape XML/JSON) — preferir comillas simples o describir sin comillas
 
