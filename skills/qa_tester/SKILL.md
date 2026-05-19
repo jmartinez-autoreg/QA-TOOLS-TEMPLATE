@@ -60,9 +60,24 @@ Recibir US → Analizar criterios de aceptación
 → [ADO] Agregar TC al Suite (mcp_ado_testplan_add_test_cases_to_suite)
 → [ADO] TC state = Ready (mcp_ado_wit_update_work_item: System.State = Ready)
 → [ADO] US: TestPlanCompleted = True (mcp_ado_wit_update_work_item: Custom.TestPlanCompleted = True)
+→ [ADO] Crear tareas QA hijas de la US (mcp_ado_wit_add_child_work_items, type: Task):
+      • "QA - Preparar Test Plan" | "QA - Ejecutar Test Plan" | "QA - Demo"
+      ⚠️ add_child_work_items NO soporta AssignedTo ni horas — solo title/description/iterationPath/areaPath
+→ [ADO] Asignar y setear horas en las 3 tareas (mcp_ado_wit_update_work_items_batch):
+      • System.AssignedTo = <usuario QA>
+      • Microsoft.VSTS.Scheduling.OriginalEstimate = <horas>
+      • Microsoft.VSTS.Scheduling.RemainingWork = <horas> (solo tareas NO cerradas)
+      • Microsoft.VSTS.Scheduling.CompletedWork = <horas> (solo tareas Closed)
+      ⚠️ RemainingWork NO se puede setear en tareas con estado Closed — omitir ese campo para ellas
+→ [ADO] Cerrar tarea "QA - Preparar Test Plan" (System.State = Closed)
 → Generar tabla tareas ADO (Preparar TP + Ejecutar TP + QA Demo con horas y estados)
-→ Generar tabla Daily (Logros + Trabajo del día con las US del sprint activo)
-→ Generar tabla de tiempo (una fila por tarea cerrada hoy con nota oficial)
+→ ⚠️ ANTES de generar Daily y tabla de tiempo: si no está claro qué tareas realizó el usuario hoy,
+   PREGUNTAR explícitamente. Ejemplos: "¿Ya realizaste la demo para US-XXXX?", "¿Ejecutaste el Test Plan hoy?"
+   NO asumir que todas las tareas creadas fueron ejecutadas.
+→ Generar Daily en formato oficial (ver sección "Formato del Daily") con título "Tareas realizadas — DD/MM/AAAA"
+→ Generar tabla de tiempo propuesta (una fila por tarea cerrada hoy con nota oficial)
+→ ⚠️ Mostrar tabla de tiempo al usuario y preguntar: "¿Estos registros son correctos? Confirma con ✅ o indícame qué cambiar."
+→ Solo proceder a registrar en Zoho cuando el usuario confirme explícitamente
 ```
 
 > ⚠️ Cada línea `[ADO]` es una llamada obligatoria a la API. No dar por hecha ninguna sin ejecutarla.
@@ -80,8 +95,11 @@ Verificar pipelines → Ejecutar pasos TC → Adjuntar evidencias
 ### Fase 3 — Daily y Registro de Tiempo
 
 ```
-Generar tabla Daily (Logros + Trabajo del día)
-→ Generar tabla de tiempo con notas aprobadas
+⚠️ Preguntar qué tareas realizó el usuario hoy si no está claro
+→ Generar Daily con formato "Tareas realizadas — DD/MM/AAAA" (ver sección Formato del Daily)
+→ Generar tabla de tiempo propuesta y mostrarla al usuario
+→ Preguntar: "¿Estos registros son correctos? Confirma con ✅ o indícame qué cambiar."
+→ Solo registrar en Zoho tras confirmación explícita del usuario
 → Generar tabla tareas ADO para actualizar
 ```
 
@@ -132,6 +150,11 @@ Dividir en TCs separados cuando:
 2. Los escenarios son flujos negativos que destruirían el estado para el flujo positivo
 3. El TC tendría más de 15 pasos (señal de que hay más de un flujo)
 4. Hay roles de usuario distintos que impiden ejecutarlos en secuencia
+
+**NO dividir cuando:**
+5. La validación del estado inicial de un elemento forma parte del flujo feliz → incluirla como **paso de verificación al inicio del TC del flujo feliz**, no como TC separado.
+   - Ejemplo: si el botón de descarga en lote debe estar deshabilitado antes de seleccionar registros, ese paso va en TC1 ("Verificar que el botón está deshabilitado") antes de que el usuario haga la selección.
+   - Un TC negativo separado solo se justifica cuando el escenario requiere setup o precondiciones **distintas** al flujo feliz.
 
 ---
 
@@ -249,6 +272,76 @@ Bug registrado: #[BUG_ID]
 
 ---
 
+## Formato del Daily
+
+### Título
+
+```
+Tareas realizadas — DD/MM/AAAA
+```
+
+### Estructura
+
+```
+Logros desde la última reunión
+• [Estado o tarea] ([total]): [orden]-[número], [orden]-[número]
+• --- listado ---
+Total: [N]
+
+Trabajo del día
+• [Tarea] ([total]): [orden]-[número], [orden]-[número]
+• --- listado ---
+Total: [N]
+```
+
+### Categorías válidas
+
+**Logros desde la última reunión** (lo que ya se completó antes de la reunión):
+- Cerradas
+- Reactivadas
+- On Hold (agregar `[razón]` al final: ej. `2-68732 [Emails]`)
+- Mejoras
+- Demos
+- Test Plans
+
+**Trabajo del día** (tareas planificadas para HOY):
+- Ejecutar Pruebas
+- Ejecutar Test Plans
+- Demos
+- Preparar Test Plans
+
+### Ejemplo completo
+
+```
+Tareas realizadas — 19/05/2026
+
+Logros desde la última reunión
+• Cerradas (2): 1-65436, 3-67876
+• Reactivadas (2): 6-65433, 10-68732
+• On Hold (1): 2-68732 [Emails]
+• Mejoras (1): 20-83557
+• Demos (1): 6-98373
+• Test Plans (2): 1-65436, 3-67876
+Total: 9
+
+Trabajo del día
+• Ejecutar Pruebas (1): 20-83557
+• Ejecutar Test Plans (1): 8-84356
+• Demos (3): 20-83557, 8-84356, 5-83803
+• Preparar Test Plans (1): 18-83824
+Total: 6
+```
+
+### Reglas del Daily
+
+1. **Si el agente no tiene certeza** de qué tareas realizó el usuario hoy, DEBE preguntar antes de generar el Daily
+2. **No asumir** qué tareas del día se completaron basándose solo en las tareas creadas en ADO — pueden estar en estado New sin ejecutarse
+3. El formato `[orden]-[número]` usa el número de orden de la US en el sprint y el ID de ADO (ej. `1-65436`)
+4. Si no hay logros previos al día, la sección "Logros" lista solo lo completado hoy
+5. **La tabla de tiempo** se muestra al usuario para confirmación ANTES de registrar en Zoho
+
+---
+
 ## Anti-Patrones (NUNCA hacer)
 
 | ❌ Evitar | ✅ Hacer en su lugar |
@@ -259,6 +352,11 @@ Bug registrado: #[BUG_ID]
 | Resultados esperados de backend | Solo comportamiento visible en la UI |
 | Dar por hecha una llamada ADO sin ejecutarla | Confirmar cada llamada MCP |
 | Crear TC sin revisar Discussion de la US | Revisar siempre — hay actualizaciones post-redacción |
+| Crear tareas QA con add_child_work_items y asumir que tienen AssignedTo/horas | Siempre hacer llamada adicional con update_work_items_batch para AssignedTo + horas |
+| Setear RemainingWork en tarea Closed | Omitir RemainingWork para tareas en estado Closed; solo usar CompletedWork |
+| Crear un TC separado para validar el estado inicial de un elemento (ej. botón deshabilitado sin selección) | Incluir esa verificación como un paso de verificación al inicio del TC del flujo feliz |
+| Generar tabla de tiempo y registrar en Zoho sin confirmación del usuario | Mostrar tabla propuesta y preguntar "¿Estos registros son correctos? ✅" antes de registrar |
+| Asumir qué tareas del día completó el usuario (ej. asumir que hizo Demo solo porque la tarea existe) | Preguntar explícitamente qué tareas realizó antes de armar el Daily y la tabla de tiempo |
 
 ---
 
@@ -269,9 +367,13 @@ Bug registrado: #[BUG_ID]
 □ TC(s) agregados a la Suite correcta del Test Plan
 □ TC(s) en estado Ready
 □ US marcada con TestPlanCompleted = True
+□ Tareas QA creadas (add_child_work_items) + AssignedTo/horas seteadas (update_work_items_batch)
+□ Tarea "QA - Preparar Test Plan" cerrada
 □ Tabla de tareas ADO generada (Preparar TP / Ejecutar TP / QA Demo)
-□ Tabla Daily generada (Logros + Trabajo del día)
-□ Tabla de tiempo generada con notas oficiales
+□ Preguntado al usuario qué tareas realizó hoy antes de armar el Daily
+□ Daily generado con formato "Tareas realizadas — DD/MM/AAAA" (Logros + Trabajo del día)
+□ Tabla de tiempo propuesta mostrada al usuario para confirmación
+□ Registro en Zoho ejecutado solo tras confirmación explícita del usuario
 ```
 
 ## Checklist de Cierre Fase 2
