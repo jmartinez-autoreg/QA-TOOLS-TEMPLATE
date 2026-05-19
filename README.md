@@ -1,6 +1,6 @@
 # 🤖 Playwright Agent — Guía de Operación
 
-> Este archivo se instaló automáticamente con `npx github:jhongraph/playwright-agent-template`.  
+> Este archivo se instaló automáticamente con `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE`.  
 > Léelo antes de empezar. Contiene todo lo que necesitas para operar el agente.
 
 ---
@@ -154,7 +154,7 @@ Archivos       →  Rutas a archivos a subir (Excel, PDF) [si el TC los necesita
 Si hay una nueva versión disponible, vuelve a ejecutar el mismo comando:
 
 ```bash
-npx github:jhongraph/playwright-agent-template
+npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE
 ```
 
 Esto actualiza tanto los archivos de workspace como las skills instaladas en `~/.agents/skills/`.
@@ -182,8 +182,8 @@ Las siguientes skills se instalaron en `~/.agents/skills/` y el agente las usa a
 | Error de MCP ADO | Verifica que el MCP de Azure DevOps esté configurado y autenticado |
 | El browser no abre | Verifica que el MCP de Playwright (Browser) esté activo |
 | Node.js no encontrado | Instala Node.js 18+ desde https://nodejs.org |
-| Skills no funcionan | Re-ejecuta `npx github:jhongraph/playwright-agent-template` |
+| Skills no funcionan | Re-ejecuta `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE` |
 
 ---
 
-*Generado por [playwright-agent-template](https://github.com/jhongraph/playwright-agent-template)*
+*Generado por [QA-TOOLS-TEMPLATE](https://github.com/jmartinez-autoreg/QA-TOOLS-TEMPLATE)*

@@ -61,7 +61,7 @@ Mac/Linux: ~/QA/mi-proyecto/
 ### Paso 2 — Abre esa carpeta en la terminal y ejecuta
 
 ```bash
-npx github:jhongraph/playwright-agent-template
+npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE
 ```
 
 Esto descarga e instala automáticamente:
@@ -262,7 +262,7 @@ Los skills son las "capacidades" del agente. Se instalan automáticamente en `~/
 Si hay una nueva versión disponible:
 
 ```bash
-npx github:jhongraph/playwright-agent-template --force
+npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE --force
 ```
 
 Esto actualiza tanto los archivos del workspace como los skills instalados en `~/.agents/skills/`.
@@ -277,7 +277,7 @@ Esto actualiza tanto los archivos del workspace como los skills instalados en `~
 | "MCP ADO no responde" | Verifica que el MCP de Azure DevOps esté configurado y con sesión activa en VS Code |
 | "El browser no abre" | Verifica que el MCP de Playwright (Browser) esté activo |
 | "Node.js no encontrado" | Instala Node.js 18+ desde [nodejs.org](https://nodejs.org) |
-| Los skills no funcionan | Vuelve a ejecutar `npx github:jhongraph/playwright-agent-template` |
+| Los skills no funcionan | Vuelve a ejecutar `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE` |
 | Error en PowerShell (Windows) | Ejecuta los comandos así: `cmd /c "npx ..."` en la terminal |
 | El agente no registra en Zoho | Verifica que Portal ID y Project ID estén configurados en `zoho_timelog/SKILL.md` |
 | "Límite de 15 horas en Zoho" | Es un límite de la API de Zoho. Distribuye el exceso al día siguiente |
@@ -285,5 +285,5 @@ Esto actualiza tanto los archivos del workspace como los skills instalados en `~
 
 ---
 
-*Generado por [playwright-agent-template](https://github.com/jhongraph/playwright-agent-template)*
+*Generado por [QA-TOOLS-TEMPLATE](https://github.com/jmartinez-autoreg/QA-TOOLS-TEMPLATE)*
 
