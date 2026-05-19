@@ -1,7 +1,7 @@
 {
   "name": "playwright-agent-template",
-  "version": "1.0.0",
-  "description": "Template de Playwright E2E Agent con integración ADO",
+  "version": "2.0.0",
+  "description": "QA Agent Template — Playwright E2E + QA Tester + Zoho Time Log con integración Azure DevOps",
   "main": "index.js",
   "bin": "./index.js",
   "scripts": {

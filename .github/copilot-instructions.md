@@ -1,15 +1,18 @@
-# Playwright E2E Agent — Instrucciones del Workspace
+# QA Agent — Instrucciones del Workspace
 
 > ⚠️ **ESTE ARCHIVO SE LEE AUTOMÁTICAMENTE.** Seguir TODOS los pasos antes de actuar.
+> Antes de cualquier acción, también leer: **`00_AGENT_RULES.md`** (reglas globales obligatorias).
 
 ---
 
-## 🚦 PASO 0 — PREGUNTAR ESCENARIO (SIEMPRE, SIN EXCEPCIÓN)
+## 🚦 PASO 0 — IDENTIFICAR EL TIPO DE SOLICITUD
 
-**ANTES de hacer CUALQUIER cosa**, el agente DEBE preguntar:
+El agente identifica primero qué tipo de tarea se pide:
 
-> Para asegurarme de entender correctamente tu solicitud, necesito que confirmes:
->
+### Solicitudes de Automatización / Ejecución de TCs → preguntar A o B
+
+**Si el usuario menciona Test Plans, TCs, ejecutar, automatizar, crear tests:**
+
 > **¿Qué escenario necesitas?**
 >
 > **A** — Proyecto Playwright completo
@@ -25,24 +28,30 @@
 >
 > Responde **A** o **B** para continuar.
 
-### ⛔ PROHIBICIÓN ABSOLUTA
+### Solicitudes de QA / Test Cases → ir directo al skill
 
-- **NO ejecutar ninguna acción hasta recibir respuesta A o B**
+- "analizar US", "preparar test plan", "crear TC", "redactar casos" → cargar `qa_tester`
+- "registrar horas", "registrar tiempo", "zoho", "time log" → cargar `zoho_timelog`
+- "daily", "reporte del día" → cargar `zoho_timelog`
+
+### ⛔ PROHIBICIONES
+
+- **NO ejecutar ninguna acción de automatización** hasta recibir respuesta A o B
 - **NO asumir el escenario** basándose en las palabras del usuario
-- **NO saltarse esta pregunta** aunque el usuario parezca claro en su intención
-- Si el usuario no responde A o B, **volver a preguntar**
+- **NO inventar datos** de US, horas, IDs — preguntar si faltan
 
 ---
 
 ## 🔒 PASO 1 — ROUTING AL SKILL CORRECTO
 
-**Solo después de recibir A o B**, identificar el skill según el request:
+**Solo después de identificar el tipo de solicitud**, cargar el skill con `read_file`:
 
-| Si el usuario menciona... | Skill a cargar con `read_file` | Ruta |
-|---------------------------|-------------------------------|------|
+| Si el usuario menciona... | Skill a cargar | Ruta |
+|---------------------------|----------------|------|
+| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
+| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
 | "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| "automatizar", "convertir TC a código", "crear tests" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
-| "crear test case", "escribir TC", "redactar caso" | `create-test-cases` | `~/.agents/skills/create-test-cases/SKILL.md` |
+| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
 | "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
 | "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
 
@@ -278,7 +287,9 @@ Schemas de referencia en `.agent-state/*.schema.json`.
 2. **El PAT de ADO se extrae automáticamente** del MCP config — nunca pedir al usuario
 3. **Los TCs se leen de ADO** vía MCP — nunca pedir que el usuario copie/pegue pasos
 4. **Procesar TCs de uno en uno** — no paralelizar sobre el mismo TC
-5. **Preguntar A o B es OBLIGATORIO** — nunca inferir del contexto
+5. **Para automatización: preguntar A o B** — nunca inferir del contexto
+6. **Para QA/Zoho: cargar el skill directamente** sin preguntar A o B
+7. **Nunca inventar datos** — IDs de Zoho, horas, fechas, actividades → siempre preguntar
 
 ---
 
@@ -286,12 +297,12 @@ Schemas de referencia en `.agent-state/*.schema.json`.
 
 ```
 1. Usuario envía mensaje
-2. PREGUNTAR "¿Escenario A o B?" (SIEMPRE — sin excepción)
-3. Esperar respuesta del usuario
-4. ¿Contiene keywords de ejecución/automatización/creación?
-   → SÍ: Identificar skill correcto, cargarlo con read_file
-   → NO: Responder normalmente
-5. Seguir las PHASES del skill en orden
+2. ¿Es sobre QA / Test Plan / redactar casos?  → cargar qa_tester   (sin preguntar A/B)
+   ¿Es sobre horas / Zoho / daily?             → cargar zoho_timelog (sin preguntar A/B)
+   ¿Es sobre ejecutar / automatizar TCs?       → preguntar "¿A o B?"
+3. Esperar respuesta si se preguntó A/B
+4. Cargar el skill correcto con read_file
+5. Seguir las FASES / PHASES del skill en orden
 6. No saltar pasos
-7. Reportar resultado al final
+7. Reportar resultado al final con IDs de elementos creados/modificados
 ```

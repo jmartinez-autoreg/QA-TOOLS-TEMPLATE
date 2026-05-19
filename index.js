@@ -33,6 +33,9 @@ if (fs.existsSync(skillsSrc)) {
   copyDir(skillsSrc, skillsDest);
   console.log('\n✅ Skills instalados en ' + skillsDest + ':');
   fs.readdirSync(skillsSrc).forEach(s => console.log('   📦 ' + s));
+  console.log('\n   ⚙️  CONFIGURACIÓN REQUERIDA:');
+  console.log('      zoho_timelog/SKILL.md → Actualiza Portal ID, Project ID y mapeo de US');
+  console.log('      qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
 }
 
 // 3. Crear carpeta .agent-state/ si no existe
@@ -53,6 +56,6 @@ if (!fs.existsSync(envDest) && fs.existsSync(envExample)) {
 }
 
 console.log('\n🚀 Listo. Abre VS Code y usa GitHub Copilot Agent.');
-console.log('   Completa .env.playwright con las credenciales del entorno.');
-console.log('   Dile al agente: "ejecuta Test Plan 9361, Suite 9363, URL: https://tu-app.com"\n');
-if (!force) console.log('   Tip: usa --force para sobreescribir archivos existentes en re-instalaciones.\n');
+console.log('   Lee el README.md para empezar.');
+console.log('   Configura los skills con datos de tu empresa (ver sección ⚙️ arriba).\n');
+if (!force) console.log('   Tip: usa --force para sobreescribir archivos en actualizaciones.\n');

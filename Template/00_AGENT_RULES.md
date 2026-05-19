@@ -1,0 +1,85 @@
+# REGLAS OBLIGATORIAS PARA AGENTES DE IA
+
+> ⚠️ **¡ALTO! LEE ESTO ANTES DE EJECUTAR CUALQUIER ACCIÓN O GENERAR CÓDIGO/TEST CASES.**
+
+Como agente de IA, estás obligado a seguir estrictamente las siguientes directrices antes de interactuar con Azure DevOps, Zoho Projects, diseñar casos de prueba o modificar scripts en este entorno.
+
+---
+
+## 1. LECTURA OBLIGATORIA DE SKILLS
+
+Antes de iniciar cualquier tarea, **DEBES** leer y asimilar por completo el archivo `SKILL.md` del directorio correspondiente. **No asumas que conoces las reglas; léelas.**
+
+| Tarea | Skill a leer |
+|-------|-------------|
+| QA Testing / Test Cases / ADO | `qa_tester/SKILL.md` |
+| Registrar horas en Zoho / Time Logs | `zoho_timelog/SKILL.md` |
+| Automatizar TCs con Playwright (código) | `playwright-e2e/SKILL.md` |
+| Ejecutar TCs y subir evidencia a ADO | `qa-execution-reporter/SKILL.md` |
+| Crear Test Cases en ADO | `create-test-cases/SKILL.md` |
+| Leer Test Cases de ADO sin ejecutar | `tc-reader/SKILL.md` |
+
+---
+
+## 2. VALIDACIÓN CONTRA ANTI-PATRONES
+
+Bajo ninguna circunstancia ejecutarás una acción que viole los Anti-Patrones definidos en la Skill correspondiente.
+
+### Reglas de Oro — QA Testing
+
+- **UNA PRECOND POR ROW/STEP.** Jamás fusiones múltiples PRECONDs en una sola fila.
+- Los resultados esperados deben describir lo que es **visualmente verificable**, no comportamiento de backend.
+- El login **nunca** lleva contraseña en las precondiciones.
+- No crear TCs sin revisar la sección **Discussion** de la US — puede contener escenarios excluidos.
+
+### Reglas de Oro — Zoho Time Logs
+
+- **SIEMPRE registrar horas como tipo `"task"`**, nunca como `"general"`. Incluir siempre el Zoho Task ID de la US.
+- **Notas con formato `• Actividad<br>• Actividad`** — usar `<br>` HTML, NUNCA `\n`.
+- No superar **15 horas por día** (límite hard de la API de Zoho).
+- Confirmar siempre la fecha — no asumir "hoy".
+
+### Reglas de Oro — Playwright / Automatización
+
+- No ejecutar código sin haber leído el skill completo primero.
+- No subir evidencia sin screenshots — el skill define el formato exacto.
+- No saltarse fases del pipeline — el orden existe por una razón.
+
+---
+
+## 3. VERIFICACIÓN DE SCRIPTS EXISTENTES
+
+Si el usuario te proporciona un script existente, tu primer paso **NO ES EJECUTARLO**.  
+Tu primer paso es **ANALIZARLO** contra las reglas del `SKILL.md` correspondiente.  
+Si viola alguna regla → advertir al usuario y corregir antes de cualquier ejecución.
+
+---
+
+## 4. USO DE HERRAMIENTAS ADO (MCP)
+
+Al actualizar pasos de Test Cases en Azure DevOps:
+- Usar XML controlado a través de la REST API según lo define el skill.
+- Ten cuidado con la fragmentación por saltos de línea `\n` en tools ADO.
+- Confirmar cada llamada MCP — no dar ninguna por hecha sin ejecutarla.
+
+---
+
+## 5. USO DE HERRAMIENTAS ZOHO (MCP)
+
+Al crear o actualizar time logs en Zoho Projects:
+- No se puede cambiar `general` → `task` via API (eliminar + recrear).
+- No se puede mover un log entre tareas via API (eliminar + recrear).
+- Límite de 15 horas por día: verificar siempre antes de crear logs en fechas pasadas.
+- No existe endpoint de eliminación en el MCP: el usuario debe eliminar manualmente desde la UI.
+
+---
+
+## 6. COMUNICACIÓN CON EL USUARIO
+
+- Si falta información → **PREGUNTAR**, nunca asumir ni inventar datos.
+- Responder siempre en el idioma que el usuario esté usando.
+- Al completar una fase de trabajo → generar siempre el **resumen de lo que se hizo** con los IDs creados/modificados.
+
+---
+
+> **Cualquier desviación de estas reglas es considerada un fallo crítico en la ejecución del agente.**
