@@ -838,16 +838,33 @@ Then IMMEDIATELY ask:
 >
 > Responde **Sí** o **No**.
 
-- Si **Sí**: documentar en la US siguiendo este flujo OBLIGATORIO:
-  1. ⚠️ **Capturar screenshot** del resultado en pantalla con `mcp_playwright_browser_take_screenshot` (si el browser sigue abierto) o del último estado visible
-  2. **Subir el screenshot** como adjunto ADO: `POST /wit/attachments?fileName=escenario-{N}.png` → guardar URL
-  3. **Publicar comentario** por cada escenario con `mcp_ado_wit_add_work_item_comment`, usando el formato oficial de `qa_tester` → sección **"Documentar Resultados en la US"**:
-     - Un hilo (comentario) por escenario ejecutado
-     - `PRECOND: Login - Usuario: X - Rol: X - Acceso portal: X - Acceso módulo/tarjeta: X`
-     - `QA PASSED / Sprint Test [Nombre escenario]` o `QA NOT PASSED / Sprint Test [Nombre escenario]`
-     - Si NOT PASSED: `Bug [ID]: descripción`
-     - `<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;">` al final del hilo
-  > ⛔ **NUNCA publicar el hilo sin el screenshot.** Si no se pudo capturar, indicar `[Evidencia no disponible]` y notificar al usuario.
+- Si **Sí**: documentar en la US siguiendo este flujo OBLIGATORIO por cada escenario:
+
+  **Paso 1 — Capturar screenshot** (si browser sigue abierto):
+  ```
+  mcp_playwright_browser_take_screenshot
+  → filename: "e2e/results/{WI_ID}/escenario-{N}.png"
+  ```
+
+  **Paso 2 — Subir a ADO con PowerShell** (no existe MCP para upload binario):
+  ```powershell
+  $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path "e2e/results/$WI_ID/escenario-$N.png"))
+  $resp = Invoke-RestMethod -Uri "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/attachments?fileName=escenario-$N.png&api-version=7.0" `
+    -Method Post -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/octet-stream" } -Body $bytes
+  $attachmentUrl = $resp.url
+  ```
+  *(usar `$auth` extraído en Phase 5.1 — si no se extrajo aún, hacerlo ahora)*
+
+  **Paso 3 — Publicar comentario con imagen inline** (PowerShell):
+  ```powershell
+  $html = "PRECOND: Login - Usuario: {U} - Rol: {R} - Acceso portal: {P} - Acceso módulo/tarjeta: {M}`n`nQA PASSED / Sprint Test`n[{ESCENARIO}]`n`n{TEST_RUN_URL}`n`n<img src=`"$attachmentUrl`" width=`"720`" style=`"border:1px solid #ccc;`" />"
+  $body = @{ text = $html } | ConvertTo-Json -Depth 3
+  Invoke-RestMethod -Uri "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/workItems/$WI_ID/comments?api-version=7.0-preview.3" `
+    -Method Post -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/json" } -Body $body
+  ```
+  > ⛔ NUNCA usar solo `mcp_ado_wit_add_work_item_comment` para comentarios con imagen — ese tool no puede subir el binario. Siempre PowerShell para el upload + comentario con img inline.
+  > ⚠️ Si browser cerrado antes de capturar: publicar comentario sin `<img>` e indicar `[Evidencia no disponible]`.
+
 - Si **No**: finalizar. El skill está completo.
 
 ---

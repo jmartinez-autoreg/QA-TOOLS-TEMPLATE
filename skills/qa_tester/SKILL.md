@@ -250,21 +250,87 @@ PRECOND 3: [Estado inicial de la UI] (si aplica)
 
 ### Flujo de documentación por escenario
 
+> ⚠️ **No existe herramienta MCP para subir archivos binarios a ADO.** El upload del screenshot DEBE hacerse con PowerShell. Sin este paso, la imagen no existe en ADO y el `<img>` no renderiza.
+
 ```
-1. Ejecutar el escenario (o verificar el resultado si ya se ejecutó)
-2. ⚠️ Capturar screenshot con mcp_playwright_browser_take_screenshot
-   → Guardar en e2e/results/{WI_ID}/escenario-{N}.png
-   → Verificar que el archivo exista y tenga tamaño > 0
-3. Subir el screenshot como adjunto en ADO:
-   POST https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments?fileName=escenario-{N}.png&api-version=7.0
-   Content-Type: application/octet-stream
-   → Guardar la URL del adjunto recibida
-4. Publicar el comentario con la URL del adjunto inline:
-   mcp_ado_wit_add_work_item_comment → texto HTML con <img src="{URL_ADJUNTO}" width="720">
+1. Ejecutar el escenario y capturar screenshot:
+   mcp_playwright_browser_take_screenshot
+   → filename: "e2e/results/{WI_ID}/escenario-{N}.png"
+   → Verificar que el archivo exista: Get-ChildItem "e2e\results\{WI_ID}\"
+
+2. Extraer PAT del MCP config (PowerShell):
 ```
 
-> ⚠️ Si el MCP Browser ya fue cerrado y no se puede capturar: indicar en el comentario
-> `[Evidencia no disponible — browser cerrado antes de capturar]` y documentar igualmente el resultado.
+```powershell
+$pat = $null
+foreach ($f in @("$env:APPDATA\Code\User\mcp.json", ".vscode\mcp.json")) {
+  if (Test-Path $f) {
+    $c = Get-Content $f -Raw | ConvertFrom-Json -EA SilentlyContinue
+    $srv = if ($c.servers) { $c.servers } elseif ($c.mcp.servers) { $c.mcp.servers } else { $null }
+    if ($srv) {
+      foreach ($k in ($srv | Get-Member -MemberType NoteProperty).Name) {
+        $v = $srv.$k.env.AZURE_DEVOPS_EXT_PAT
+        if ($v -and $v -notlike '${env:*}') { $pat = $v; break }
+      }
+    }
+    if ($pat) { break }
+  }
+}
+if (-not $pat) { $pat = $env:AZURE_DEVOPS_EXT_PAT }
+$auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
+Write-Host "PAT listo."
+```
+
+```
+3. Subir screenshot como adjunto ADO (PowerShell):
+```
+
+```powershell
+$ORG     = "{ORG}"       # ej: AutoregPR
+$PROJECT = "{PROJECT}"   # ej: Motorambar
+$WI_ID   = "{WI_ID}"
+$N       = "{N}"         # número de escenario
+$fileName = "escenario-$N.png"
+$filePath = "e2e/results/$WI_ID/$fileName"
+
+$bytes = [System.IO.File]::ReadAllBytes((Resolve-Path $filePath))
+$uploadUri = "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/attachments?fileName=$fileName&api-version=7.0"
+$resp = Invoke-RestMethod -Uri $uploadUri -Method Post `
+  -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/octet-stream" } `
+  -Body $bytes
+$attachmentUrl = $resp.url
+Write-Host "URL adjunto: $attachmentUrl"
+```
+
+```
+4. Publicar comentario con imagen inline (PowerShell):
+   → Construir el HTML del comentario según el formato oficial
+   → Pegar la URL del adjunto en el <img src>
+```
+
+```powershell
+$commentHtml = @"
+PRECOND: Login - Usuario: {USUARIO} - Rol: {ROL} - Acceso portal: {PORTAL} - Acceso módulo/tarjeta: {MODULO}
+
+QA PASSED / Sprint Test
+[{NOMBRE_ESCENARIO}]
+
+{URL_TEST_RUN}
+
+<img src="$attachmentUrl" width="720" style="border:1px solid #ccc;" />
+"@
+
+$body = @{ text = $commentHtml } | ConvertTo-Json -Depth 3
+$commentUri = "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/workItems/$WI_ID/comments?api-version=7.0-preview.3"
+Invoke-RestMethod -Uri $commentUri -Method Post `
+  -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/json" } `
+  -Body $body
+Write-Host "Comentario publicado en WI $WI_ID."
+```
+
+> ⚠️ Repetir pasos 1–4 por cada escenario. Cada escenario = su propio PNG + su propio comentario.
+> ⚠️ Si el MCP Browser fue cerrado antes de capturar: indicar `[Evidencia no disponible — browser cerrado]` y publicar el comentario sin `<img>`.
+
 
 ### Formato oficial por hilo (Procedimientos Generales de Calidad)
 
