@@ -66,10 +66,25 @@ Recibir US → Analizar criterios de aceptación
 → [ADO] Asignar y setear horas en las 3 tareas (mcp_ado_wit_update_work_items_batch):
       • System.AssignedTo = <usuario QA>
       • Microsoft.VSTS.Common.Activity = "Testing"
-      • Microsoft.VSTS.Scheduling.OriginalEstimate = <horas>
+      • Microsoft.VSTS.Scheduling.OriginalEstimate = <horas según estándar abajo>
       • Microsoft.VSTS.Scheduling.RemainingWork = <horas> (solo tareas NO cerradas)
       • Microsoft.VSTS.Scheduling.CompletedWork = <horas> (solo tareas Closed)
       ⚠️ RemainingWork NO se puede setear en tareas con estado Closed — omitir ese campo para ellas
+
+      ### Horas estándar por tarea QA (Tabla oficial — Procedimientos Generales de Calidad)
+
+      > Las horas se registran en intervalos de **0.25** (0.25, 0.5, 0.75, 1, 1.25…)
+
+      | Tarea | Estimadas (OriginalEstimate) | Remanentes (RemainingWork) | Completadas al crear (CompletedWork) |
+      |-------|-----------------------------|-----------------------------|--------------------------------------|
+      | QA - Preparar Test Plan | **1h** | **1h** | **0** |
+      | QA - Ejecutar Test Plan | **1h** | **1h** | **0** |
+      | QA - Ejecutar Pruebas | **1h** | **1h** | **0** |
+      | QA - Demo | **0.25h** | **0.25h** | **0** |
+      | QA - Apoyo | **0.5h** | **0.5h** | **0** |
+
+      ⚠️ Usar SIEMPRE estos valores por defecto. Solo cambiar si el usuario indica explícitamente un valor distinto.
+      ⚠️ Al CERRAR una tarea: CompletedWork = horas reales trabajadas, RemainingWork = 0.
 → [ADO] Cerrar tarea "QA - Preparar Test Plan" (System.State = Closed)
 → Generar tabla tareas ADO (Preparar TP + Ejecutar TP + QA Demo con horas y estados)
 → ⚠️ ANTES de generar Daily y tabla de tiempo: si no está claro qué tareas realizó el usuario hoy,
@@ -184,50 +199,73 @@ PRECOND 3: [Estado inicial de la UI] (si aplica)
 
 ## Documentar Resultados en la US
 
-### Variante 1 — Historia Cerrada (Todo Pasado)
+> **Regla fundamental:** Cada escenario de prueba se documenta en un **hilo separado** en la sección Discussion de la US. Un escenario = un comentario/hilo.
+
+### Formato oficial por hilo (Procedimientos Generales de Calidad)
 
 ```
-✅ QA PASSED — [Fecha]
+PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
 
-Se ejecutó el Test Plan completo. Todos los criterios de aceptación fueron verificados.
+QA PASSED / Sprint Test
+[Nombre del escenario]
 
-Test Plan: [ID] | Suite: [ID] | TC(s): [lista de IDs]
-Resultado: PASSED
-Historia cerrada.
+[URL de la corrida del caso de prueba en ADO Test Plans]
+[Screenshot de evidencia]
 ```
 
-### Variante 2 — Historia con Bug Abierto
+```
+PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
+
+QA NOT PASSED / Sprint Test
+[Nombre del escenario]
+
+Bug [ID]: [descripción corta del defecto]
+[Screenshot de evidencia]
+```
+
+### Reglas del formato
+
+| Campo | Regla |
+|-------|-------|
+| **PRECOND** | Siempre primera línea del hilo. Formato exacto: `Login - Usuario: X - Rol: X - Acceso portal: X - Acceso módulo/tarjeta: X` |
+| **Resultado** | `QA PASSED` o `QA NOT PASSED` |
+| **Ambiente** | `Sprint Test` por defecto. Alternativas: `Pre-Prod`, `Prod` |
+| **[Escenario]** | Nombre del escenario entre corchetes en la misma línea del resultado |
+| **Enlace** | URL del Test Run en ADO (si PASSED) o `Bug [ID]: descripción` (si NOT PASSED) |
+| **Evidencia** | Screenshot(s) al final del hilo |
+| **Múltiples escenarios** | Un hilo por escenario — NUNCA agrupar en un solo comentario |
+
+### Ejemplo — PASSED
 
 ```
-🐛 QA FAILED — [Fecha]
+PRECOND: Login - Usuario: admin - Rol: Administrador - Acceso portal: Académico - Acceso módulo/tarjeta: PEI / Solicitud de Asistencia Técnica
 
-Se ejecutó el Test Plan. Se encontró un defecto bloqueante.
+QA PASSED / Sprint Test
+[Guardar Administrador]
 
-Defecto: #[BUG_ID] — [Título del bug]
-Historia permanece en estado Resolved hasta corrección.
+https://dev.azure.com/.../runs/XXXXX
+[screenshot]
 ```
 
-### Variante 3 — Historia en On Hold
+### Ejemplo — NOT PASSED
 
 ```
-⏸ QA ON HOLD — [Fecha]
+PRECOND: Login - Usuario: graciagc - Rol: AdminIL - Acceso portal: Académico - Acceso módulo/tarjeta: PEI / Solicitud de Asistencia Técnica
 
-No es posible ejecutar las pruebas por el motivo indicado.
+QA NOT PASSED / Sprint Test
+[Guardar AdminIL]
+
+Bug 105867: Al Guardar, presenta mensaje inesperado
+[screenshot]
+```
+
+### Variante — Historia en On Hold
+
+```
+QA ON HOLD / Sprint Test
 
 Razón: [Descripción clara del bloqueante]
-Acción: [Qué necesita ocurrir para desbloquear]
-```
-
-### Variante 4 — Historia Parcialmente Probada
-
-```
-🔄 QA PARCIAL — [Fecha]
-
-Se ejecutaron [N] de [Total] TCs. Pendiente completar ejecución.
-
-TCs ejecutados: [lista]
-TCs pendientes: [lista]
-Razón: [por qué quedan pendientes]
+Acción requerida: [Qué necesita ocurrir para desbloquear]
 ```
 
 ---
