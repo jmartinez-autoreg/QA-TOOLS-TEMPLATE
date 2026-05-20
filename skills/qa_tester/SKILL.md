@@ -101,11 +101,27 @@ Recibir US → Analizar criterios de aceptación
 
 ### Fase 2 — Ejecutar Test Plan
 
+> ⚠️ **ANTES de cualquier acción de ejecución:** preguntar siempre A o B. NUNCA asumir.
+
 ```
-Verificar pipelines → Ejecutar pasos TC → Adjuntar evidencias
-→ Si falla: registrar Bug → mensaje DEV
-→ Si pasa: documentar resultado en US
-→ Cambiar historia a Closed si todo Passed
+⚠️ PRIMER PASO OBLIGATORIO: preguntar al usuario:
+
+  ¿Cómo quieres ejecutar?
+
+  A — Proyecto Playwright completo
+      Genera archivos .spec.ts y .fixture.ts reutilizables
+      Los tests quedan como código para regresión futura
+
+  B — Ejecución directa (sin código)
+      Navego la app vía MCP Browser
+      Ejecuto los pasos del TC manualmente, capturo screenshots
+      Documento resultados en la US sin generar código TypeScript
+
+  Responde A o B para continuar.
+
+→ Si A: cargar skill playwright-e2e
+→ Si B: cargar skill qa-execution-reporter
+→ En ambos casos: el skill cargado maneja todo el flujo desde ese punto
 ```
 
 ### Fase 3 — Daily y Registro de Tiempo
@@ -229,27 +245,49 @@ PRECOND 3: [Estado inicial de la UI] (si aplica)
 ## Documentar Resultados en la US
 
 > **Regla fundamental:** Cada escenario de prueba se documenta en un **hilo separado** en la sección Discussion de la US. Un escenario = un comentario/hilo.
+>
+> ⛔ **SCREENSHOTS OBLIGATORIOS:** Antes de publicar cualquier comentario de resultado, capturar screenshot de la pantalla que muestra el resultado del escenario. Sin screenshot = evidencia incompleta. NO publicar el hilo sin haberlo capturado.
+
+### Flujo de documentación por escenario
+
+```
+1. Ejecutar el escenario (o verificar el resultado si ya se ejecutó)
+2. ⚠️ Capturar screenshot con mcp_playwright_browser_take_screenshot
+   → Guardar en e2e/results/{WI_ID}/escenario-{N}.png
+   → Verificar que el archivo exista y tenga tamaño > 0
+3. Subir el screenshot como adjunto en ADO:
+   POST https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments?fileName=escenario-{N}.png&api-version=7.0
+   Content-Type: application/octet-stream
+   → Guardar la URL del adjunto recibida
+4. Publicar el comentario con la URL del adjunto inline:
+   mcp_ado_wit_add_work_item_comment → texto HTML con <img src="{URL_ADJUNTO}" width="720">
+```
+
+> ⚠️ Si el MCP Browser ya fue cerrado y no se puede capturar: indicar en el comentario
+> `[Evidencia no disponible — browser cerrado antes de capturar]` y documentar igualmente el resultado.
 
 ### Formato oficial por hilo (Procedimientos Generales de Calidad)
 
-```
+```html
 PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
 
 QA PASSED / Sprint Test
 [Nombre del escenario]
 
 [URL de la corrida del caso de prueba en ADO Test Plans]
-[Screenshot de evidencia]
+
+<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
 ```
 
-```
+```html
 PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
 
 QA NOT PASSED / Sprint Test
 [Nombre del escenario]
 
 Bug [ID]: [descripción corta del defecto]
-[Screenshot de evidencia]
+
+<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
 ```
 
 ### Reglas del formato
@@ -261,31 +299,33 @@ Bug [ID]: [descripción corta del defecto]
 | **Ambiente** | `Sprint Test` por defecto. Alternativas: `Pre-Prod`, `Prod` |
 | **[Escenario]** | Nombre del escenario entre corchetes en la misma línea del resultado |
 | **Enlace** | URL del Test Run en ADO (si PASSED) o `Bug [ID]: descripción` (si NOT PASSED) |
-| **Evidencia** | Screenshot(s) al final del hilo |
+| **Evidencia** | Screenshot subido como adjunto ADO e incluido como `<img>` inline en el comentario. **OBLIGATORIO.** |
 | **Múltiples escenarios** | Un hilo por escenario — NUNCA agrupar en un solo comentario |
 
 ### Ejemplo — PASSED
 
-```
+```html
 PRECOND: Login - Usuario: admin - Rol: Administrador - Acceso portal: Académico - Acceso módulo/tarjeta: PEI / Solicitud de Asistencia Técnica
 
 QA PASSED / Sprint Test
 [Guardar Administrador]
 
 https://dev.azure.com/.../runs/XXXXX
-[screenshot]
+
+<img src="https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments/{GUID}?fileName=escenario-1.png" width="720" style="border:1px solid #ccc;" />
 ```
 
 ### Ejemplo — NOT PASSED
 
-```
+```html
 PRECOND: Login - Usuario: graciagc - Rol: AdminIL - Acceso portal: Académico - Acceso módulo/tarjeta: PEI / Solicitud de Asistencia Técnica
 
 QA NOT PASSED / Sprint Test
 [Guardar AdminIL]
 
 Bug 105867: Al Guardar, presenta mensaje inesperado
-[screenshot]
+
+<img src="https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments/{GUID}?fileName=escenario-1.png" width="720" style="border:1px solid #ccc;" />
 ```
 
 ### Variante — Historia en On Hold

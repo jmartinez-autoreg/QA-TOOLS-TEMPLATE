@@ -828,10 +828,27 @@ When all phases complete, summarize with this exact message:
 > 1. Ve a: `https://dev.azure.com/{ORG}/{PROJECT}/_testPlans/execute?planId={PLAN_ID}`
 > 2. Abre cualquier TC de la lista
 > 3. En la sección **Discussion** verás el comentario con la tabla de resultados y las imágenes inline
->
-> ¿Quieres ejecutar más TCs o hay algo que ajustar?
 
-**Do NOT ask for further input unless the user replies.** The skill is complete.
+Then IMMEDIATELY ask:
+
+> 📢 **SAY TO USER:**
+>
+> ¿Quieres que documente los resultados de la prueba en la sección **Discussion** de la US en ADO?
+> El formato oficial es un hilo por escenario con PRECOND, resultado (QA PASSED / QA NOT PASSED), enlace al Test Run y evidencia.
+>
+> Responde **Sí** o **No**.
+
+- Si **Sí**: documentar en la US siguiendo este flujo OBLIGATORIO:
+  1. ⚠️ **Capturar screenshot** del resultado en pantalla con `mcp_playwright_browser_take_screenshot` (si el browser sigue abierto) o del último estado visible
+  2. **Subir el screenshot** como adjunto ADO: `POST /wit/attachments?fileName=escenario-{N}.png` → guardar URL
+  3. **Publicar comentario** por cada escenario con `mcp_ado_wit_add_work_item_comment`, usando el formato oficial de `qa_tester` → sección **"Documentar Resultados en la US"**:
+     - Un hilo (comentario) por escenario ejecutado
+     - `PRECOND: Login - Usuario: X - Rol: X - Acceso portal: X - Acceso módulo/tarjeta: X`
+     - `QA PASSED / Sprint Test [Nombre escenario]` o `QA NOT PASSED / Sprint Test [Nombre escenario]`
+     - Si NOT PASSED: `Bug [ID]: descripción`
+     - `<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;">` al final del hilo
+  > ⛔ **NUNCA publicar el hilo sin el screenshot.** Si no se pudo capturar, indicar `[Evidencia no disponible]` y notificar al usuario.
+- Si **No**: finalizar. El skill está completo.
 
 ---
 

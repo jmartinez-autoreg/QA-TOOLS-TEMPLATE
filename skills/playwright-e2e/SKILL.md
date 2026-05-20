@@ -13,6 +13,35 @@ Skill para convertir test cases manuales en pruebas E2E automatizadas con Playwr
 
 ---
 
+## ⚠️ PASO 0 — PREGUNTAR MODALIDAD DE TRABAJO (SIEMPRE PRIMERO)
+
+> **NUNCA comenzar el discovery ni abrir el browser sin haber preguntado esto primero.**
+
+Al cargar este skill, la primera acción es preguntar al usuario:
+
+```
+¿Cómo quieres que construya el flujo de automatización?
+
+🎥 Opción A — Tú grabas con Playwright Codegen (recomendado, más preciso)
+   El agente prepara el entorno y te entrega un comando listo para copiar.
+   Tú navegas la app en el browser que se abre, haces el flujo completo,
+   copias el código generado y lo pegas aquí en el chat.
+   El agente lo convierte en un spec limpio y optimizado.
+
+🤖 Opción B — El agente explora solo (cero esfuerzo de tu parte)
+   El agente navega la app vía MCP Browser, descubre selectores
+   y construye los tests automáticamente sin que hagas nada.
+
+Responde A o B para continuar.
+```
+
+⛔ Esperar respuesta antes de cualquier otra acción.
+
+- Si **A**: ir a FASE 0.5 (verificar entorno + entregar comando codegen)
+- Si **B**: ir directamente a FASE 1 (descubrimiento via MCP Browser)
+
+---
+
 ## ⛔ CHECKLIST DE DISCOVERY TECNOLÓGICO — OBLIGATORIO antes de FASE 1
 
 > Este checklist debe completarse **antes de escribir una sola línea de código**.
