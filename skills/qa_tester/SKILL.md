@@ -163,18 +163,47 @@ Cada paso del TC tiene:
 
 ### Regla de División de TCs
 
-Dividir en TCs separados cuando:
-1. Los escenarios requieren datos de prueba completamente distintos e incompatibles
-2. Los escenarios son flujos negativos que destruirían el estado para el flujo positivo
-3. El TC tendría más de 15 pasos (señal de que hay más de un flujo)
-4. Hay roles de usuario distintos que impiden ejecutarlos en secuencia
+> **Principio de oro: el número de TCs por defecto es UNO.**
+> La carga de la prueba recae en quien quiere dividir, no en quien quiere agrupar.
+> Si hay duda → un solo TC.
 
-**NO dividir cuando:**
-5. La validación del estado inicial de un elemento forma parte del flujo feliz → incluirla como **paso de verificación al inicio del TC del flujo feliz**, no como TC separado.
-   - Ejemplo: si el botón de descarga en lote debe estar deshabilitado antes de seleccionar registros, ese paso va en TC1 ("Verificar que el botón está deshabilitado") antes de que el usuario haga la selección.
-   - Un TC negativo separado solo se justifica cuando el escenario requiere setup o precondiciones **distintas** al flujo feliz.
+#### ✅ Criterio principal para agrupar: misma pantalla
 
----
+**Si todos los escenarios ocurren en la misma pantalla → UN SOLO TC.**
+Cubrir todos los escenarios/criterios de esa pantalla en orden secuencial como pasos del mismo TC.
+Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realmente solicitan — no agregar pasos extra por cada criterio si el flujo ya los cubre.
+
+#### ⛔ Solo dividir en TCs separados cuando se cumple al menos UNA de estas condiciones:
+
+1. **Pantalla diferente** — el escenario ocurre en una pantalla o módulo distinto al flujo principal
+2. **Rol de usuario diferente** — el escenario requiere un usuario con permisos distintos que no pueden coexistir en la misma sesión
+3. **El escenario negaría el estado** — ejecutar el escenario negativo destruiría los datos necesarios para el escenario positivo (y no se puede restablecer en el mismo TC)
+4. **El TC superaría los 15 pasos** — y los pasos adicionales corresponden a un flujo genuinamente independiente (no al mismo flujo con más detalles)
+
+#### ❌ NO dividir en estos casos (errores frecuentes):
+
+| Situación | Qué hacer |
+|-----------|-----------|
+| Criterios con "Escenario 1, Escenario 2..." en la misma pantalla | Un solo TC con todos los escenarios como pasos secuenciales |
+| Validar que un botón/acción aparece visible | Paso dentro del TC principal, no TC separado |
+| Validar estado inicial de un elemento (ej. botón deshabilitado) | Paso de verificación al inicio del TC del flujo feliz |
+| Escenarios que comparten las mismas precondiciones | Un solo TC — las precondiciones son las mismas |
+| "Hay muchos criterios" sin que ninguno cambie de pantalla o rol | Agrupar todos, optimizar los pasos para cubrir solo lo necesario |
+
+#### Ejemplo correcto — 4 criterios en la misma pantalla → 1 TC
+
+```
+Criterios:
+  Escenario 1: Mostrar acción "Reenviar datos a PDV" según permisos
+  Escenario 2: Mostrar acción "Enviar documentos a PDV" según permisos
+  Escenario 3: Enviar datos a PDV correctamente → mensaje de confirmación
+  Escenario 4: Enviar documentos a PDV correctamente → mensaje de confirmación
+
+Resultado: 1 TC con 4 bloques de pasos secuenciales en la misma pantalla.
+NO crear 4 TCs separados.
+```
+
+
 
 ## Plantilla Base de TC
 
@@ -401,7 +430,8 @@ Total: 6
 
 | ❌ Evitar | ✅ Hacer en su lugar |
 |----------|---------------------|
-| Crear un TC por criterio de aceptación | Agrupar criterios del mismo flujo en un TC |
+| Crear un TC por criterio de aceptación | Agrupar TODOS los criterios de la misma pantalla en un solo TC |
+| Crear un TC por cada "Escenario N" de los criterios | Si son de la misma pantalla → pasos secuenciales en un TC único |
 | Fusionar múltiples PRECONDs en un solo step | Una PRECOND por fila |
 | Poner la contraseña en PRECOND 2 | Solo indicar el rol/usuario, nunca la clave |
 | Resultados esperados de backend | Solo comportamiento visible en la UI |
