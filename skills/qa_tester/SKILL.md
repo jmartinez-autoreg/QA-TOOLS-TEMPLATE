@@ -65,6 +65,7 @@ Recibir US → Analizar criterios de aceptación
       ⚠️ add_child_work_items NO soporta AssignedTo ni horas — solo title/description/iterationPath/areaPath
 → [ADO] Asignar y setear horas en las 3 tareas (mcp_ado_wit_update_work_items_batch):
       • System.AssignedTo = <usuario QA>
+      • Microsoft.VSTS.Common.Activity = "Testing"
       • Microsoft.VSTS.Scheduling.OriginalEstimate = <horas>
       • Microsoft.VSTS.Scheduling.RemainingWork = <horas> (solo tareas NO cerradas)
       • Microsoft.VSTS.Scheduling.CompletedWork = <horas> (solo tareas Closed)
@@ -127,6 +128,8 @@ Cada TC DEBE tener las siguientes filas de precondición (una por row):
 | 3 | **PRECOND 3** | Estado inicial de la UI antes de iniciar el TC (opcional si no aplica) |
 
 > ⚠️ **REGLA DE ORO:** UNA PRECOND POR ROW/STEP. Jamás fusionar múltiples PRECONDs en una sola fila.
+>
+> ⚠️ **SIN EXPECTED RESULT:** Las filas de PRECOND en ADO llevan únicamente el campo **Action** con el texto de la precondición. El campo **Expected Result debe quedar vacío** en todas las filas de PRECOND. Solo los pasos de ejecución llevan Expected Result.
 
 ### Estructura de Pasos
 
@@ -164,13 +167,13 @@ Dividir en TCs separados cuando:
 NOMBRE TC: [Portal]-[Módulo]-[Pantalla]-[Funcionalidad] [Escenario]
 ESTADO: Design
 
-=== PRECONDICIONES ===
+=== PRECONDICIONES (Action only — Expected Result: vacío) ===
 PRECOND 0: [Acceso — con/sin login, URL inicial]
 PRECOND 1: [Datos necesarios en el sistema]
 PRECOND 2: [Rol/usuario requerido — SIN contraseña]
 PRECOND 3: [Estado inicial de la UI] (si aplica)
 
-=== PASOS ===
+=== PASOS (Action + Expected Result obligatorio) ===
 | Paso | Acción                          | Resultado Esperado                    |
 |------|----------------------------------|---------------------------------------|
 | 1    | [Acción del tester]              | [Lo que el usuario ve]                |
