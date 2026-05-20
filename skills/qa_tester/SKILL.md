@@ -270,6 +270,20 @@ Bug registrado: #[BUG_ID]
 > Usar el skill **`@zoho_timelog`** (o el equivalente de tu herramienta de tracking).
 > Al finalizar Fase 1 o Fase 2, invocar con las US IDs y horas del día.
 
+### Formato oficial de notas Zoho (SIEMPRE usar estas plantillas)
+
+`[#####]` = ID de la **sub-tarea en ADO** (ej: `10731 Preparar Test Plan`).
+
+| Actividad | Nota oficial |
+|-----------|-------------|
+| **Preparar Test Plan** | `Sesión de trabajo realizando la documentación necesaria para cumplir con el requerimiento asignado, ejecutando la(s) tarea(s): [#####] Preparar Test Plan.` |
+| **Ejecutar Test Plan** | `Sesión de trabajo realizando las pruebas necesarias para cumplir con el requerimiento asignado, ejecutando la(s) tarea(s): [#####] Ejecutar Test Plan.` |
+| **Ejecutar Pruebas** | `Sesión de trabajo realizando las pruebas necesarias para cumplir con el requerimiento asignado, ejecutando la(s) tarea(s): [#####] Ejecutar Pruebas.` |
+| **QA Demo** | `Sesión de trabajo realizando las demostraciones necesarias para cumplir con el requerimiento asignado, ejecutando la(s) tarea(s): [#####] QA Demo.` |
+| **QA Apoyo** | `Sesión de trabajo realizando el apoyo necesario para cumplir con el requerimiento asignado ejecutando la(s) tarea(s): [#####] QA Apoyo.` |
+
+> ⚠️ Al generar la tabla de tiempo propuesta, usar SIEMPRE estas plantillas con el ID de sub-tarea ADO real. **NUNCA inventar ni resumir notas.**
+
 ---
 
 ## Formato del Daily
