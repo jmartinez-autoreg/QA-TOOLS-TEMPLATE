@@ -268,6 +268,13 @@ PRECOND 3: [Estado inicial de la UI] (si aplica)
 
 ### Formato oficial por hilo (Procedimientos Generales de Calidad)
 
+> ⛔ **EL COMENTARIO SOLO CONTIENE LOS CAMPOS DEL FORMATO. NADA MÁS.**
+> - NO agregar descripciones de lo que ocurrió ("El sistema mostró...", "Se presentó la acción...")
+> - NO agregar listas de escenarios dentro del hilo
+> - NO agregar texto de método de ejecución ("Ejecución directa vía MCP Browser")
+> - NO agregar el ID del TC ni el número de escenario en el texto libre
+> - NO agrupar 2 o más escenarios en un mismo hilo — uno por uno, siempre
+
 ```html
 PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
 
@@ -295,12 +302,13 @@ Bug [ID]: [descripción corta del defecto]
 | Campo | Regla |
 |-------|-------|
 | **PRECOND** | Siempre primera línea del hilo. Formato exacto: `Login - Usuario: X - Rol: X - Acceso portal: X - Acceso módulo/tarjeta: X` |
-| **Resultado** | `QA PASSED` o `QA NOT PASSED` |
+| **Resultado** | `QA PASSED` o `QA NOT PASSED` — sin texto adicional en esa línea |
 | **Ambiente** | `Sprint Test` por defecto. Alternativas: `Pre-Prod`, `Prod` |
-| **[Escenario]** | Nombre del escenario entre corchetes en la misma línea del resultado |
+| **[Escenario]** | Nombre del escenario entre corchetes en la línea siguiente al resultado |
 | **Enlace** | URL del Test Run en ADO (si PASSED) o `Bug [ID]: descripción` (si NOT PASSED) |
-| **Evidencia** | Screenshot subido como adjunto ADO e incluido como `<img>` inline en el comentario. **OBLIGATORIO.** |
-| **Múltiples escenarios** | Un hilo por escenario — NUNCA agrupar en un solo comentario |
+| **Evidencia** | Screenshot subido como adjunto ADO e incluido como `<img>` inline. **OBLIGATORIO.** |
+| **Un hilo por escenario** | Si hay 4 escenarios → 4 comentarios separados. Nunca "Escenarios 1 y 2" en uno. |
+| **Cero texto libre** | No agregar descripciones, listas, notas de método, IDs de TC ni ningún texto que no sea parte del template |
 
 ### Ejemplo — PASSED
 
