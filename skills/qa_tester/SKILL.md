@@ -90,6 +90,9 @@ Recibir US → Analizar criterios de aceptación
 → ⚠️ ANTES de generar Daily y tabla de tiempo: si no está claro qué tareas realizó el usuario hoy,
    PREGUNTAR explícitamente. Ejemplos: "¿Ya realizaste la demo para US-XXXX?", "¿Ejecutaste el Test Plan hoy?"
    NO asumir que todas las tareas creadas fueron ejecutadas.
+→ ⚠️ PREGUNTAR el número de orden [orden] de cada US en el sprint si no se conoce:
+   "Para generar el Daily necesito el número de orden de cada US en el sprint (ej. '1-9893, 3-9511'). ¿Cuáles son?"
+   OBLIGATORIO antes de generar el Daily — NUNCA omitir ni inventar el [orden]
 → Generar Daily en formato oficial (ver sección "Formato del Daily") con título "Tareas realizadas — DD/MM/AAAA"
 → Generar tabla de tiempo propuesta (una fila por tarea cerrada hoy con nota oficial)
 → ⚠️ Mostrar tabla de tiempo al usuario y preguntar: "¿Estos registros son correctos? Confirma con ✅ o indícame qué cambiar."
@@ -411,6 +414,23 @@ Razón: [Descripción clara del bloqueante]
 Acción requerida: [Qué necesita ocurrir para desbloquear]
 ```
 
+### Variante — Ejecutar Pruebas sin Test Plan (16.2)
+
+Cuando se ejecutan pruebas **sin Test Cases formales** (flujo "Ejecutar Pruebas"):
+- Se usan múltiples PRECONDs numeradas: **PRECOND 1** = datos del sistema, **PRECOND 2** = login
+- No hay `[Escenario]` entre corchetes
+- No hay URL de Test Run
+
+```html
+PRECOND 1: [Condición de datos en el sistema]
+- [Campo]: [Valor]
+PRECOND 2: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
+
+QA PASSED / Sprint Test
+
+<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
+```
+
 ---
 
 ## Registrar Bug / Defecto
@@ -535,8 +555,9 @@ Total: 6
 1. **Si el agente no tiene certeza** de qué tareas realizó el usuario hoy, DEBE preguntar antes de generar el Daily
 2. **No asumir** qué tareas del día se completaron basándose solo en las tareas creadas en ADO — pueden estar en estado New sin ejecutarse
 3. El formato `[orden]-[número]` usa el número de orden de la US en el sprint y el ID de ADO (ej. `1-65436`)
-4. Si no hay logros previos al día, la sección "Logros" lista solo lo completado hoy
-5. **La tabla de tiempo** se muestra al usuario para confirmación ANTES de registrar en Zoho
+4. **El `[orden]` ES OBLIGATORIO** — si el agente no conoce el número de orden de cada US en el sprint, DEBE preguntar explícitamente ANTES de generar el Daily. **NUNCA omitir el `[orden]` ni inventar un número**
+5. Si no hay logros previos al día, la sección "Logros" lista solo lo completado hoy
+6. **La tabla de tiempo** se muestra al usuario para confirmación ANTES de registrar en Zoho
 
 ---
 
@@ -551,6 +572,8 @@ Total: 6
 | Resultados esperados de backend | Solo comportamiento visible en la UI |
 | Dar por hecha una llamada ADO sin ejecutarla | Confirmar cada llamada MCP |
 | Crear TC sin revisar Discussion de la US | Revisar siempre — hay actualizaciones post-redacción |
+| Copiar y pegar criterios de aceptación como pasos del TC (as-is) | Redactar pasos como acciones concretas ejecutables (verbo imperativo + resultado visible en UI) |
+| Generar el Daily sin conocer el `[orden]` de las USs en el sprint | Preguntar: "¿Cuál es el número de orden de cada US en el sprint?" ANTES de generar el Daily |
 | Crear tareas QA con add_child_work_items y asumir que tienen AssignedTo/horas | Siempre hacer llamada adicional con update_work_items_batch para AssignedTo + horas |
 | Setear RemainingWork en tarea Closed | Omitir RemainingWork para tareas en estado Closed; solo usar CompletedWork |
 | Crear un TC separado para validar el estado inicial de un elemento (ej. botón deshabilitado sin selección) | Incluir esa verificación como un paso de verificación al inicio del TC del flujo feliz |
@@ -570,7 +593,8 @@ Total: 6
 □ Tarea "QA - Preparar Test Plan" cerrada
 □ Tabla de tareas ADO generada (Preparar TP / Ejecutar TP / QA Demo)
 □ Preguntado al usuario qué tareas realizó hoy antes de armar el Daily
-□ Daily generado con formato "Tareas realizadas — DD/MM/AAAA" (Logros + Trabajo del día)
+□ [orden] de cada US en el sprint confirmado con el usuario antes de generar el Daily
+□ Daily generado con formato "Tareas realizadas — DD/MM/AAAA" con [orden]-[número] correcto en cada ítem
 □ Tabla de tiempo propuesta mostrada al usuario para confirmación
 □ Registro en Zoho ejecutado solo tras confirmación explícita del usuario
 ```
