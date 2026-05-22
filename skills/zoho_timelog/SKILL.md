@@ -75,6 +75,10 @@ Un log por sub-tarea ADO. Cada actividad QA (Preparar TP, Ejecutar TP, QA Demo, 
 | QA Apoyo / Soporte | ✅ Sí |
 | Ceremoniales (Daily, Planning) | ✅ Sí |
 
+> ⚠️ **NOTA TÉCNICA (bulk endpoint):** `add_bulk_time_logs` requiere log_object URI-encoded y puede
+> fallar con JSON_PARSE_ERROR. Si falla en el primer intento, usar `add_time_log` individualmente
+> para cada log. NO reintentar el bulk más de 1 vez.
+
 ---
 
 ## Reglas de Oro (OBLIGATORIAS)
@@ -87,6 +91,11 @@ Un log por sub-tarea ADO. Cada actividad QA (Preparar TP, Ejecutar TP, QA Demo, 
 □ REGLA 5: No superar 15h de logs por día (límite API de Zoho)
 □ REGLA 6: La fecha debe estar en formato YYYY-MM-DD
 □ REGLA 7: bill_status siempre "Billable" para actividades QA del sprint
+□ REGLA 8: SIEMPRE obtener las horas del campo CompletedWork de ADO ANTES de pedir horas al usuario.
+           Usar mcp_ado_wit_get_work_item con fields=["Microsoft.VSTS.Scheduling.CompletedWork"].
+           Solo preguntar al usuario si CompletedWork = 0 o no existe.
+□ REGLA 9: Portal ID y Project ID se resuelven UNA SOLA VEZ al inicio (via get_portals + get_projects_list)
+           y se reutilizan para TODOS los logs de la sesión. NUNCA volver a preguntar por el proyecto.
 ```
 
 ---
@@ -142,17 +151,25 @@ Un log por sub-tarea ADO. Cada actividad QA (Preparar TP, Ejecutar TP, QA Demo, 
 
 ### PASO 0 — Recopilar información (OBLIGATORIO antes de cualquier acción)
 
+> ⚡ **EFICIENCIA PRIMERO:** Resolver automáticamente todo lo que se pueda desde ADO y Zoho
+> ANTES de hacer preguntas al usuario. Solo preguntar lo que NO se puede obtener automáticamente.
+
 Verificar que el usuario proporcionó todos los datos. Si falta alguno, **PREGUNTAR**:
 
 ```
 DATOS GENERALES:
-  □ Fecha del registro (YYYY-MM-DD)
-  □ Proyecto (si hay varios proyectos Zoho configurados)
+  □ Fecha del registro (YYYY-MM-DD) — única pregunta obligatoria si no se menciona
+  □ Portal ID + Project ID → resolver automáticamente via get_portals + get_projects_list
+    UNA SOLA VEZ y reusar. NUNCA preguntar al usuario por portal/proyecto.
 
 POR CADA US TRABAJADA:
   □ Número de US en ADO (ej: 9505)
-  □ Lista de actividades realizadas y horas de cada una:
-      Ejemplo: "Preparar TP: 1h, pruebas: 1h, datos: 0.5h"
+  □ Horas → OBTENER AUTOMÁTICAMENTE de ADO:
+      1. Buscar tareas hijas asignadas al usuario (WIQL con [System.Parent] IN (IDs) AND [System.AssignedTo])
+      2. Para cada tarea: mcp_ado_wit_get_work_item fields=["Microsoft.VSTS.Scheduling.CompletedWork"]
+      3. Solo preguntar horas al usuario si CompletedWork = 0 o campo vacío.
+      Ejemplo SÍ preguntar: "La tarea 10813 tiene 0h registradas en ADO. ¿Cuánto tiempo le dedicaste?"
+      Ejemplo NO preguntar: CompletedWork = 0.5 → usar 0.5h directamente.
   □ Estado final de la US al terminar el día:
       → Closed    (las pruebas pasaron, historia cerrada)
       → Resolved  (dev completó, QA pendiente o en progreso)
