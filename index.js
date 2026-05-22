@@ -38,14 +38,23 @@ if (fs.existsSync(skillsSrc)) {
   console.log('      qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
 }
 
-// 3. Crear carpeta .agent-state/ si no existe
+// 3. Instalar agentes en ~/.copilot/agents/
+const agentsSrc  = path.join(__dirname, 'agents');
+const agentsDest = path.join(os.homedir(), '.copilot', 'agents');
+if (fs.existsSync(agentsSrc)) {
+  copyDir(agentsSrc, agentsDest);
+  console.log('\n✅ Agentes instalados en ' + agentsDest + ':');
+  fs.readdirSync(agentsSrc).forEach(a => console.log('   🤖 ' + a));
+}
+
+// 4. Crear carpeta .agent-state/ si no existe
 const agentStateDir = path.join(process.cwd(), '.agent-state');
 if (!fs.existsSync(agentStateDir)) {
   fs.mkdirSync(agentStateDir, { recursive: true });
   console.log('\n✅ Carpeta .agent-state/ creada');
 }
 
-// 4. Crear .env.playwright a partir del ejemplo (solo si no existe)
+// 5. Crear .env.playwright a partir del ejemplo (solo si no existe)
 const envDest    = path.join(process.cwd(), '.env.playwright');
 const envExample = path.join(templateDest, '.env.playwright.example');
 if (!fs.existsSync(envDest) && fs.existsSync(envExample)) {

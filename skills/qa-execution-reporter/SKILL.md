@@ -492,6 +492,29 @@ $env:SLOW_MO = '500'; npm run test:headed
 
 ---
 
+## CRITERIO DE SCREENSHOTS — Evidencia por criterio de aceptación
+
+> ⚠️ Los screenshots **no son obligatorios en cada paso**. El agente determina cuáles pantallas requieren evidencia visual leyendo los criterios de aceptación de la US.
+
+**Cómo decidir qué capturar:**
+
+1. Leer los criterios de aceptación de la US antes de ejecutar
+2. Por cada criterio, identificar: ¿el resultado esperado es algo **visualmente verificable** por el usuario?
+3. Capturar screenshot solo en los puntos donde la evidencia visual confirma un criterio
+
+| Tipo de criterio | ¿Capturar screenshot? |
+|------------------|----------------------|
+| Estado visible de un elemento (botones, mensajes, tablas) | ✅ Sí — capturar la pantalla que muestra ese estado |
+| Mensaje de éxito/error después de una acción | ✅ Sí — capturar el mensaje |
+| Redirección a otra pantalla | ✅ Sí — capturar la pantalla destino |
+| Paso de navegación intermedio sin criterio verificable | ❌ No — omitir |
+| Login o flujo de setup previo sin criterio propio | ❌ No — omitir, a menos que el criterio valide el acceso |
+| Descarga de archivo / exportación | ✅ Sí — capturar la confirmación o el archivo descargado |
+
+> Si la US no tiene criterios de aceptación escritos → capturar al menos el estado inicial y el resultado final del flujo.
+
+---
+
 ## PHASE 5 — EVIDENCE UPLOAD TO ADO (FULLY AUTOMATIC)
 
 ### 5.0 — Preparar screenshots según escenario
@@ -603,7 +626,46 @@ Generate `e2e/upload-evidence.js` and execute automatically, no user input neede
 The script must:
 1. **Read PAT from `process.env.ADO_PAT`** — never from a file or argument
 2. **Read results from `e2e/results.json`** — never hardcode TC data in the script
-3. **Implement idempotency via `e2e/upload-state.json`**:
+3. **Create a formal ADO Test Run** before uploading evidence:
+
+   ```js
+   // ✅ REQUIRED: Create ADO Test Run first, then use its URL in the comment
+   async function createTestRun(planId, suiteId, testCaseIds, runName) {
+     const url = `https://dev.azure.com/${ORG}/${PROJECT}/_apis/test/runs?api-version=7.0`;
+     const body = {
+       name: runName || `QA Run — ${new Date().toISOString().slice(0,10)}`,
+       plan: { id: planId },
+       pointIds: testCaseIds,   // TC IDs to include in the run
+       automated: false,
+       state: 'InProgress'
+     };
+     const res = await adoRequest('POST', url, body, 'application/json');
+     return res;   // res.id = runId, res.webAccessUrl = URL del Test Run
+   }
+
+   async function completeTestRun(runId, results) {
+     // Patch individual test results
+     const patchUrl = `https://dev.azure.com/${ORG}/${PROJECT}/_apis/test/runs/${runId}/results?api-version=7.0`;
+     const resultPayload = results.map(tc => ({
+       testCase: { id: tc.tcId },
+       outcome: tc.overall === 'PASSED' ? 'Passed' : 'Failed',
+       state: 'Completed',
+       comment: tc.overall === 'PASSED' ? 'QA PASSED' : 'QA NOT PASSED'
+     }));
+     await adoRequest('PATCH', patchUrl, resultPayload, 'application/json');
+
+     // Close the run
+     const closeUrl = `https://dev.azure.com/${ORG}/${PROJECT}/_apis/test/runs/${runId}?api-version=7.0`;
+     await adoRequest('PATCH', closeUrl, { state: 'Completed' }, 'application/json');
+   }
+
+   // In main(), BEFORE the comment upload loop:
+   const run = await createTestRun(PLAN_ID, SUITE_ID, results.map(r => r.tcId), `QA Run — Suite ${SUITE_ID}`);
+   const TEST_RUN_URL = run.webAccessUrl;   // ← use this URL in every comment
+   await completeTestRun(run.id, results);
+   ```
+
+4. **Implement idempotency via `e2e/upload-state.json`**:
    - On start: load state file (`{}` if not found)
    - Per TC: if `state[wiId].allScreenshots === true` → **skip entirely** (already uploaded)
    - If `state[wiId].commentId` exists but `allScreenshots` is false → **PATCH** the existing comment instead of creating a new one

@@ -1,6 +1,6 @@
 ---
 name: create-test-cases
-description: 'Crea Test Cases profesionales en Azure DevOps siguiendo estándares QA empresariales. Usar cuando el usuario pida crear, redactar, generar, dividir o corregir TCs, casos de prueba o test cases en cualquier organización/proyecto de ADO. Aplica nomenclatura Portal-Módulo-Pantalla-Funcionalidad [Escenario], estructura PRECOND 0/1/3, atomización máx. 15 pasos, y resultados esperados observables.'
+description: 'Crea Test Cases profesionales en Azure DevOps siguiendo estándares QA empresariales. Usar cuando el usuario pida crear, redactar, generar, dividir o corregir TCs, casos de prueba o test cases en cualquier organización/proyecto de ADO. Aplica nomenclatura Portal-Módulo-Pantalla-Funcionalidad [Escenario], estructura PRECOND secuencial 0..N (Login siempre el último), atomización máx. 15 pasos, y resultados esperados observables.'
 argument-hint: 'Describe la funcionalidad a testear, pega pasos de un TC existente, o indica org/proyecto/plan/suite'
 ---
 
@@ -24,9 +24,9 @@ Antes de crear cualquier TC, necesitas estos datos. **Pregunta todo lo que falte
 | **Portal / Aplicación** | `AutoReg`, `MiPortal` | Sí (para el título) |
 | **Módulo** | `Preventas`, `Ventas` | Sí (para el título) |
 | **Pantalla / Funcionalidad** | `Proc. Preventas Excel` | Sí (para el título) |
-| **URL de la pantalla** | `https://app.empresa.com/Forms/Modulo.aspx` | Sí — incluir en PRECOND 3 y en pasos de navegación. Requerida para automatización futura. |
-| **Usuario de prueba** | `graciagc` | Sí (para PRECOND 3) |
-| **Rol del usuario** | `CASE CREATOR` | Sí (para PRECOND 3) |
+| **URL de la pantalla** | `https://app.empresa.com/Forms/Modulo.aspx` | Sí — incluir en pasos de navegación. Requerida para automatización futura. |
+| **Usuario de prueba** | `graciagc` | Sí (para PRECOND Login) |
+| **Rol del usuario** | `CASE CREATOR` | Sí (para PRECOND Login) |
 | **Escenarios a cubrir** | Happy path, errores, cancelar... | Sí |
 
 > Si el usuario ya proporcionó esta información en mensajes previos o en el contexto de la conversación, no vuelvas a preguntar.
@@ -58,24 +58,36 @@ MiPortal-Ventas-Gestión de Pedidos-Creación de Pedido [Cancelar]
 
 ## 3. Estructura de pasos — Sistema PRECOND
 
-Todo TC debe comenzar con precondiciones en este orden exacto:
+Todo TC debe comenzar con precondiciones. Las PRECONDs se numeran **secuencialmente desde 0** — el número indica la posición, no la categoría. Incluir **solo** las categorías que el TC necesita, en este orden:
 
-| Paso | Tipo | Contenido | Cuándo usarlo |
-|------|------|-----------|---------------|
-| **PRECOND 0** | Dependencias de TCs | TCs que deben ejecutarse antes para dejar el sistema en un estado dado | Cuando el TC depende de otro TC previo |
-| **PRECOND 1** | Datos necesarios | Estado de archivos, usuarios creados, datos precargados, configuraciones | Cuando se necesitan datos específicos listos |
-| **PRECOND 3** | Login | `Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W` | SIEMPRE (todo TC requiere login) |
+| Categoría | Contenido | Cuándo incluir |
+|-----------|-----------|----------------|
+| Dependencias de TCs | TCs que deben ejecutarse antes para dejar el sistema en un estado dado | Si el TC depende de otro TC previo |
+| Datos del sistema | Archivos, usuarios creados, datos precargados, configuraciones específicas | Si el TC requiere datos específicos |
+| Info de usuario | Tipo de rol, escenario de permisos, condiciones del usuario | Si el escenario requiere especificar condiciones de usuario adicionales |
+| **Login** | `Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W` | **Siempre — pero su número = su posición en la secuencia** |
+
+> ⚠️ **El número NO es fijo por categoría.** Es la posición en la lista de precondiciones del TC:
+> - Solo login → `PRECOND 0: Login - ...`
+> - Datos + login → `PRECOND 0: Datos [...] | PRECOND 1: Login - ...`
+> - TC deps + datos + login → `PRECOND 0: TC deps [...] | PRECOND 1: Datos [...] | PRECOND 2: Login - ...`
 
 Después de los PRECONDs, continúan los **pasos de ejecución** numerados secuencialmente.
 
-**Ejemplo completo:**
+**Ejemplo — solo Login (único PRECOND):**
+```
+1. PRECOND 0: Login - Usuario: usuario01 - Rol: ADMIN - Acceso portal: MiPortal - Acceso módulo: Ventas / Gestión de Pedidos|
+2. Clic en el botón 'Crear Pedido'|Se presenta el formulario de creación con los campos Nombre, Cantidad y Fecha habilitados
+3. Ingresar 'Producto A' en el campo Nombre|El campo muestra el texto 'Producto A' sin errores de validación
+4. Clic en el botón 'Guardar'|Se presenta mensaje de éxito 'Pedido creado correctamente' y se redirige a la lista de pedidos
+```
+
+**Ejemplo — TC deps + Datos + Login (tres PRECONDs):**
 ```
 1. PRECOND 0: TC-A (ID XXXX) ejecutado hasta el paso 10; el sistema muestra la pantalla de resultados|
 2. PRECOND 1: Archivo Excel con 3 registros válidos cargado en la sesión activa|
-3. PRECOND 3: Login - Usuario: usuario01 - Rol: ADMIN - Acceso portal: MiPortal - Acceso módulo: Ventas / Gestión de Pedidos|
-4. Clic en el botón "Crear Pedido"|Se presenta el formulario de creación con los campos Nombre, Cantidad y Fecha habilitados
-5. Ingresar "Producto A" en el campo Nombre|El campo muestra el texto "Producto A" sin errores de validación
-6. Clic en el botón "Guardar"|Se presenta mensaje de éxito "Pedido creado correctamente" y se redirige a la lista de pedidos
+3. PRECOND 2: Login - Usuario: usuario01 - Rol: ADMIN - Acceso portal: MiPortal - Acceso módulo: Ventas / Gestión de Pedidos|
+4. Clic en el botón 'Crear Pedido'|Se presenta el formulario de creación con los campos Nombre, Cantidad y Fecha habilitados
 ```
 
 ---
@@ -209,7 +221,7 @@ Esperar confirmación ("dale", "sí", "ok") antes de crear en ADO.
 
 **Pasos:**
 ```
-1. PRECOND 3: Login - Usuario: admin01 - Rol: VENDEDOR - Acceso portal: MiPortal - Acceso módulo: Ventas / Gestión de Pedidos|
+1. PRECOND 0: Login - Usuario: admin01 - Rol: VENDEDOR - Acceso portal: MiPortal - Acceso módulo: Ventas / Gestión de Pedidos|
 2. Clic en el botón 'Crear Pedido'|Se presenta el formulario de creación de pedido con campos Nombre, Cantidad, Fecha y botones 'Guardar' y 'Cancelar'
 3. Ingresar 'Producto de Prueba' en el campo 'Nombre'|El campo muestra el texto ingresado sin errores de validación
 4. Ingresar '5' en el campo 'Cantidad'|El campo muestra '5' y no presenta alertas

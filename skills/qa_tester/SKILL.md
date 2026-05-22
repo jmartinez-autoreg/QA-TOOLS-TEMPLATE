@@ -152,14 +152,19 @@ Ejemplo: Admin-Vehiculos-Grid-Descarga [Descarga individual por VIN]
 
 ### Estructura de Precondiciones
 
-Cada TC DEBE tener las siguientes filas de precondición (una por row):
+Las PRECONDs se numeran **secuencialmente desde 0**. Incluir **solo** las categorías que el TC necesita, en este orden:
 
-| # | PRECOND | Descripción |
-|---|---------|-------------|
-| 0 | **PRECOND 0** | Indicar si la pantalla es accesible sin login o con login específico |
-| 1 | **PRECOND 1** | Datos mínimos disponibles en el sistema para ejecutar el TC |
-| 2 | **PRECOND 2** | Rol/usuario necesario para la prueba (NUNCA incluir contraseña en las precondiciones) |
-| 3 | **PRECOND 3** | Estado inicial de la UI antes de iniciar el TC (opcional si no aplica) |
+| Categoría | Descripción | Cuándo incluir |
+|-----------|-------------|----------------|
+| Dependencias de TCs | TCs que deben ejecutarse previamente para dejar el sistema en un estado dado | Si el TC depende de otro TC previo |
+| Datos del sistema | Datos, archivos, configuraciones o condiciones específicas que deben existir | Si el TC requiere datos específicos |
+| Info de usuario | Tipo de rol, escenario de permisos, condiciones del usuario bajo prueba | Si el escenario requiere especificar condiciones de usuario adicionales |
+| **Login** | `Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W` | **Siempre — pero su número = su posición en la secuencia** |
+
+> ⚠️ El número NO es fijo por categoría. Es la posición en la lista del TC:
+> - Solo login → `PRECOND 0: Login - ...`
+> - Datos + login → `PRECOND 0: Datos [...] | PRECOND 1: Login - ...`
+> - TC deps + datos + login → `PRECOND 0: TC deps [...] | PRECOND 1: Datos [...] | PRECOND 2: Login - ...`
 
 > ⚠️ **REGLA DE ORO:** UNA PRECOND POR ROW/STEP. Jamás fusionar múltiples PRECONDs en una sola fila.
 >
@@ -222,7 +227,42 @@ Resultado: 1 TC con 4 bloques de pasos secuenciales en la misma pantalla.
 NO crear 4 TCs separados.
 ```
 
+---
 
+## Regla de Story Points
+
+> Antes de crear un Test Plan formal, evaluar los Story Points de la US.
+
+| Story Points | Decisión |
+|---|---|
+| **≤ 2 SP** | **No crear Test Plan formal en ADO.** Ejecutar pruebas exploratorias directas (Escenario B) sin TCs formales. Documentar resultado en la US con formato §16.2 (`QA PASSED` / `QA FAILED`). |
+| **> 2 SP** | Flujo completo: crear TP → TCs → ejecutar → documentar con §16.1 (`QA PASSED` / `QA NOT PASSED`). |
+
+> ⚠️ Si la US tiene ≤ 2 SP y el usuario pide crear un TP formal → advertir y proponer exploratoria directa. No bloquear si el usuario insiste, pero **siempre avisar**.
+
+---
+
+## Documentación de US Post-Ejecución
+
+**Antes de ejecutar**, verificar el estado de la US en ADO:
+
+1. **VERIFICAR** que la US está en estado `Resolved`
+   - Si NO está Resolved → advertir al usuario: *"La US no fue entregada por DEV (estado actual: X). ¿Deseas continuar de todas formas?"*
+   - No ejecutar automáticamente sobre historias en estado distinto a Resolved sin confirmación explícita
+
+2. **EJECUTAR** las pruebas según el flujo elegido (A o B)
+
+3. **Post-ejecución:**
+
+| Resultado | Acción |
+|-----------|--------|
+| Todos los TCs/escenarios pasan | `[ADO]` Cambiar US a `Closed` + agregar comentario HTML con resultado `QA PASSED` |
+| Algún TC/escenario falla | `[ADO]` Mantener US en `Resolved` + crear Bug vinculado + comentario `QA NOT PASSED` (con TP) o `QA FAILED` (sin TP) |
+
+> ⚠️ El estado `Closed` en la US **solo lo cambia QA**, nunca el DEV. Representa aprobación QA de la historia.
+> ⚠️ Si hay TCs fallidos → NO cerrar la historia. Crear Bug, vincular a la US, comentar con info del defecto.
+
+---
 
 ## Plantilla Base de TC
 
@@ -230,11 +270,13 @@ NO crear 4 TCs separados.
 NOMBRE TC: [Portal]-[Módulo]-[Pantalla]-[Funcionalidad] [Escenario]
 ESTADO: Design
 
-=== PRECONDICIONES (Action only — Expected Result: vacío) ===
-PRECOND 0: [Acceso — con/sin login, URL inicial]
-PRECOND 1: [Datos necesarios en el sistema]
-PRECOND 2: [Rol/usuario requerido — SIN contraseña]
-PRECOND 3: [Estado inicial de la UI] (si aplica)
+=== PRECONDICIONES (Action only — Expected Result: vacío — solo incluir categorías que aplican) ===
+PRECOND 0: [Primera categoría necesaria: TC deps / Datos / Info usuario / Login]
+PRECOND 1: [Segunda categoría — si aplica]
+... (Login siempre el último número en la secuencia)
+
+Ejemplo — solo login:       PRECOND 0: Login - Usuario: X - Rol: Y - Acceso portal: Z - Módulo: W
+Ejemplo — datos + login:     PRECOND 0: [Condición de datos], PRECOND 1: Login - Usuario: X ...
 
 === PASOS (Action + Expected Result obligatorio) ===
 | Paso | Acción                          | Resultado Esperado                    |
@@ -417,16 +459,32 @@ Acción requerida: [Qué necesita ocurrir para desbloquear]
 ### Variante — Ejecutar Pruebas sin Test Plan (16.2)
 
 Cuando se ejecutan pruebas **sin Test Cases formales** (flujo "Ejecutar Pruebas"):
-- Se usan múltiples PRECONDs numeradas: **PRECOND 1** = datos del sistema, **PRECOND 2** = login
+- Se usan PRECONDs numeradas secuencialmente desde 0: datos del sistema primero, login al final
 - No hay `[Escenario]` entre corchetes
 - No hay URL de Test Run
+- Resultado exitoso: `QA PASSED / Sprint Test`
+- Resultado con fallo: `QA FAILED / Sprint Test` (⚠️ sin TP formal → `FAILED`, no `NOT PASSED`)
 
+**Plantilla — PASSED:**
 ```html
-PRECOND 1: [Condición de datos en el sistema]
+PRECOND 0: [Condición de datos en el sistema]
 - [Campo]: [Valor]
-PRECOND 2: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
+PRECOND 1: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
 
 QA PASSED / Sprint Test
+
+<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
+```
+
+**Plantilla — FAILED (sin TP):**
+```html
+PRECOND 0: [Condición de datos en el sistema]
+- [Campo]: [Valor]
+PRECOND 1: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
+
+QA FAILED / Sprint Test
+
+Bug [ID]: [descripción corta del defecto]
 
 <img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
 ```
@@ -492,7 +550,47 @@ Bug registrado: #[BUG_ID]
 
 ## Formato del Daily
 
-### Título
+> El Daily tiene **dos partes**: el texto del Daily (para presentar en la reunión) y las dos tablas de soporte.
+
+### Parte 1 — Consulta automática ADO (Tabla de cambios del día)
+
+Antes de generar el Daily, ejecutar esta consulta WIQL para obtener todos los WIs del sprint modificados hoy:
+
+```sql
+SELECT [Id], [Title], [State], [AssignedTo]
+FROM WorkItems
+WHERE [System.WorkItemType] = 'User Story'
+  AND [System.IterationPath] UNDER @CurrentIteration
+  AND [System.ChangedDate] >= '{hoy}T04:00:00Z'
+  AND [System.ChangedDate] < '{mañana}T04:00:00Z'
+```
+
+> ⚠️ **Zona horaria:** UTC-4 (República Dominicana/AST). El día empieza a las 04:00 UTC.
+> `{hoy}` = fecha actual en formato `YYYY-MM-DD`, `{mañana}` = día calendario siguiente.
+> **Sin filtro AssignedTo** — trae TODOS los WIs cambiados en el sprint. El usuario revisa y corrige si falta algo.
+
+Presentar los resultados al usuario como **Tabla 1**:
+
+| US | Título | Cambio (estado actual) | Razón (si On Hold) |
+|----|--------|----------------------|--------------------|
+| [ID] | [Título] | [Active/Resolved/Closed/On Hold] | [si aplica] |
+
+> Preguntar al usuario: *"¿Esta tabla refleja correctamente tus logros de hoy? ¿Falta o sobra algo?"* y esperar confirmación antes de generar el Daily.
+
+### Parte 2 — Tabla de registros Zoho (Tabla 2)
+
+Después de confirmar la Tabla 1, generar la **Tabla 2** con los registros para Zoho:
+
+| US | Tarea ADO | Tarea ADO ID | Horas | Nota oficial (Zoho) |
+|----|-----------|-------------|-------|---------------------|
+| [ID] | [nombre tarea] | [ID sub-tarea] | [h] | [nota de la tabla oficial] |
+
+> Mostrar la Tabla 2 al usuario: *"¿Estos registros son correctos? Confirma con ✅ o indícame qué cambiar."*
+> Solo registrar en Zoho **tras confirmación explícita**.
+
+---
+
+### Título del Daily
 
 ```
 Tareas realizadas — DD/MM/AAAA
