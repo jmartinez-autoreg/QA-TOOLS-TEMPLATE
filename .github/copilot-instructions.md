@@ -5,6 +5,63 @@
 
 ---
 
+## 🤖 AGENTES DISPONIBLES EN ESTE WORKSPACE
+
+Este workspace tiene **2 agentes especializados**. El agente principal detecta automáticamente cuál usar según la solicitud:
+
+### @QA-PRO — Agente de Testing
+**Usar cuando el usuario mencione:**
+- Test Cases, Test Plans, Suites
+- Ejecutar pruebas, automatizar tests
+- Playwright, E2E, specs
+- Registrar horas en Zoho
+- Daily, reporte del día
+- Preparar TP, analizar US (desde perspectiva QA)
+
+**Capabilities:**
+- Crear Test Cases en Azure DevOps
+- Ejecutar pruebas (manual o automatizado)
+- Capturar screenshots y subir evidencia
+- Automatización E2E con Playwright
+- Time tracking en Zoho Projects
+
+**Archivo:** `agents/QA-PRO.agent.md`
+
+### @PO-PRO — Agente de Product Owner
+**Usar cuando el usuario mencione:**
+- Redactar User Story, escribir US
+- Crear historia de usuario
+- Criterios de aceptación
+- Refinar backlog, dividir feature
+- Convertir requerimientos en USs
+- "Agregar al backlog"
+
+**Capabilities:**
+- Redactar User Stories profesionales para Motorambar
+- Generar criterios de aceptación densos con validaciones
+- Dividir features en USs atómicas
+- Crear USs directamente en Azure DevOps con formato HTML
+- Usar vocabulario del dominio (VIN, estados de vehículo, etc.)
+
+**Archivo:** `agents/PO-PRO.agent.md`
+
+### Routing automático
+
+El agente principal **detecta automáticamente** cuál agente especializado usar:
+
+| Solicitud del usuario | Agente a usar | Razón |
+|----------------------|---------------|-------|
+| "Redacta una US para validar el VIN" | **@PO-PRO** | Keyword: "Redacta US" |
+| "Crea criterios de aceptación para..." | **@PO-PRO** | Keyword: "criterios" |
+| "Analiza la US 9884 y prepara el TP" | **@QA-PRO** | Keyword: "preparar TP" (QA) |
+| "Ejecuta el Test Plan 10716" | **@QA-PRO** | Keyword: "ejecutar", "Test Plan" |
+| "Refina esta feature en USs más pequeñas" | **@PO-PRO** | Keyword: "refina", "USs" |
+| "Registra 2h en Zoho para la US 9884" | **@QA-PRO** | Keyword: "Zoho", "registra" |
+
+> ⚠️ **Si hay ambigüedad**, el agente pregunta: *"¿Quieres que actúe como PO (redactar US) o como QA (crear Test Cases)?"*
+
+---
+
 ## 🚦 PASO 0 — IDENTIFICAR EL TIPO DE SOLICITUD
 
 El agente identifica primero qué tipo de tarea se pide:
@@ -48,12 +105,13 @@ El agente identifica primero qué tipo de tarea se pide:
 
 | Si el usuario menciona... | Skill a cargar | Ruta |
 |---------------------------|----------------|------|
-| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
+| "analizar US", "preparar TP", "crear TC", "redactar casos" (QA) | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
 | "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
 | "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
 | "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
 | "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
 | "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
+| **"redactar US", "crear historia", "criterios de aceptación" (PO)** | **`po-user-story`** | **`~/.agents/skills/po-user-story/SKILL.md`** |
 
 ### Reglas adicionales:
 
@@ -297,9 +355,10 @@ Schemas de referencia en `.agent-state/*.schema.json`.
 
 ```
 1. Usuario envía mensaje
-2. ¿Es sobre QA / Test Plan / redactar casos?  → cargar qa_tester   (sin preguntar A/B)
-   ¿Es sobre horas / Zoho / daily?             → cargar zoho_timelog (sin preguntar A/B)
-   ¿Es sobre ejecutar / automatizar TCs?       → preguntar "¿A o B?"
+2. ¿Es sobre redactar US / criterios / refinar backlog? → cargar po-user-story (PO-PRO)
+   ¿Es sobre QA / Test Plan / crear TCs?               → cargar qa_tester    (QA-PRO)
+   ¿Es sobre horas / Zoho / daily?                     → cargar zoho_timelog (QA-PRO)
+   ¿Es sobre ejecutar / automatizar TCs?               → preguntar "¿A o B?" (QA-PRO)
 3. Esperar respuesta si se preguntó A/B
 4. Cargar el skill correcto con read_file
 5. Seguir las FASES / PHASES del skill en orden

@@ -66,8 +66,7 @@ npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE
 
 Esto descarga e instala automáticamente:
 - Los archivos de configuración del agente en tu carpeta del proyecto
-- Los **skills** (capacidades) en `~/.agents/skills/` (carpeta oculta del sistema)
-- El **agente QA-PRO** en `~/.copilot/agents/` para que puedas invocarlo con `@QA-PRO`
+- Los skills (capacidades del agente) en `~/.agents/skills/` (carpeta oculta del sistema)
 
 ### Paso 3 — Abre VS Code en esa carpeta
 
@@ -84,19 +83,7 @@ O desde VS Code: `Archivo → Abrir Carpeta` → selecciona la carpeta que creas
 
 ### Paso 5 — ¡Listo! Escríbele al agente
 
-Puedes hablarle de dos formas:
-
-**Opción 1 — Chat directo** (el agente detecta automáticamente si es tarea QA)
-```
-Analiza la US 9884 y prepara el test plan
-```
-
-**Opción 2 — Invocación explícita** (recomendado para evitar conflictos con otros agentes)
-```
-@QA-PRO Analiza la US 9884 y prepara el test plan
-```
-
-Más ejemplos:
+Ejemplos de lo que puedes escribirle:
 
 ```
 Analiza la US 9884 y prepara el test plan
@@ -138,16 +125,14 @@ Esta tabla relaciona el número de US de ADO con el ID de tarea en Zoho
 
 ## 🗣️ Cómo hablarle al agente — ejemplos reales
 
-> 💡 **Tip:** Usa `@QA-PRO` para invocarlo explícitamente si tienes otros agentes configurados.
-
 ### Para crear y preparar Test Cases
 
 ```
-@QA-PRO Analiza la US 9884 y dime cuántos TCs necesita
+Analiza la US 9884 y dime cuántos TCs necesita
 ```
 
 ```
-@QA-PRO Prepara el test plan completo para la US 9884
+Prepara el test plan completo para la US 9884
 ```
 
 ```
