@@ -1,0 +1,19 @@
+{
+  "name": "playwright-agent-template",
+  "version": "2.0.0",
+  "description": "QA Agent Template — Playwright E2E + QA Tester + Zoho Time Log con integración Azure DevOps",
+  "main": "index.js",
+  "bin": "./index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.2"
+  }
+}
