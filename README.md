@@ -7,7 +7,7 @@
 
 ## ¿Qué hace este agente?
 
-Es un asistente de IA para equipos de QA que trabaja directamente en VS Code con GitHub Copilot.
+Es un asistente de IA para equipos de QA. Funciona con **GitHub Copilot** (VS Code) y también con **Claude Code** (CLI de Anthropic). El mismo comando `npx` instala ambos.
 Puedes pedirle cosas en lenguaje natural, por ejemplo:
 
 - *"Analiza la US 9884 y prepara el test plan"*
@@ -33,19 +33,28 @@ y la aplicación bajo prueba — todo sin que tengas que escribir código.
 
 ## ✅ Requisitos previos
 
-Antes de instalar, verifica que tienes todo esto:
+### Para GitHub Copilot (VS Code)
 
 | Requisito | Cómo verificarlo | Dónde instalarlo si falta |
 |-----------|-----------------|--------------------------|
-| **Node.js 18+** | Abre terminal → escribe `node -v` | [nodejs.org](https://nodejs.org) |
+| **Node.js 18+** | Terminal → `node -v` | [nodejs.org](https://nodejs.org) |
 | **VS Code** | Abre VS Code | [code.visualstudio.com](https://code.visualstudio.com) |
-| **GitHub Copilot** (extensión de VS Code) | `Ctrl+Shift+X` → busca "GitHub Copilot" | Marketplace de VS Code |
-| **MCP Azure DevOps** configurado | El agente puede conectarse a ADO sin errores | Pide ayuda a tu equipo de IT |
-| **MCP Playwright (Browser)** configurado | El agente puede abrir un navegador | Pide ayuda a tu equipo de IT |
-| **MCP Zoho Projects** configurado | Solo si vas a registrar horas en Zoho | Pide ayuda a tu equipo de IT |
+| **GitHub Copilot** (extensión) | `Ctrl+Shift+X` → busca "GitHub Copilot" | Marketplace de VS Code |
+| **MCP Azure DevOps** configurado | El agente conecta a ADO sin errores | Pide ayuda a tu equipo de IT |
+| **MCP Playwright (Browser)** configurado | El agente puede abrir navegador | Pide ayuda a tu equipo de IT |
+| **MCP Zoho Projects** configurado | Solo si registras horas en Zoho | Pide ayuda a tu equipo de IT |
+
+### Para Claude Code (CLI)
+
+| Requisito | Cómo verificarlo | Dónde instalarlo si falta |
+|-----------|-----------------|--------------------------|
+| **Node.js 18+** | Terminal → `node -v` | [nodejs.org](https://nodejs.org) |
+| **Claude Code CLI** | Terminal → `claude --version` | `npm install -g @anthropic-ai/claude-code` |
+| **MCP Azure DevOps** configurado | `~/.claude/settings.json` o `.claude/settings.json` | Pide ayuda a tu equipo de IT |
+| **MCP Zoho Projects** configurado | Solo si registras horas en Zoho | Pide ayuda a tu equipo de IT |
 
 > **¿Qué es un MCP?** Es una conexión que permite al agente comunicarse con sistemas externos
-> (Azure DevOps, Zoho, el navegador). Tu equipo de IT o el administrador de VS Code puede configurarlos.
+> (Azure DevOps, Zoho, el navegador). Tu equipo de IT o el administrador puede configurarlos.
 
 ---
 
@@ -64,26 +73,29 @@ Mac/Linux: ~/QA/mi-proyecto/
 npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE
 ```
 
-Esto descarga e instala automáticamente:
-- Los archivos de configuración del agente en tu carpeta del proyecto
-- Los skills (capacidades del agente) en `~/.agents/skills/` (carpeta oculta del sistema)
+Esto instala automáticamente:
+- Los archivos de configuración del agente en tu carpeta del proyecto (incluyendo `CLAUDE.md` para Claude Code y `copilot-instructions.md` para Copilot)
+- Los skills en `~/.agents/skills/` — compartidos entre ambos agentes
+- El agente QA-PRO en `~/.copilot/agents/` y en `~/.claude/agents/`
 
-### Paso 3 — Abre VS Code en esa carpeta
+### Paso 3a — Usar con GitHub Copilot
 
 ```bash
 code .
 ```
 
-O desde VS Code: `Archivo → Abrir Carpeta` → selecciona la carpeta que creaste.
-
-### Paso 4 — Abre GitHub Copilot en modo Agent
-
 - Presiona `Ctrl+Shift+I` (Windows/Linux) o `Cmd+Shift+I` (Mac)
-- Asegúrate de que aparezca **"Agent"** en la parte superior del panel de chat
+- Asegúrate de que aparezca **"Agent"** en el panel de chat
 
-### Paso 5 — ¡Listo! Escríbele al agente
+### Paso 3b — Usar con Claude Code
 
-Ejemplos de lo que puedes escribirle:
+```bash
+claude
+```
+
+`CLAUDE.md` se carga automáticamente — no necesitas hacer nada más. El agente QA-PRO está activo desde el primer mensaje.
+
+### Paso 4 — ¡Listo! Escríbele al agente
 
 ```
 Analiza la US 9884 y prepara el test plan
@@ -201,20 +213,51 @@ Cuando pides ejecutar o automatizar TCs, el agente pregunta:
 
 ---
 
+## 🤖 Copilot vs Claude Code — Diferencias
+
+| Aspecto | GitHub Copilot | Claude Code |
+|---------|---------------|-------------|
+| Configuración principal | `copilot-instructions.md` | `CLAUDE.md` (se lee automáticamente) |
+| Archivo de agente | `~/.copilot/agents/QA-PRO.agent.md` | `~/.claude/agents/QA-PRO-claude.md` |
+| Skills compartidos | `~/.agents/skills/` | `~/.agents/skills/` (mismo directorio) |
+| Activación | `Ctrl+Shift+I` en VS Code | `claude` en terminal |
+| MCP ADO | Nombres internos de Copilot | `mcp__azure-devops-Autoreg__*` |
+| MCP Zoho | Nombres internos de Copilot | `mcp__claude_ai_Zhoho__ZohoProjects_*` |
+| Auto-aprendizaje | Actualiza archivos de skill | Notifica y actualiza **ambas versiones** en sincronía |
+
+> Los SKILL.md son **idénticos** para ambos agentes — actualizar uno actualiza los dos.
+
+---
+
+## 🧠 Auto-aprendizaje
+
+Cuando algo no funciona como esperas o corriges al agente, el agente **debe notificarlo automáticamente**:
+
+```
+⚠️ AUTO-APRENDIZAJE DETECTADO
+ Problema   : [qué salió mal]
+ Causa raíz : [por qué ocurrió]
+ Fix         : [qué cambiaría en las instrucciones]
+```
+
+Luego propone actualizar los archivos afectados (SKILL.md y/o CLAUDE.md + copilot-instructions.md) y pide tu confirmación antes de escribir cualquier cambio. Esto garantiza que el mismo error **no ocurra en el futuro** en ninguna de las dos versiones del agente.
+
+---
+
 ## 📂 Archivos que se crean en tu carpeta
 
 ```
 mi-proyecto/
-├── .github/
-│   └── copilot-instructions.md    ← El "cerebro" del agente — NO editar
-├── .agent-state/                  ← Estado interno del agente — NO editar
-├── TPlans/                        ← Aquí van los tests generados (Escenario A)
-├── 00_AGENT_RULES.md              ← Reglas globales del agente
-├── playwright.config.ts           ← Configuración de velocidad, video, screenshots
-├── playwright-guide.md            ← Referencia técnica para desarrolladores
+├── CLAUDE.md                      ← Instrucciones del agente para Claude Code (automático)
+├── copilot-instructions.md        ← Instrucciones del agente para Copilot
+├── .agent-state/                  ← Estado interno del agente — no editar
+├── TPlans/                        ← Tests generados (Escenario A)
+├── 00_AGENT_RULES.md              ← Reglas globales (compartidas Copilot + Claude)
+├── playwright.config.ts           ← Config de Playwright
+├── playwright-guide.md            ← Referencia técnica
 ├── execution-rules.md             ← Reglas para escribir tests
-├── selector-strategy.md           ← Estrategia de selectores CSS/XPath
-└── agent-architecture.md          ← Arquitectura del pipeline de agentes
+├── selector-strategy.md           ← Estrategia de selectores
+└── agent-architecture.md          ← Arquitectura del pipeline
 ```
 
 ---
@@ -274,14 +317,18 @@ Esto actualiza tanto los archivos del workspace como los skills instalados en `~
 | Problema | Solución |
 |----------|----------|
 | El agente no encuentra los TCs | Verifica que tengas el Test Plan ID y Suite ID correctos en ADO |
-| "MCP ADO no responde" | Verifica que el MCP de Azure DevOps esté configurado y con sesión activa en VS Code |
+| "MCP ADO no responde" (Copilot) | Verifica el MCP de Azure DevOps en VS Code |
+| "MCP ADO no responde" (Claude) | Verifica `~/.claude/settings.json` → clave `azure-devops-Autoreg` |
 | "El browser no abre" | Verifica que el MCP de Playwright (Browser) esté activo |
 | "Node.js no encontrado" | Instala Node.js 18+ desde [nodejs.org](https://nodejs.org) |
+| `claude` no se reconoce como comando | Instala Claude Code: `npm install -g @anthropic-ai/claude-code` |
+| `CLAUDE.md` no se carga en Claude Code | Ejecuta `claude` desde la carpeta raíz del proyecto (donde está el CLAUDE.md) |
 | Los skills no funcionan | Vuelve a ejecutar `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE` |
 | Error en PowerShell (Windows) | Ejecuta los comandos así: `cmd /c "npx ..."` en la terminal |
 | El agente no registra en Zoho | Verifica que Portal ID y Project ID estén configurados en `zoho_timelog/SKILL.md` |
 | "Límite de 15 horas en Zoho" | Es un límite de la API de Zoho. Distribuye el exceso al día siguiente |
 | El agente no habla español | Escríbele en español — responde en el idioma que uses |
+| El agente repite un error ya corregido | El Auto-aprendizaje no se activó — pide al agente que lo haga: "actualiza las instrucciones" |
 
 ---
 

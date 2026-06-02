@@ -53,12 +53,19 @@ if (fs.existsSync(skillsSrc)) {
   console.log('      qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
 }
 
-// 3. Instalar agentes en ~/.copilot/agents/ (SIEMPRE actualiza)
-const agentsSrc  = path.join(__dirname, 'agents');
-const agentsDest = path.join(os.homedir(), '.copilot', 'agents');
+// 3a. Instalar agentes en ~/.copilot/agents/ (Copilot — SIEMPRE actualiza)
+const agentsSrc       = path.join(__dirname, 'agents');
+const agentsCopilot   = path.join(os.homedir(), '.copilot', 'agents');
 if (fs.existsSync(agentsSrc)) {
-  copyDirAlways(agentsSrc, agentsDest);
-  console.log('\n✅ Agente QA-PRO actualizado en ' + agentsDest);
+  copyDirAlways(agentsSrc, agentsCopilot);
+  console.log('\n✅ Agente QA-PRO (Copilot) actualizado en ' + agentsCopilot);
+}
+
+// 3b. Instalar agentes en ~/.claude/agents/ (Claude Code — SIEMPRE actualiza)
+const agentsClaude = path.join(os.homedir(), '.claude', 'agents');
+if (fs.existsSync(agentsSrc)) {
+  copyDirAlways(agentsSrc, agentsClaude);
+  console.log('✅ Agente QA-PRO (Claude Code) actualizado en ' + agentsClaude);
 }
 
 // 4. Crear carpeta .agent-state/ si no existe
@@ -78,8 +85,10 @@ if (!fs.existsSync(envDest) && fs.existsSync(envExample)) {
   console.log('\n   ⚠️  .env.playwright ya existe — no sobreescrito');
 }
 
-console.log('\n🚀 Listo. Abre VS Code y usa GitHub Copilot Agent.');
-console.log('   Lee el README.md para empezar.');
+console.log('\n🚀 Listo. Elige tu agente:');
+console.log('   📎 GitHub Copilot  → Abre VS Code, activa Copilot Agent (Ctrl+Shift+I) y escribe "@QA-PRO"');
+console.log('   🤖 Claude Code     → Abre esta carpeta con "claude" en la terminal (CLAUDE.md se carga automáticamente)');
+console.log('\n   Lee el README.md para instrucciones completas.');
 console.log('   Configura los skills con datos de tu empresa (ver sección ⚙️ arriba).\n');
 console.log('💡 Skills y agentes se actualizan automáticamente en cada ejecución.');
 if (!force) console.log('   Archivos del workspace: usa --force para sobreescribir si ya existen.\n');
