@@ -33,7 +33,10 @@ Al recibir una US el agente DEBE seguir este orden:
 2. **Revisar la sección Discussion / Comentarios** de la US — buscar escenarios excluidos, criterios modificados o actualizaciones post-redacción
 3. **Identificar** portal, módulo, pantalla para el nombre del TC
 4. **Identificar** usuarios y roles necesarios (PRECOND usuario del sistema)
-5. **Filtrar** cada criterio: ¿es ejecutable desde la UI sin manipulación de backend? Si no → marcar como "Cobertura DEV", excluir del TC
+5. **Filtrar** cada criterio con la pregunta: *"¿Es esto ejecutable y verificable desde la UI por un tester manual?"*
+   - Si **todos** responden NO → US es **Cobertura DEV**: NO crear TC ni TP formal. Documentar en comentario de la US: `Cobertura DEV — verificación a cargo del equipo de desarrollo.`
+   - Si **algunos** responden NO → excluir esos criterios del TC, incluir solo pasos UI verificables
+   - **Señales de Cobertura DEV:** "query en BD", "estructura de tablas", "acceso a base de datos", "código/programación", "appsettings", "worker/Service Bus", "infraestructura", "tabla de settings", "script SQL"
 6. **Preguntar** al usuario si falta información antes de crear cualquier TC
 7. **Aplicar** la regla de división para determinar cuántos TC se necesitan
 8. **Redactar** TCs completos con precondiciones y pasos (acción + resultado esperado)

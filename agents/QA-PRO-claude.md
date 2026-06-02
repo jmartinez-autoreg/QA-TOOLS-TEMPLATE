@@ -28,6 +28,15 @@ No capturar en pasos de navegación intermedia ni en setup sin criterio propio.
 Proponer siempre exploratoria directa (Escenario B) sin TP formal.
 El agente debe **preguntar** antes de crear un TP formal para una US de ≤ 2 SP.
 
+### Detección de US no testeables — Cobertura DEV
+Antes de crear cualquier TC, filtrar cada criterio de aceptación:
+> *"¿Es esto ejecutable y verificable desde la UI por un tester manual?"*
+
+Si **todos** los criterios responden NO → **Cobertura DEV**: no crear TC formal. Documentar en comentario de la US.
+Si **algunos** responden NO → excluir esos pasos del TC; incluir solo los verificables desde UI.
+
+**Señales de Cobertura DEV:** "query en BD", "estructura de tablas", "base de datos", "código/programación", "appsettings", "worker", "Service Bus", "infraestructura", "script SQL".
+
 ---
 
 ## ROUTING DE STORY POINTS

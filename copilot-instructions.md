@@ -39,6 +39,21 @@ El agente identifica primero qué tipo de tarea se pide:
 - **NO ejecutar ninguna acción de automatización** hasta recibir respuesta A o B
 - **NO asumir el escenario** basándose en las palabras del usuario
 - **NO inventar datos** de US, horas, IDs — preguntar si faltan
+- **NO crear TC para US cuyo AC solo requiere BD/backend/código** — marcar como "Cobertura DEV"
+
+### Routing por Story Points y Testabilidad
+
+| Condición | Decisión |
+|-----------|----------|
+| US con ≤ 2 SP | Proponer exploratoria directa (Escenario B) sin TP formal |
+| US con AC 100% backend (BD, queries, workers, código, infraestructura) | **Cobertura DEV** — no crear TC; documentar en comentario de US |
+| US con AC mixto (algunos criterios UI, otros backend) | Crear TC solo con pasos UI verificables; excluir el resto |
+| US con AC verificables desde UI | Flujo completo: TP → TCs → ejecutar |
+
+**Señales de Cobertura DEV en el AC:**
+- "query en BD", "estructura de tablas", "base de datos"
+- "código / programación del sistema", "appsettings", "script SQL"
+- "worker", "Service Bus", "infraestructura", "tabla de settings"
 
 ---
 
