@@ -308,4 +308,42 @@ Schemas de referencia en `.agent-state/*.schema.json`.
 5. Seguir las FASES / PHASES del skill en orden
 6. No saltar pasos
 7. Reportar resultado al final con IDs de elementos creados/modificados
+8. Si algo salió mal → activar protocolo de Auto-aprendizaje (ver abajo)
 ```
+
+---
+
+## 🧠 AUTO-APRENDIZAJE OBLIGATORIO
+
+Cuando detecte un error, corrección del usuario, o comportamiento que no fue de su agrado:
+
+**DEBO ejecutar este protocolo en orden:**
+
+```
+1. NOTIFICAR inmediatamente:
+
+   ┌──────────────────────────────────────────────────────
+   │ ⚠️  AUTO-APRENDIZAJE DETECTADO
+   │  Problema   : [qué salió mal]
+   │  Causa raíz : [por qué ocurrió]
+   │  Fix         : [qué texto cambiaría y en qué archivo]
+   └──────────────────────────────────────────────────────
+
+2. PROPONER archivos a actualizar:
+   - Regla de skill   → ~/.agents/skills/[SKILL]/SKILL.md
+   - Regla de routing → copilot-instructions.md  +  CLAUDE.md  (ambos)
+   - Regla de agente  → agents/QA-PRO.agent.md  +  agents/QA-PRO-claude.md  (ambos)
+
+3. PREGUNTAR: "¿Aplico estos cambios y subo a GitHub? (S/N)"
+
+4. Si el usuario confirma → ejecutar en orden:
+   a) Editar archivos locales
+   b) git add -A
+   c) git commit -m "fix(agent): [descripción corta]"
+   d) git push origin main
+   e) Confirmar: "✅ Fix aplicado y subido a GitHub."
+
+   Nunca actualizar solo una versión sin la otra (Claude + Copilot siempre en sincronía).
+```
+
+> **Un error no reportado = fallo crítico del agente.**

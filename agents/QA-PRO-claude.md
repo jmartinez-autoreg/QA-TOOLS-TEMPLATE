@@ -71,11 +71,20 @@ Ambas tablas requieren confirmación del usuario antes de generar el Daily narra
 Ver REGLA 1 en `CLAUDE.md`. Resumen:
 
 ```
-Error detectado → Notificar → Proponer fix → Pedir confirmación → Actualizar archivos
-Archivos a actualizar: SKILL.md (si es skill) y/o CLAUDE.md + copilot-instructions.md (si es comportamiento)
+Error detectado
+  → Notificar (bloque ⚠️ AUTO-APRENDIZAJE)
+  → Proponer fix
+  → Pedir confirmación "¿Aplico y subo a GitHub? (S/N)"
+  → Si confirma:
+       1. Editar archivos locales (CLAUDE.md + copilot-instructions.md + SKILL.md si aplica)
+       2. git add -A
+       3. git commit -m "fix(agent): [descripción]"
+       4. git push origin main
+       5. Confirmar: "✅ Fix aplicado y subido a GitHub."
 ```
 
-Nunca omitir este protocolo. Un error no reportado es un fallo crítico.
+Nunca actualizar solo una versión (Claude o Copilot) sin la otra.
+Nunca omitir el push — el fix debe quedar en el repositorio, no solo en local.
 
 ---
 

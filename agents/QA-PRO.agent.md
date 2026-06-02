@@ -39,18 +39,39 @@ argument-hint: "US ID / TC IDs / 'daily' / 'registrar horas' / 'crear TP'"
 
 ---
 
-## 3. REGLA 1 — AUTO-MEJORA (Actualizar skill cuando corriges error)
+## 3. REGLA 1 — AUTO-APRENDIZAJE OBLIGATORIO
 
-**Cuándo**: El agente detecta una mala práctica en un skill (ej: skill dice "PRECOND 3 siempre" pero el PDF oficial dice "secuencial 0..N").
+**Cuándo**: El agente detecta un error, una corrección del usuario, o comportamiento que no fue de su agrado.
 
-**Acción**:
-1. Corregir el comportamiento **inmediatamente** en esta sesión
-2. **Actualizar el skill instalado** en `~/.agents/skills/SKILL_NAME/SKILL.md` para que el fix persista
-3. Notificar al usuario:
+**Acción** (en este orden):
 
-> ✅ **Auto-mejora aplicada**: Detecté un error en el skill `[SKILL_NAME]`. Corregí el comportamiento y actualicé el archivo instalado para que no vuelva a ocurrir.
+1. **NOTIFICAR** inmediatamente:
 
-> ⚠️ **NO actualizar archivos del template** en `QA-TOOLS-TEMPLATE-edit/` — solo los instalados en `~/.agents/skills/`.
+```
+┌──────────────────────────────────────────────────────
+│ ⚠️  AUTO-APRENDIZAJE DETECTADO
+│  Problema   : [qué salió mal]
+│  Causa raíz : [por qué ocurrió]
+│  Fix         : [qué texto cambiaría y en qué archivo]
+└──────────────────────────────────────────────────────
+```
+
+2. **PROPONER** archivos a actualizar:
+   - Regla de skill   → `~/.agents/skills/[SKILL]/SKILL.md`
+   - Regla de routing → `copilot-instructions.md` + `CLAUDE.md` (ambos)
+   - Regla de agente  → `agents/QA-PRO.agent.md` + `agents/QA-PRO-claude.md` (ambos)
+
+3. **PREGUNTAR**: "¿Aplico estos cambios y subo a GitHub? (S/N)"
+
+4. Si el usuario confirma → ejecutar en orden:
+   - Editar los archivos locales afectados
+   - `git add -A`
+   - `git commit -m "fix(agent): [descripción corta]"`
+   - `git push origin main`
+   - Confirmar: "✅ Fix aplicado y subido a GitHub."
+
+> Nunca actualizar solo una versión (Copilot o Claude) sin la otra — siempre en sincronía.
+> Un error no reportado = fallo crítico del agente.
 
 ---
 

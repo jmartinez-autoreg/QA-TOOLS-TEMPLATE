@@ -56,10 +56,26 @@ Cuando detecte cualquiera de estas situaciones:
    - Regla de routing   → CLAUDE.md  +  copilot-instructions.md  (ambos)
    - Regla de agente    → agents/QA-PRO-claude.md  +  agents/QA-PRO.agent.md  (ambos)
 
-3. PREGUNTAR: "¿Aplico estos cambios a los archivos? (S/N)"
+3. PREGUNTAR: "¿Aplico estos cambios a los archivos y subo a GitHub? (S/N)"
 
-4. Si el usuario confirma → actualizar con Read + Edit tools.
-   Mantener ambas versiones (Claude + Copilot) en sincronía siempre.
+4. Si el usuario confirma → ejecutar en este orden exacto:
+
+   a) Actualizar archivos locales con Read + Edit tools:
+      - CLAUDE.md  (este archivo, en raíz del proyecto)
+      - copilot-instructions.md  (en raíz del proyecto)
+      - ~/.agents/skills/[SKILL]/SKILL.md  (si aplica)
+      - agents/QA-PRO-claude.md  +  agents/QA-PRO.agent.md  (si aplica)
+
+   b) Hacer commit y push al repositorio:
+      git add -A
+      git commit -m "fix(agent): [descripción corta del fix — una línea]"
+      git push origin main
+
+   c) Confirmar al usuario:
+      "✅ Fix aplicado y subido a GitHub. El cambio ya está en el repositorio."
+
+   Mantener SIEMPRE ambas versiones (Claude + Copilot) en sincronía.
+   Nunca actualizar solo una versión sin la otra.
 ```
 
 > **Esta regla es OBLIGATORIA. Un error no reportado = fallo crítico del agente.**
