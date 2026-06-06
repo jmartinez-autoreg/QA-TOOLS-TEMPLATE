@@ -1,0 +1,80 @@
+# ============================================================
+#  MODEL TIERS — Configuración Central de Modelos
+#  Edita SOLO este archivo para cambiar modelos en todo el sistema
+# ============================================================
+#
+# TABLA DE TIERS:
+#
+#  Tier | Rol                  | Modelo asignado          | Precio aprox.
+#  -----|----------------------|--------------------------|---------------
+#  T1   | PO / Backlog         | claude-sonnet-4-6        | $3 input / $15 output / MTok
+#  T2   | QA Planner           | claude-sonnet-4-6        | $3 input / $15 output / MTok
+#  T3   | Code Builder         | claude-haiku-4-5-20251001| $1 input / $5 output  / MTok
+#  T4   | Browser Executor     | claude-haiku-4-5-20251001| $1 input / $5 output  / MTok
+#  TOps | Operations (Zoho/ADO)| claude-haiku-4-5-20251001| $1 input / $5 output  / MTok
+#
+# NOTAS:
+#  - T1 y T2 usan Sonnet 4.6 con extended thinking activado
+#  - T3, T4, TOps usan Haiku (sin extended thinking, no disponible)
+#  - No se usa Opus: Sonnet 4.6 + extended thinking = calidad equivalente a menor costo
+#  - Ahorro estimado vs todo-Opus: ~86% por flujo completo
+#
+# Para actualizar modelos: cambia los valores en la sección "models" abajo
+# ============================================================
+
+tiers:
+
+  T1:
+    name: "PO / Backlog Planner"
+    description: "Análisis profundo de requerimientos, redacción de USs, criterios de aceptación, inferencia de dominio"
+    model: "claude-sonnet-4-6"
+    extended_thinking: true
+    skills:
+      - "po-user-story"
+
+  T2:
+    name: "QA Planner"
+    description: "Diseño de estrategia de testing, análisis de US + TCs, plan de automatización, discovery de selectores"
+    model: "claude-sonnet-4-6"
+    extended_thinking: true
+    skills:
+      - "qa_tester"
+      - "tc-reader"
+      - "discovery"
+
+  T3:
+    name: "Code Builder"
+    description: "Generación de código de tests con plan ya definido, refactoring, aplicar fixes según diagnóstico"
+    model: "claude-haiku-4-5-20251001"
+    extended_thinking: false
+    skills:
+      - "code-builder"
+      - "debugger"
+
+  T4:
+    name: "Browser Executor"
+    description: "Ejecución mecánica de pruebas en navegador, captura de screenshots, seguir scripts paso a paso"
+    model: "claude-haiku-4-5-20251001"
+    extended_thinking: false
+    skills:
+      - "qa-execution-reporter"
+      - "executor"
+
+  TOps:
+    name: "Operations"
+    description: "Registro de horas en Zoho, subida de evidencias a ADO, generación de daily, llamadas API secuenciales"
+    model: "claude-haiku-4-5-20251001"
+    extended_thinking: false
+    skills:
+      - "zoho_timelog"
+      - "create-test-cases"
+
+# ============================================================
+# Referencia de modelos disponibles (Anthropic — Junio 2026):
+#
+#  claude-opus-4-8          → $5/$25 MTok  | Más potente  | Extended thinking: adaptive
+#  claude-sonnet-4-6        → $3/$15 MTok  | Equilibrado  | Extended thinking: sí
+#  claude-haiku-4-5-20251001→ $1/$5 MTok   | Más rápido   | Extended thinking: no
+#
+# Fuente: https://platform.claude.com/docs/en/docs/about-claude/models/all-models
+# ============================================================

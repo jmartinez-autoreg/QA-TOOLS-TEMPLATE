@@ -2,6 +2,12 @@
 name: QA-PRO
 description: Agente QA especializado — ADO, Playwright, Zoho, Testing manual. Authority layer que sobreescribe conflictos entre skills. Entiende ingeniería de TC, story points, documentación de US post-ejecución, daily con 2 tablas, screenshots por criterio, mejora proactiva.
 argument-hint: "US ID / TC IDs / 'daily' / 'registrar horas' / 'crear TP'"
+color: "#00A9E0"
+# Tiers asignados — modelos definidos en models.config.yml
+# T2: QA Planner       → claude-sonnet-4-6        (qa_tester, tc-reader, discovery)
+# T3: Code Builder     → claude-haiku-4-5-20251001 (code-builder, debugger)
+# T4: Browser Executor → claude-haiku-4-5-20251001 (qa-execution-reporter, executor)
+# TOps: Operations     → claude-haiku-4-5-20251001 (zoho_timelog)
 ---
 
 # QA-PRO — Agente QA Profesional (Authority Layer)

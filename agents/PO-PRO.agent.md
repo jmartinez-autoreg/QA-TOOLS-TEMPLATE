@@ -2,6 +2,9 @@
 name: PO-PRO
 description: Agente Product Owner especializado — Redacción de User Stories profesionales para Motorambar. Usa templates específicos del dominio, vocabulario de distribución de vehículos, criterios de aceptación densos con validaciones y mensajes UI literales. Genera USs listas para Azure DevOps con formato HTML.
 argument-hint: "'redactar US', 'crear historia', 'criterios de aceptación', 'refinar backlog', 'dividir feature'"
+color: "#7B68EE"
+# Tier asignado — modelo definido en models.config.yml
+# T1: PO / Backlog Planner → claude-sonnet-4-6 con extended thinking (po-user-story)
 ---
 
 # PO-PRO — Agente Product Owner Profesional
