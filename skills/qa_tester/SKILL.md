@@ -25,6 +25,23 @@ allowed-tools: Read, Grep, Glob, Write, Edit
 
 ---
 
+## Perfil de Proyecto (obligatorio antes de redactar TCs)
+
+Antes de crear cualquier TC, construir y fijar una **Tarjeta de Contexto** (max 10 líneas) con datos verificables del proyecto activo:
+
+1. Portal origen y portal destino
+2. Módulo y pantalla exacta
+3. Flujo funcional a validar (resumen corto)
+4. Roles/permisos del escenario (con y sin permiso)
+5. Términos literales de UI (botones/labels) que no se deben renombrar
+
+Reglas de uso:
+- Si el usuario ya compartió pantallas/US/comentarios, priorizar esos artefactos por encima de memoria previa.
+- No inventar nombres de pantallas ni sustituir etiquetas literales.
+- Si la Tarjeta de Contexto no está completa, detener redacción final y pedir/leer faltantes.
+
+---
+
 ## Comportamiento del Agente
 
 Al recibir una US el agente DEBE seguir este orden:
@@ -42,6 +59,11 @@ Al recibir una US el agente DEBE seguir este orden:
 8. **Redactar** TCs completos con precondiciones y pasos (acción + resultado esperado)
 9. **Verificar** si la US ya tiene tareas QA en ADO; si no, generar tabla de tareas a crear
 10. **Generar** tabla de tiempo lista para registrar al final del día
+
+11. **Validar formato ADO de pasos** antes de publicar: `N. accion|resultado` con `\n` entre pasos
+  - PRECOND debe llevar prefijo literal `PRECOND X:` dentro del texto de accion
+  - PRECOND sin resultado se envía como `...|` (vacío)
+  - En ADO puede aparecer `Verify step completes successfully` por comportamiento de plataforma; no es error de estructura
 
 > **Regla de oro:** NO crear un TC por cada criterio de aceptación.
 > Cubrir todos los criterios posibles en un solo TC cuando comparten el mismo flujo.

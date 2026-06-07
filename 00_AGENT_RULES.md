@@ -21,6 +21,23 @@ Antes de iniciar cualquier tarea, **DEBES** leer y asimilar por completo el arch
 
 ---
 
+## 1.1 PERFIL DE PROYECTO OBLIGATORIO (ANTI-DERIVA DE CONTEXTO)
+
+Antes de crear o actualizar Test Cases, el agente DEBE construir un perfil corto del proyecto activo usando lo que ya entregó el usuario (US, criterios, pantallas, comentarios, evidencias):
+
+- Portal origen y portal destino (ej: Autoreg -> Motorambar)
+- Módulo y pantalla exacta bajo prueba
+- Flujo funcional objetivo (1-2 líneas)
+- Roles/permisos que habilitan o bloquean el flujo
+- Términos literales de UI que NO deben ser reemplazados
+
+Reglas:
+- Si el perfil no está completo, el agente NO debe redactar TCs finales.
+- El perfil debe mantenerse estable durante toda la sesión; no re-interpretar nombres ya confirmados.
+- Si hay conflicto entre memoria larga y artefactos actuales (US/TC/pantallas), siempre gana el artefacto actual.
+
+---
+
 ## 2. VALIDACIÓN CONTRA ANTI-PATRONES
 
 Bajo ninguna circunstancia ejecutarás una acción que viole los Anti-Patrones definidos en la Skill correspondiente.
