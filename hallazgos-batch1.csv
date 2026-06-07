@@ -1,0 +1,6 @@
+"US_ID","Tipo","Categoria","Descripcion","Correccion"
+"9502","A","TCS_SIN_TP_COMPLETE","Tiene 1 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
+"9817","A","TCS_SIN_TP_COMPLETE","Tiene 6 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
+"9851","A","TCS_SIN_TP_COMPLETE","Tiene 1 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
+"9852","A","TCS_SIN_TP_COMPLETE","Tiene 1 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
+"9892","A","TCS_SIN_TP_COMPLETE","Tiene 7 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"

@@ -1,0 +1,8 @@
+"US_ID","US_Titulo","Total_TCs","TCs_Design","TCs_Closed","TCs_Ready","Estrategia","IDs_Eliminar","IDs_Mantener"
+"9502","Seguridad: Autenticación (DISTRIBUIDOR)","1","0","1","0","Todos los TCs ya ejecutados (Closed)","","10049"
+"9817","Vehículos: Grid de Registros Asignación en Lote","6","6","0","0","Todos los TCs en Design (sin ejecutar)","10283, 10284, 10286, 10282, 10285, 10287",""
+"9856","Vehículos: Grid de Registros NUEVOS Criterios de Búsqueda Pantalla","10","6","4","0","TCs nuevos ya ejecutados + TCs viejos obsoletos","10238, 10236, 10235, 10237, 10234, 10233","10666, 10669, 10668, 10667"
+"9873","Importación Vehicular: Localidades - Asignar automáticamente LocationId reconocido","8","5","3","0","TCs nuevos ya ejecutados + TCs viejos obsoletos","10626, 10628, 10627, 10629, 10625","10672, 10671, 10670"
+"9892","Catálogos: Documentos - Portal de Distribuidor","7","7","0","0","Todos los TCs en Design (sin ejecutar)","10067, 10678, 10677, 10066, 10069, 10068, 10070",""
+"9940","Roles desde Motorambar","3","3","0","0","Todos los TCs en Design (sin ejecutar)","10086, 10084, 10085",""
+"9947","Vehículos Revisión Completa: Grid Expandido o Individual  Click Revisión Completa editar y visualizar documentos","10","10","0","0","Todos los TCs en Design (sin ejecutar)","10206, 10645, 10207, 10204, 10203, 10644, 10643, 10202, 10208, 10205",""
