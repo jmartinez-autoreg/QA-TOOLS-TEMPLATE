@@ -1,9 +1,33 @@
 ﻿﻿# QA Agent — Instrucciones del Workspace
 
 > ⚠️ **ESTE ARCHIVO SE LEE AUTOMÁTICAMENTE.** Seguir TODOS los pasos antes de actuar.
-> Antes de cualquier acción, también leer:
-> 1. **`PROJECT-CONTEXT.md`** — Dominio del proyecto: portales, login, módulos, roles, terminología literal. **LEER PRIMERO.**
+> Antes de cualquier acción, también leer **en este orden**:
+> 1. **`projects/{PROYECTO_ACTIVO}/CONTEXT.md`** — Dominio del proyecto: portales, login, módulos, roles, terminología literal. **LEER PRIMERO.**
 > 2. **`00_AGENT_RULES.md`** — Reglas globales obligatorias.
+
+---
+
+## 📁 PROYECTOS DISPONIBLES
+
+Los proyectos con contexto conocido están en `projects/`. Cada uno tiene su `CONTEXT.md` con toda la info de dominio.
+
+| Carpeta | Proyecto | Descripción |
+|---------|----------|-------------|
+| `projects/motorambar/` | **Motorambar** | Portal distribución vehicular — ADO org: AutoregPR |
+| `projects/_TEMPLATE/` | Template | Copiar y renombrar para nuevo proyecto |
+
+### Cómo determinar el proyecto activo
+
+1. Si el usuario menciona un nombre de proyecto → cargar `projects/{nombre}/CONTEXT.md`
+2. Si el usuario da un ID de US/TC/TP de ADO → inferir proyecto por organización ADO en el contexto
+3. Si no está claro → preguntar: *"¿En qué proyecto estás trabajando? (ej: motorambar)"*
+4. **NUNCA inventar datos del proyecto** — siempre leer el CONTEXT.md correspondiente
+
+### Agregar un proyecto nuevo
+
+1. Copiar `projects/_TEMPLATE/CONTEXT.md` → `projects/{nombre}/CONTEXT.md`
+2. Completar todas las secciones con datos reales
+3. Hacer commit al repo — quedará disponible en cualquier PC al hacer `git pull`
 
 ---
 

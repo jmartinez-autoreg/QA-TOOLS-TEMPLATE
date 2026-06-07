@@ -1,7 +1,7 @@
-# Contexto de Proyecto — Motorambar / Autoreg
+# Contexto de Proyecto — Motorambar
 
-> ⚠️ **ESTE ARCHIVO SE LEE AUTOMÁTICAMENTE.** Contiene el dominio del proyecto.
-> El agente DEBE conocer todo esto antes de crear TCs, USs o ejecutar pruebas.
+> ⚠️ Este archivo se carga automáticamente cuando el proyecto activo es **Motorambar**.
+> Contiene todo el conocimiento de dominio para que el agente opere sin pedir datos al usuario.
 
 ---
 
