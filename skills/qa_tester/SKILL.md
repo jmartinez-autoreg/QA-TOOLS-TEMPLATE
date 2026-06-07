@@ -102,7 +102,7 @@ Recibir US → Analizar criterios de aceptación
 
       | Tarea | Estimadas (OriginalEstimate) | Remanentes (RemainingWork) | Completadas al crear (CompletedWork) |
       |-------|-----------------------------|-----------------------------|--------------------------------------|
-      | QA - Preparar Test Plan | **0.5h** | **0.5h** | **0** |
+      | QA - Preparar Test Plan | **1h** | **1h** | **0** |
       | QA - Ejecutar Test Plan | **1h** | **1h** | **0** |
       | QA - Ejecutar Pruebas | **1h** | **1h** | **0** |
       | QA - Demo | **0.25h** | **0.25h** | **0** |

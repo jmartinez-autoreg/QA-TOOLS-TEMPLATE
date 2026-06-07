@@ -1,4 +1,0 @@
-"US_ID","Tipo","Categoria","Descripcion","Correccion"
-"9893","A","TCS_SIN_TP_COMPLETE","Tiene 9 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
-"9940","A","TCS_SIN_TP_COMPLETE","Tiene 3 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
-"9947","A","TCS_SIN_TP_COMPLETE","Tiene 10 TCs pero TestPlanCompleted = False","Setear TestPlanCompleted = True"
