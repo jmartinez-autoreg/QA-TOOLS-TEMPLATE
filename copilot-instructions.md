@@ -1,7 +1,9 @@
 ﻿﻿# QA Agent — Instrucciones del Workspace
 
 > ⚠️ **ESTE ARCHIVO SE LEE AUTOMÁTICAMENTE.** Seguir TODOS los pasos antes de actuar.
-> Antes de cualquier acción, también leer: **`00_AGENT_RULES.md`** (reglas globales obligatorias).
+> Antes de cualquier acción, también leer:
+> 1. **`PROJECT-CONTEXT.md`** — Dominio del proyecto: portales, login, módulos, roles, terminología literal. **LEER PRIMERO.**
+> 2. **`00_AGENT_RULES.md`** — Reglas globales obligatorias.
 
 ---
 
