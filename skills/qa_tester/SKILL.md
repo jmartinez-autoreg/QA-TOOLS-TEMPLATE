@@ -102,11 +102,11 @@ Recibir US → Analizar criterios de aceptación
 
       | Tarea | Estimadas (OriginalEstimate) | Remanentes (RemainingWork) | Completadas al crear (CompletedWork) |
       |-------|-----------------------------|-----------------------------|--------------------------------------|
-      | QA - Preparar Test Plan | **1h** | **1h** | **0** |
-      | QA - Ejecutar Test Plan | **1h** | **1h** | **0** |
-      | QA - Ejecutar Pruebas | **1h** | **1h** | **0** |
+      | QA - Preparar Test Plan | **0.5h** | **0.5h** | **0** |
+      | QA - Ejecutar Test Plan | **0.5h** | **0.5h** | **0** |
+      | QA - Ejecutar Pruebas | **0.5h** | **0.5h** | **0** |
       | QA - Demo | **0.25h** | **0.25h** | **0** |
-      | QA - Apoyo | **0.5h** | **0.5h** | **0** |
+      | QA - Apoyo | **0.25h** | **0.25h** | **0** |
 
       ⚠️ Usar SIEMPRE estos valores por defecto. Solo cambiar si el usuario indica explícitamente un valor distinto.
       ⚠️ Al CERRAR una tarea: CompletedWork = horas reales trabajadas, RemainingWork = 0.
@@ -192,6 +192,10 @@ Las PRECONDs se numeran **secuencialmente desde 0**. Incluir **solo** las catego
 > - TC deps + datos + login → `PRECOND 0: TC deps [...] | PRECOND 1: Datos [...] | PRECOND 2: Login - ...`
 
 > ⚠️ **REGLA DE ORO:** UNA PRECOND POR ROW/STEP. Jamás fusionar múltiples PRECONDs en una sola fila.
+>
+> ⚠️ **SIEMPRE EN UNA SOLA LÍNEA:** El texto de cada PRECOND nunca usa saltos de línea internos ni bullets con guion.
+> - ❌ `PRECOND 1: Login \n- Usuario: X \n- Rol: Y`
+> - ✅ `PRECOND 1: Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W`
 >
 > ⚠️ **SIN EXPECTED RESULT:** Las filas de PRECOND en ADO llevan únicamente el campo **Action** con el texto de la precondición. El campo **Expected Result debe quedar vacío** en todas las filas de PRECOND. Solo los pasos de ejecución llevan Expected Result.
 
@@ -698,6 +702,7 @@ Total: 6
 | Copiar y pegar criterios de aceptación como pasos del TC (as-is) | Redactar pasos como acciones concretas ejecutables (verbo imperativo + resultado visible en UI) |
 | Generar el Daily sin conocer el `[orden]` de las USs en el sprint | Preguntar: "¿Cuál es el número de orden de cada US en el sprint?" ANTES de generar el Daily |
 | Crear tareas QA con add_child_work_items y asumir que tienen AssignedTo/horas | Siempre hacer llamada adicional con update_work_items_batch para AssignedTo + horas |
+| PRECOND con saltos de línea internos (`\n- Usuario:`, `\n- Rol:`) | PRECOND siempre en una sola línea: `PRECOND N: Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W` |
 | Setear RemainingWork en tarea Closed | Omitir RemainingWork para tareas en estado Closed; solo usar CompletedWork |
 | Crear un TC separado para validar el estado inicial de un elemento (ej. botón deshabilitado sin selección) | Incluir esa verificación como un paso de verificación al inicio del TC del flujo feliz |
 | Generar tabla de tiempo y registrar en Zoho sin confirmación del usuario | Mostrar tabla propuesta y preguntar "¿Estos registros son correctos? ✅" antes de registrar |
