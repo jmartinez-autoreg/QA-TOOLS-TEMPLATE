@@ -193,9 +193,18 @@ Las PRECONDs se numeran **secuencialmente desde 0**. Incluir **solo** las catego
 
 > ⚠️ **REGLA DE ORO:** UNA PRECOND POR ROW/STEP. Jamás fusionar múltiples PRECONDs en una sola fila.
 >
-> ⚠️ **SIEMPRE EN UNA SOLA LÍNEA:** El texto de cada PRECOND nunca usa saltos de línea internos ni bullets con guion.
-> - ❌ `PRECOND 1: Login \n- Usuario: X \n- Rol: Y`
-> - ✅ `PRECOND 1: Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W`
+> ⚠️ **FORMATO INTERNO CON SHIFT+ENTER:** Cada PRECOND ocupa un solo row en ADO, pero internamente usa saltos de línea (Shift+Enter) para separar cada campo. El resultado visual en ADO es:
+> ```
+> PRECOND 1: Login
+> - Usuario: jmartinez
+> - Rol: Administrador
+> - Acceso portal: Autoreg
+> - Acceso módulo: Vehículos
+> ```
+> Todo eso va en **un solo step row**. Los saltos son Shift+Enter dentro del campo Action, no rows separados.
+> - ❌ Múltiples rows de ADO para una misma PRECOND
+> - ❌ Todo en una sola línea plana: `PRECOND 1: Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W`
+> - ✅ Un solo row con Shift+Enter entre cada campo
 >
 > ⚠️ **SIN EXPECTED RESULT:** Las filas de PRECOND en ADO llevan únicamente el campo **Action** con el texto de la precondición. El campo **Expected Result debe quedar vacío** en todas las filas de PRECOND. Solo los pasos de ejecución llevan Expected Result.
 
@@ -304,8 +313,21 @@ PRECOND 0: [Primera categoría necesaria: TC deps / Datos / Info usuario / Login
 PRECOND 1: [Segunda categoría — si aplica]
 ... (Login siempre el último número en la secuencia)
 
-Ejemplo — solo login:       PRECOND 0: Login - Usuario: X - Rol: Y - Acceso portal: Z - Módulo: W
-Ejemplo — datos + login:     PRECOND 0: [Condición de datos], PRECOND 1: Login - Usuario: X ...
+Ejemplo — solo login (un solo row, Shift+Enter entre campos):
+  PRECOND 0: Login
+  - Usuario: X
+  - Rol: Y
+  - Acceso portal: Z
+  - Acceso módulo: W
+
+Ejemplo — datos + login (dos rows separados):
+  Row 1 → PRECOND 0: [Condición de datos]
+           - [Campo]: [Valor]
+  Row 2 → PRECOND 1: Login
+           - Usuario: X
+           - Rol: Y
+           - Acceso portal: Z
+           - Acceso módulo: W
 
 === PASOS (Action + Expected Result obligatorio) ===
 | Paso | Acción                          | Resultado Esperado                    |
@@ -702,7 +724,8 @@ Total: 6
 | Copiar y pegar criterios de aceptación como pasos del TC (as-is) | Redactar pasos como acciones concretas ejecutables (verbo imperativo + resultado visible en UI) |
 | Generar el Daily sin conocer el `[orden]` de las USs en el sprint | Preguntar: "¿Cuál es el número de orden de cada US en el sprint?" ANTES de generar el Daily |
 | Crear tareas QA con add_child_work_items y asumir que tienen AssignedTo/horas | Siempre hacer llamada adicional con update_work_items_batch para AssignedTo + horas |
-| PRECOND con saltos de línea internos (`\n- Usuario:`, `\n- Rol:`) | PRECOND siempre en una sola línea: `PRECOND N: Login - Usuario: X - Rol: Y - Acceso portal: Z - Acceso módulo: W` |
+| Varios rows de ADO para una misma PRECOND | Una PRECOND = un solo row; los campos van dentro con Shift+Enter |
+| PRECOND plana en una sola línea sin saltos | Usar Shift+Enter para separar cada campo dentro del mismo row |
 | Setear RemainingWork en tarea Closed | Omitir RemainingWork para tareas en estado Closed; solo usar CompletedWork |
 | Crear un TC separado para validar el estado inicial de un elemento (ej. botón deshabilitado sin selección) | Incluir esa verificación como un paso de verificación al inicio del TC del flujo feliz |
 | Generar tabla de tiempo y registrar en Zoho sin confirmación del usuario | Mostrar tabla propuesta y preguntar "¿Estos registros son correctos? ✅" antes de registrar |
