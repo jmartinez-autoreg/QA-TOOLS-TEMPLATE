@@ -240,7 +240,6 @@ Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realm
 1. **Pantalla diferente** — el escenario ocurre en una pantalla o módulo distinto al flujo principal
 2. **Rol de usuario diferente** — el escenario requiere un usuario con permisos distintos que no pueden coexistir en la misma sesión
 3. **El escenario negaría el estado** — ejecutar el escenario negativo destruiría los datos necesarios para el escenario positivo (y no se puede restablecer en el mismo TC)
-4. **El TC superaría los 15 pasos** — y los pasos adicionales corresponden a un flujo genuinamente independiente (no al mismo flujo con más detalles)
 
 #### ❌ NO dividir en estos casos (errores frecuentes):
 

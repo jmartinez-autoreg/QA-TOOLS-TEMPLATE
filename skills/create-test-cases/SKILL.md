@@ -1,6 +1,6 @@
 ---
 name: create-test-cases
-description: 'Crea Test Cases profesionales en Azure DevOps siguiendo estándares QA empresariales. Usar cuando el usuario pida crear, redactar, generar, dividir o corregir TCs, casos de prueba o test cases en cualquier organización/proyecto de ADO. Aplica nomenclatura Portal-Módulo-Pantalla-Funcionalidad [Escenario], estructura PRECOND secuencial 0..N (Login siempre el último), atomización máx. 15 pasos, y resultados esperados observables.'
+description: 'Crea Test Cases profesionales en Azure DevOps siguiendo estándares QA empresariales. Usar cuando el usuario pida crear, redactar, generar, dividir o corregir TCs, casos de prueba o test cases en cualquier organización/proyecto de ADO. Aplica nomenclatura Portal-Módulo-Pantalla-Funcionalidad [Escenario], estructura PRECOND secuencial 0..N (Login siempre el último), y resultados esperados observables.'
 argument-hint: 'Describe la funcionalidad a testear, pega pasos de un TC existente, o indica org/proyecto/plan/suite'
 ---
 
@@ -194,7 +194,7 @@ Para cualquier funcionalidad, considerar al menos estos escenarios:
 3. Para cada escenario:
    a. Redactar título con nomenclatura (sección 2)
    b. Redactar pasos con PRECONDs (secciones 3-4)
-   c. Verificar ≤15 pasos, resultados observables
+   c. Verificar resultados observables
    ↓
 4. Presentar resumen al usuario para aprobación
    ↓
