@@ -1,28 +1,18 @@
-# Dependencies
 node_modules/
-
-# Test results
 test-results/
 playwright-report/
-
-# Build output
 dist/
-
-# IDE
 .vscode/
 *.code-workspace
-
-# OS
 .DS_Store
 Thumbs.db
-
-# Temp files
 *.log
 *.tmp
-
-# Generated evidence
 results/
 TPlans/results/
 
 # Local scratch workspace (notes, drafts, temp analysis - never synced)
 .workspace/
+
+# Credentials
+.env.playwright

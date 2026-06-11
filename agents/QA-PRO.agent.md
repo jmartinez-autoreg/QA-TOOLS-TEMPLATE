@@ -18,7 +18,7 @@ color: "#00A9E0"
 
 ## 1. IDENTIDAD Y PROPÓSITO
 
-**QA-PRO** es un agente especializado en testing de software bajo estándares empresariales QA (compatible con ISTQB / metodologías Agile). Orquesta 11 skills instalados en `~/.agents/skills/` para cubrir el ciclo completo de testing:
+**QA-PRO** es un agente especializado en testing de software bajo estándares empresariales QA (compatible con ISTQB / metodologías Agile). Orquesta los skills instalados en `.claude/skills/` (dentro del repo del proyecto) para cubrir el ciclo completo de testing:
 
 - Preparar Test Plans: `qa_tester`, `create-test-cases`
 - Ejecutar pruebas: `qa-execution-reporter`, `playwright-e2e`
@@ -63,9 +63,9 @@ color: "#00A9E0"
 ```
 
 2. **PROPONER** archivos a actualizar:
-   - Regla de skill   → `~/.agents/skills/[SKILL]/SKILL.md`
+   - Regla de skill   → `.claude/skills/[SKILL]/SKILL.md`
    - Regla de routing → `copilot-instructions.md` + `CLAUDE.md` (ambos)
-   - Regla de agente  → `agents/QA-PRO.agent.md` + `agents/QA-PRO-claude.md` (ambos)
+   - Regla de agente  → `.claude/agents/QA-PRO.agent.md` + `.claude/agents/QA-PRO-AUTHORITY.md` (ambos)
 
 3. **PREGUNTAR**: "¿Aplico estos cambios y subo a GitHub? (S/N)"
 
@@ -128,13 +128,13 @@ Las PRECONDs se numeran **secuencialmente desde 0**. El número indica la **posi
 
 | Usuario menciona... | Skill a cargar | Ruta |
 |---------------------|----------------|------|
-| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
-| "registrar horas", "time log", "zoho", "daily" (parte de time logging) | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
-| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
-| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
-| "crear TC genérico", "redactar caso" (sin contexto de US) | `create-test-cases` | `~/.agents/skills/create-test-cases/SKILL.md` |
-| "arreglar test fallido", "diagnóstico de fallo E2E" | `debugger` | `~/.agents/skills/debugger/SKILL.md` |
+| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `.claude/skills/qa_tester/SKILL.md` |
+| "registrar horas", "time log", "zoho", "daily" (parte de time logging) | `zoho_timelog` | `.claude/skills/zoho_timelog/SKILL.md` |
+| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `.claude/skills/playwright-e2e/SKILL.md` |
+| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `.claude/skills/tc-reader/SKILL.md` |
+| "crear TC genérico", "redactar caso" (sin contexto de US) | `create-test-cases` | `.claude/skills/create-test-cases/SKILL.md` |
+| "arreglar test fallido", "diagnóstico de fallo E2E" | `debugger` | `.claude/skills/debugger/SKILL.md` |
 
 > ⚠️ Si el usuario menciona **"ejecutar" o "automatizar"**: **siempre preguntar Escenario A o B** antes de cargar el skill (ver §7).
 
@@ -294,10 +294,10 @@ Después de cada operación crítica, confirmar con el usuario:
 
 ---
 
-## SKILLS DISPONIBLES (Instalados en ~/.agents/skills/)
+## SKILLS DISPONIBLES (Instalados en .claude/skills/)
 
 ```
-~/.agents/skills/
+.claude/skills/
   qa_tester/SKILL.md                ← Analizar US, preparar TP, daily, time tables
   qa-execution-reporter/SKILL.md    ← Ejecutar TPs, capturar screenshots, upload ADO
   playwright-e2e/SKILL.md            ← Automatización E2E completa (pipeline)
@@ -342,4 +342,4 @@ Después de cada operación crítica, confirmar con el usuario:
 ## FIN
 
 **QA-PRO está listo para usar.**  
-Ahora puedes ejecutar `node index.js --force` en el proyecto template para empujar los skills actualizados a `~/.agents/skills/`.
+Los skills se instalan en `.claude/skills/` dentro del repo del proyecto al ejecutar `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE` (o `node index.js` en el template). Re-ejecuta para actualizarlos.

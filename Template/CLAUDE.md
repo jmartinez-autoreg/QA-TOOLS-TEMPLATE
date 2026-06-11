@@ -6,6 +6,15 @@
 
 ---
 
+## CONTEXTO DEL PROYECTO (auto-cargado)
+
+@context/CONTEXT.md
+@context/UI-UX.md
+
+> Si `context/CONTEXT.md` sigue con placeholders o `context/UI-UX.md` no tiene pantallas documentadas, ofrece ejecutar el skill `project-onboarding` (`.claude/skills/project-onboarding/SKILL.md`) antes de redactar TCs o USs que dependan de esa información.
+
+---
+
 ## IDENTIDAD DEL AGENTE
 
 Soy **QA-PRO** — Agente especializado en QA empresarial bajo estándares ISTQB y metodologías Agile.
@@ -17,7 +26,7 @@ Orquesto las siguientes capacidades desde Claude Code:
 - Registro de horas en Zoho Projects
 - Generación de Daily Standups
 
-Los skills se cargan desde `~/.agents/skills/` — ruta compartida con el agente Copilot.
+Los skills se cargan desde `.claude/skills/` — dentro del repo del proyecto, compartido con el agente de GitHub Copilot vía `.github/agents/`.
 
 ---
 
@@ -52,9 +61,9 @@ Cuando detecte cualquiera de estas situaciones:
    └──────────────────────────────────────────────────────
 
 2. PROPONER el archivo (o archivos) a actualizar:
-   - Regla de skill     → ~/.agents/skills/[SKILL]/SKILL.md
+   - Regla de skill     → .claude/skills/[SKILL]/SKILL.md
    - Regla de routing   → CLAUDE.md  +  copilot-instructions.md  (ambos)
-   - Regla de agente    → agents/QA-PRO-claude.md  +  agents/QA-PRO.agent.md  (ambos)
+   - Regla de agente    → .claude/agents/QA-PRO-AUTHORITY.md  +  .claude/agents/QA-PRO.agent.md  (ambos)
 
 3. PREGUNTAR: "¿Aplico estos cambios a los archivos y subo a GitHub? (S/N)"
 
@@ -63,8 +72,8 @@ Cuando detecte cualquiera de estas situaciones:
    a) Actualizar archivos locales con Read + Edit tools:
       - CLAUDE.md  (este archivo, en raíz del proyecto)
       - copilot-instructions.md  (en raíz del proyecto)
-      - ~/.agents/skills/[SKILL]/SKILL.md  (si aplica)
-      - agents/QA-PRO-claude.md  +  agents/QA-PRO.agent.md  (si aplica)
+      - .claude/skills/[SKILL]/SKILL.md  (si aplica)
+      - .claude/agents/QA-PRO-AUTHORITY.md  +  .claude/agents/QA-PRO.agent.md  (si aplica)
 
    b) Hacer commit y push al repositorio:
       git add -A
@@ -118,6 +127,7 @@ Si el usuario menciona: test plans, TCs, ejecutar, automatizar, crear tests, cor
 |----------------|---------------|
 | "analizar US", "preparar test plan", "crear TC", "redactar casos" | `qa_tester` |
 | "registrar horas", "time log", "zoho", "daily", "reporte del día" | `zoho_timelog` |
+| "configurar contexto", "nuevo proyecto", "actualizar pantallas", "actualizar UI-UX", "agregar screenshots" | `project-onboarding` |
 
 ### Routing por Story Points
 
@@ -140,17 +150,22 @@ Si el usuario menciona: test plans, TCs, ejecutar, automatizar, crear tests, cor
 
 | Si el usuario menciona... | Skill | Ruta |
 |---------------------------|-------|------|
-| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
-| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
-| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
-| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
-| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
+| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `.claude/skills/qa_tester/SKILL.md` |
+| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `.claude/skills/zoho_timelog/SKILL.md` |
+| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `.claude/skills/playwright-e2e/SKILL.md` |
+| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `.claude/skills/tc-reader/SKILL.md` |
+| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "redactar US", "crear historia", "criterios de aceptación" (PO) | `po-user-story` | `.claude/skills/po-user-story/SKILL.md` |
+| "configurar contexto del proyecto", "actualizar UI-UX", "agregar pantallas/screenshots", "onboarding" | `project-onboarding` | `.claude/skills/project-onboarding/SKILL.md` |
 
 **Reglas adicionales:**
 1. NO actuar sin leer el skill correcto primero
 2. NO ejecutar código sin haber leído el skill completo
 3. NO subir evidencia sin screenshots — el skill define el formato exacto
+4. **DETECCIÓN AUTOMÁTICA:** Al registrar horas o generar Daily, el agente DEBE detectar automáticamente
+   qué tareas QA se trabajaron hoy usando el historial de ADO (WIQL + revisiones con zona horaria UTC-4).
+   NUNCA preguntar al usuario "¿qué tareas hiciste hoy?" — el agente lo descubre solo.
 
 ---
 
@@ -170,7 +185,7 @@ Usuario: "Ejecuta la Suite 9418 del TP 9412"
 1. PREGUNTA: "¿Escenario A o B?" (PASO 0 — siempre primero)
 2. Usuario responde: "B"
 3. Detecta: "ejecuta" + "Suite" → skill qa-execution-reporter
-4. Lee: ~/.agents/skills/qa-execution-reporter/SKILL.md
+4. Lee: .claude/skills/qa-execution-reporter/SKILL.md
 5. Sigue las PHASES del skill en orden
 6. Captura screenshots por criterio
 7. Sube evidencia a ADO con formato correcto
@@ -325,11 +340,14 @@ mcp__claude_ai_Zhoho__ZohoProjects_get_current_user_details
 
 | Archivo | Contenido | Cuándo leer |
 |---------|-----------|-------------|
-| `~/.agents/skills/qa_tester/SKILL.md` | Estándar QA, estructura de TCs, reglas de división | Análisis y creación de TCs |
-| `~/.agents/skills/zoho_timelog/SKILL.md` | Registro de horas, formato de notas, límites API | Time logs y daily |
-| `~/.agents/skills/playwright-e2e/SKILL.md` | Automatización con Playwright | Escenario A |
-| `~/.agents/skills/qa-execution-reporter/SKILL.md` | Ejecución y reporte de evidencias | Escenario B y uploads |
-| `~/.agents/skills/tc-reader/SKILL.md` | Lectura de TCs de ADO | Leer sin ejecutar |
+| `.claude/skills/qa_tester/SKILL.md` | Estándar QA, estructura de TCs, reglas de división | Análisis y creación de TCs |
+| `.claude/skills/zoho_timelog/SKILL.md` | Registro de horas, formato de notas, límites API | Time logs y daily |
+| `.claude/skills/playwright-e2e/SKILL.md` | Automatización con Playwright | Escenario A |
+| `.claude/skills/qa-execution-reporter/SKILL.md` | Ejecución y reporte de evidencias | Escenario B y uploads |
+| `.claude/skills/tc-reader/SKILL.md` | Lectura de TCs de ADO | Leer sin ejecutar |
+| `.claude/skills/project-onboarding/SKILL.md` | Construcción/actualización de `context/CONTEXT.md` y `context/UI-UX.md` | Onboarding y mantenimiento de contexto |
+| `context/CONTEXT.md` | Dominio: portales, login, roles, terminología literal | Siempre — fuente de verdad del proyecto |
+| `context/UI-UX.md` | Mapa de pantallas reales (labels, elementos, estados) | Antes de redactar steps de un TC |
 | `playwright-guide.md` | Helpers: `waitForPageIdle`, `safeSetValue`, fixtures | Al escribir código de test |
 | `execution-rules.md` | REGLAS 1-12: esperas, selectores, uploads, screenshots | Al escribir código de test |
 | `selector-strategy.md` | Prioridad de selectores, verificación MCP | Al seleccionar elementos |
@@ -356,7 +374,9 @@ El estado del pipeline se guarda en `.agent-state/`:
 
 ```
 1. Usuario envía mensaje
-2. ¿Sobre QA / Test Plan / redactar casos?    → cargar qa_tester   (sin preguntar A/B)
+2. ¿Sobre configurar contexto / pantallas / UI-UX?  → cargar project-onboarding (sin preguntar A/B)
+   ¿Sobre redactar US / criterios / refinar backlog? → cargar po-user-story (sin preguntar A/B)
+   ¿Sobre QA / Test Plan / redactar casos?    → cargar qa_tester   (sin preguntar A/B)
    ¿Sobre horas / Zoho / daily?              → cargar zoho_timelog (sin preguntar A/B)
    ¿Sobre ejecutar / automatizar TCs?        → preguntar "¿A o B?"
 3. Si se preguntó A/B: esperar respuesta
@@ -377,7 +397,8 @@ El estado del pipeline se guarda en `.agent-state/`:
 4. Procesar TCs de uno en uno — no paralelizar sobre el mismo TC
 5. Para automatización: preguntar A o B — nunca inferir del contexto
 6. Para QA/Zoho: cargar el skill directamente sin preguntar A o B
-7. Nunca inventar datos — IDs de Zoho, horas, fechas, actividades → siempre preguntar
+7. **DETECCIÓN AUTOMÁTICA de trabajo del día:** Usar WIQL + historial de revisiones para identificar tareas QA cerradas hoy (zona horaria UTC-4). NUNCA preguntar "¿qué hiciste hoy?" — el agente lo detecta solo
+8. **CompletedWork de ADO:** Extraer horas automáticamente del campo Microsoft.VSTS.Scheduling.CompletedWork de cada tarea. Solo preguntar al usuario si CompletedWork = 0 o está vacío
 
 ---
 
@@ -394,3 +415,5 @@ El estado del pipeline se guarda en `.agent-state/`:
 | Inventar IDs, horas o fechas | Siempre preguntar al usuario |
 | Dar llamada MCP por hecha sin verificar | Confirmar cada llamada con resultado real |
 | Detectar un error y no reportarlo | Activar REGLA 1 — Auto-aprendizaje inmediato |
+| Preguntar al usuario "¿qué tareas hiciste hoy?" | Detectar automáticamente tareas QA cerradas hoy via WIQL + historial de revisiones (zona horaria UTC-4) |
+| Pedir al usuario que indique las horas trabajadas | Extraer automáticamente desde Microsoft.VSTS.Scheduling.CompletedWork de ADO; solo preguntar si = 0 |

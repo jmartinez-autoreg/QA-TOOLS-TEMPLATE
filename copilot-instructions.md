@@ -2,32 +2,28 @@
 
 > ⚠️ **ESTE ARCHIVO SE LEE AUTOMÁTICAMENTE.** Seguir TODOS los pasos antes de actuar.
 > Antes de cualquier acción, también leer **en este orden**:
-> 1. **`projects/{PROYECTO_ACTIVO}/CONTEXT.md`** — Dominio del proyecto: portales, login, módulos, roles, terminología literal. **LEER PRIMERO.**
-> 2. **`00_AGENT_RULES.md`** — Reglas globales obligatorias.
+> 1. **`context/CONTEXT.md`** — Dominio del proyecto: portales, login, módulos, roles, terminología literal. **LEER PRIMERO.**
+> 2. **`context/UI-UX.md`** — Mapa de pantallas reales (labels, elementos, estados) antes de redactar steps de un TC.
+> 3. **`00_AGENT_RULES.md`** — Reglas globales obligatorias.
 
 ---
 
-## 📁 PROYECTOS DISPONIBLES
+## 📁 CONTEXTO DEL PROYECTO
 
-Los proyectos con contexto conocido están en `projects/`. Cada uno tiene su `CONTEXT.md` con toda la info de dominio.
+El contexto de este proyecto vive en `context/` dentro de este mismo repo:
 
-| Carpeta | Proyecto | Descripción |
-|---------|----------|-------------|
-| `projects/motorambar/` | **Motorambar** | Portal distribución vehicular — ADO org: AutoregPR |
-| `projects/_TEMPLATE/` | Template | Copiar y renombrar para nuevo proyecto |
+| Archivo | Contenido |
+|---------|-----------|
+| `context/CONTEXT.md` | Dominio: portales, login, módulos, roles, terminología literal — **fuente de verdad** |
+| `context/UI-UX.md` | Mapa de pantallas reales (labels, elementos, estados) |
+| `context/screenshots/` | Imágenes referenciadas desde `UI-UX.md` |
 
-### Cómo determinar el proyecto activo
+### Reglas de contexto
 
-1. Si el usuario menciona un nombre de proyecto → cargar `projects/{nombre}/CONTEXT.md`
-2. Si el usuario da un ID de US/TC/TP de ADO → inferir proyecto por organización ADO en el contexto
-3. Si no está claro → preguntar: *"¿En qué proyecto estás trabajando? (ej: motorambar)"*
-4. **NUNCA inventar datos del proyecto** — siempre leer el CONTEXT.md correspondiente
-
-### Agregar un proyecto nuevo
-
-1. Copiar `projects/_TEMPLATE/CONTEXT.md` → `projects/{nombre}/CONTEXT.md`
-2. Completar todas las secciones con datos reales
-3. Hacer commit al repo — quedará disponible en cualquier PC al hacer `git pull`
+1. **Leer `context/CONTEXT.md` SIEMPRE** antes de actuar — nunca inventar datos del proyecto.
+2. **Antes de redactar steps de un TC**, consultar `context/UI-UX.md`. Si la pantalla no está documentada, NO suponer el diseño/labels — pedir un screenshot al usuario (alimenta `project-onboarding`) o inspeccionar la app real vía MCP Browser.
+3. Si `context/CONTEXT.md` sigue con placeholders o `context/UI-UX.md` no tiene pantallas documentadas → ofrecer ejecutar el skill `project-onboarding` antes de continuar.
+4. El contexto vive en TU repo — al actualizarlo, hacer commit/push de `context/` para que quede disponible en el equipo.
 
 ---
 
@@ -59,6 +55,8 @@ El agente identifica primero qué tipo de tarea se pide:
 - "analizar US", "preparar test plan", "crear TC", "redactar casos" → cargar `qa_tester`
 - "registrar horas", "registrar tiempo", "zoho", "time log" → cargar `zoho_timelog`
 - "daily", "reporte del día" → cargar `zoho_timelog`
+- "redactar US", "crear historia", "criterios de aceptación" → cargar `po-user-story`
+- "configurar contexto", "nuevo proyecto", "actualizar pantallas/UI-UX", "agregar screenshots", "onboarding" → cargar `project-onboarding`
 
 ### ⛔ PROHIBICIONES
 
@@ -74,12 +72,14 @@ El agente identifica primero qué tipo de tarea se pide:
 
 | Si el usuario menciona... | Skill a cargar | Ruta |
 |---------------------------|----------------|------|
-| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
-| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
-| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
-| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
-| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
+| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `.claude/skills/qa_tester/SKILL.md` |
+| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `.claude/skills/zoho_timelog/SKILL.md` |
+| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `.claude/skills/playwright-e2e/SKILL.md` |
+| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `.claude/skills/tc-reader/SKILL.md` |
+| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "redactar US", "crear historia", "criterios de aceptación" (PO) | `po-user-story` | `.claude/skills/po-user-story/SKILL.md` |
+| "configurar contexto del proyecto", "actualizar UI-UX", "agregar pantallas/screenshots", "onboarding" | `project-onboarding` | `.claude/skills/project-onboarding/SKILL.md` |
 
 ### Reglas adicionales:
 
@@ -112,7 +112,7 @@ Agente:
 1. PREGUNTA: "¿Escenario A o B?" (PASO 0 — siempre primero)
 2. Usuario responde: "B"
 3. Detecta keywords: "ejecuta" + "Suite" → skill qa-execution-reporter
-4. Carga skill: read_file("~/.agents/skills/qa-execution-reporter/SKILL.md")
+4. Carga skill: read_file(".claude/skills/qa-execution-reporter/SKILL.md")
 5. Sigue las PHASES del skill en orden
 6. Captura screenshots por paso
 7. Sube evidencia a ADO con formato correcto
@@ -332,7 +332,9 @@ Schemas de referencia en `.agent-state/*.schema.json`.
 
 ```
 1. Usuario envía mensaje
-2. ¿Es sobre QA / Test Plan / redactar casos?  → cargar qa_tester   (sin preguntar A/B)
+2. ¿Es sobre configurar contexto / pantallas / UI-UX?  → cargar project-onboarding (sin preguntar A/B)
+   ¿Es sobre redactar US / criterios / refinar backlog? → cargar po-user-story (sin preguntar A/B)
+   ¿Es sobre QA / Test Plan / redactar casos?  → cargar qa_tester   (sin preguntar A/B)
    ¿Es sobre horas / Zoho / daily?             → cargar zoho_timelog (sin preguntar A/B)
    ¿Es sobre ejecutar / automatizar TCs?       → preguntar "¿A o B?"
 3. Esperar respuesta si se preguntó A/B
@@ -362,9 +364,9 @@ Cuando detecte un error, corrección del usuario, o comportamiento que no fue de
    └──────────────────────────────────────────────────────
 
 2. PROPONER archivos a actualizar:
-   - Regla de skill   → ~/.agents/skills/[SKILL]/SKILL.md
+   - Regla de skill   → .claude/skills/[SKILL]/SKILL.md
    - Regla de routing → copilot-instructions.md  +  CLAUDE.md  (ambos)
-   - Regla de agente  → agents/QA-PRO.agent.md  +  agents/QA-PRO-claude.md  (ambos)
+   - Regla de agente  → .claude/agents/QA-PRO.agent.md  +  .claude/agents/QA-PRO-AUTHORITY.md  (ambos)
 
 3. PREGUNTAR: "¿Aplico estos cambios y subo a GitHub? (S/N)"
 

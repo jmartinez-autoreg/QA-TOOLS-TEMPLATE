@@ -105,13 +105,14 @@ El agente identifica primero qué tipo de tarea se pide:
 
 | Si el usuario menciona... | Skill a cargar | Ruta |
 |---------------------------|----------------|------|
-| "analizar US", "preparar TP", "crear TC", "redactar casos" (QA) | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
-| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
-| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
-| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
-| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| **"redactar US", "crear historia", "criterios de aceptación" (PO)** | **`po-user-story`** | **`~/.agents/skills/po-user-story/SKILL.md`** |
+| "analizar US", "preparar TP", "crear TC", "redactar casos" (QA) | `qa_tester` | `.claude/skills/qa_tester/SKILL.md` |
+| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `.claude/skills/zoho_timelog/SKILL.md` |
+| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `.claude/skills/playwright-e2e/SKILL.md` |
+| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `.claude/skills/tc-reader/SKILL.md` |
+| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| **"redactar US", "crear historia", "criterios de aceptación" (PO)** | **`po-user-story`** | **`.claude/skills/po-user-story/SKILL.md`** |
+| **"configurar contexto del proyecto", "actualizar UI-UX", "agregar pantallas/screenshots", "onboarding"** | **`project-onboarding`** | **`.claude/skills/project-onboarding/SKILL.md`** |
 
 ### Reglas adicionales:
 
@@ -139,7 +140,7 @@ Agente:
 1. PREGUNTA: "¿Escenario A o B?" (PASO 0 — siempre primero)
 2. Usuario responde: "B"
 3. Detecta keywords: "ejecuta" + "Suite" → skill qa-execution-reporter
-4. Carga skill: read_file("~/.agents/skills/qa-execution-reporter/SKILL.md")
+4. Carga skill: read_file(".claude/skills/qa-execution-reporter/SKILL.md")
 5. Sigue las PHASES del skill en orden
 6. Captura screenshots por paso
 7. Sube evidencia a ADO con formato correcto

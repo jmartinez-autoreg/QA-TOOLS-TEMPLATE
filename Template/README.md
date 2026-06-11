@@ -64,9 +64,13 @@ Mac/Linux: ~/QA/mi-proyecto/
 npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE
 ```
 
-Esto descarga e instala automáticamente:
-- Los archivos de configuración del agente en tu carpeta del proyecto
-- Los skills (capacidades del agente) en `~/.agents/skills/` (carpeta oculta del sistema)
+Esto descarga e instala automáticamente, **todo dentro de la carpeta de tu proyecto** (ya no en carpetas globales del sistema):
+- Los archivos de configuración del agente (`CLAUDE.md`, `copilot-instructions.md`, reglas)
+- Los skills (capacidades del agente) en `.claude/skills/`
+- Los agentes en `.claude/agents/` (Claude Code) y `.github/agents/` (GitHub Copilot)
+- La carpeta `context/` (`CONTEXT.md`, `UI-UX.md`, `screenshots/`) para el contexto de TU proyecto
+
+> Como todo vive en tu repo, puedes versionarlo con `git` y afinarlo para cada proyecto de forma independiente.
 
 ### Paso 3 — Abre VS Code en esa carpeta
 
@@ -98,13 +102,30 @@ URL: https://mi-aplicacion.com
 Registra 2 horas para la US 9884, actividad: Preparar TP, fecha: hoy
 ```
 
+### Paso 6 (recomendado) — Configura el contexto de tu proyecto
+
+La primera vez, pídele al agente:
+
+```
+Configura el contexto del proyecto
+```
+
+Esto dispara el skill **`project-onboarding`**, que te hace unas preguntas y construye el "cerebro local"
+del proyecto en `context/`:
+- `context/CONTEXT.md` — portales, login, roles, módulos, terminología literal de tu dominio
+- `context/UI-UX.md` — mapa de pantallas reales (puedes adjuntar **screenshots** y el agente los documenta)
+
+> Con el contexto cargado, los Test Cases salen mucho más precisos: el agente deja de **suponer** labels
+> y flujos, y usa los textos reales de tu app. Cuando termines, sube `context/`, `.claude/` y `.github/agents/`
+> a **tu propio repositorio** para que quede disponible en el equipo.
+
 ---
 
 ## ⚙️ Configuración inicial (una sola vez por equipo)
 
 ### Si usas Zoho Projects para registrar horas
 
-Abre el archivo: `~/.agents/skills/zoho_timelog/SKILL.md`
+Abre el archivo: `.claude/skills/zoho_timelog/SKILL.md`
 
 Busca la sección **"Contexto del Proyecto"** y reemplaza los valores entre `{{}}` con los de tu empresa:
 
@@ -205,8 +226,17 @@ Cuando pides ejecutar o automatizar TCs, el agente pregunta:
 
 ```
 mi-proyecto/
+├── CLAUDE.md                      ← El "cerebro" del agente en Claude Code — NO editar
+├── .claude/
+│   ├── skills/                    ← Capacidades del agente (qa_tester, zoho_timelog, ...)
+│   └── agents/                    ← QA-PRO, PO-PRO, QA-PRO-AUTHORITY (Claude Code)
 ├── .github/
-│   └── copilot-instructions.md    ← El "cerebro" del agente — NO editar
+│   ├── copilot-instructions.md    ← El "cerebro" del agente en Copilot — NO editar
+│   └── agents/                    ← QA-PRO, PO-PRO (GitHub Copilot)
+├── context/                       ← El contexto de TU proyecto (versionable)
+│   ├── CONTEXT.md                 ← Dominio: portales, login, roles, terminología
+│   ├── UI-UX.md                   ← Mapa de pantallas reales (labels, estados)
+│   └── screenshots/               ← Imágenes referenciadas desde UI-UX.md
 ├── .agent-state/                  ← Estado interno del agente — NO editar
 ├── TPlans/                        ← Aquí van los tests generados (Escenario A)
 ├── 00_AGENT_RULES.md              ← Reglas globales del agente
@@ -216,6 +246,9 @@ mi-proyecto/
 ├── selector-strategy.md           ← Estrategia de selectores CSS/XPath
 └── agent-architecture.md          ← Arquitectura del pipeline de agentes
 ```
+
+> **Sube `context/`, `.claude/` y `.github/agents/` a tu propio repositorio.** Ahí vive la configuración
+> afinada de tu proyecto — así queda disponible para el equipo y en futuras sesiones.
 
 ---
 
@@ -242,11 +275,13 @@ Para Zoho (registro de horas):
 
 ## 🧩 Skills disponibles
 
-Los skills son las "capacidades" del agente. Se instalan automáticamente en `~/.agents/skills/`.
+Los skills son las "capacidades" del agente. Se instalan automáticamente en `.claude/skills/` dentro de tu proyecto.
 
 | Skill | ¿Para qué sirve? | El agente lo usa cuando dices... |
 |-------|-----------------|----------------------------------|
+| `project-onboarding` | Construir el contexto del proyecto (`context/`) a partir de datos y screenshots | "configurar contexto", "nuevo proyecto", "agregar pantallas" |
 | `qa_tester` | Analizar US, crear TCs, documentar resultados, registrar bugs | "analizar US", "crear TC", "preparar test plan" |
+| `po-user-story` | Redactar User Stories con criterios de aceptación densos | "redactar US", "crear historia", "criterios de aceptación" |
 | `zoho_timelog` | Registrar horas en Zoho, generar reporte daily | "registrar horas", "zoho", "daily", "time log" |
 | `playwright-e2e` | Automatizar TCs con código Playwright (Escenario A) | "automatizar", "crear tests E2E" |
 | `qa-execution-reporter` | Ejecutar TCs y subir evidencia a ADO (Escenario B) | "ejecutar TC", "correr Suite" |
@@ -265,7 +300,23 @@ Si hay una nueva versión disponible:
 npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE --force
 ```
 
-Esto actualiza tanto los archivos del workspace como los skills instalados en `~/.agents/skills/`.
+Esto actualiza los archivos del workspace, los skills (`.claude/skills/`) y los agentes
+(`.claude/agents/`, `.github/agents/`). Tu carpeta `context/` **nunca se sobreescribe** —
+tu conocimiento del proyecto está a salvo aunque uses `--force`.
+
+### ⬆️ Migración desde v2 (instalaciones globales)
+
+La v3 cambia el modelo: skills y agentes ahora viven **dentro de tu repo**, no en carpetas globales del sistema.
+Si vienes de la v2, borra manualmente las instalaciones globales viejas y reinstala:
+
+```powershell
+# Windows (PowerShell)
+Remove-Item -Recurse -Force "$env:USERPROFILE\.agents\skills" -ErrorAction SilentlyContinue
+Remove-Item -Force "$env:USERPROFILE\.claude\agents\QA-PRO*" -ErrorAction SilentlyContinue
+Remove-Item -Force "$env:USERPROFILE\.copilot\agents\QA-PRO*" -ErrorAction SilentlyContinue
+```
+
+Luego, en la carpeta de tu proyecto: `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE`.
 
 ---
 

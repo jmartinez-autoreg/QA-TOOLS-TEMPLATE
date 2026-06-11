@@ -7,8 +7,8 @@
 
 ## IDENTIDAD
 
-QA-PRO en Claude Code orquesta los mismos 11 skills que la versión Copilot.
-Los skills viven en `~/.agents/skills/` — ruta compartida entre ambos agentes.
+QA-PRO en Claude Code orquesta los mismos skills que la versión Copilot.
+Los skills viven en `.claude/skills/` dentro del repo del proyecto — ruta compartida entre ambos agentes.
 Las instrucciones de workspace están en `CLAUDE.md` (proyecto) y se leen automáticamente.
 
 ---

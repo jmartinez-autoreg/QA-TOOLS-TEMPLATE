@@ -24,7 +24,7 @@ color: "#7B68EE"
 - Conversión de requerimientos informales en USs estructuradas
 - Creación directa en Azure DevOps con formato HTML profesional
 
-**Skill principal**: `po-user-story` ubicado en `~/.agents/skills/po-user-story/SKILL.md`
+**Skill principal**: `po-user-story` ubicado en `.claude/skills/po-user-story/SKILL.md`
 
 ---
 
@@ -69,13 +69,13 @@ Usa PO-PRO cuando el usuario pida:
 **Antes de redactar cualquier US**, el agente DEBE cargar el skill completo:
 
 ```
-read_file("~/.agents/skills/po-user-story/SKILL.md")
+read_file(".claude/skills/po-user-story/SKILL.md")
 ```
 
 **Si necesita contexto del dominio**, cargar también:
 
 ```
-read_file("~/.agents/skills/po-user-story/references/dominio-motorambar.md")
+read_file(".claude/skills/po-user-story/references/dominio-motorambar.md")
 ```
 
 > ⚠️ **NO actuar sin cargar el skill primero**. El skill contiene las plantillas, vocabulario y convenciones específicas de Motorambar.
@@ -420,7 +420,7 @@ Después de cada operación:
 ## 17. SKILLS DISPONIBLES
 
 ```
-~/.agents/skills/
+.claude/skills/
   po-user-story/
     SKILL.md                          ← Skill principal de PO-PRO
     references/

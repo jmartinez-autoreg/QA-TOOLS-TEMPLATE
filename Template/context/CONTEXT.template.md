@@ -1,8 +1,8 @@
-# Contexto de Proyecto — [NOMBRE DEL PROYECTO]
+# Contexto del Proyecto
 
-> ⚠️ Este archivo se carga cuando el proyecto activo es **[NOMBRE]**.
-> Completa cada sección con los datos reales del proyecto.
-> El agente usará este archivo como fuente de verdad para TCs, USs y ejecución.
+> ⚠️ Este archivo se auto-carga al inicio de cada sesión (vía `@context/CONTEXT.md` en `CLAUDE.md`).
+> Completa cada sección con los datos reales del proyecto — el agente lo usa como **fuente de verdad** para TCs, USs y ejecución.
+> NUNCA inventar datos de esta sección: si falta información, preguntar al usuario o usar el skill `project-onboarding`.
 
 ---
 

@@ -1,11 +1,8 @@
 #!/usr/bin/env node
-const fs       = require('fs');
-const path     = require('path');
-const os       = require('os');
-const readline = require('readline');
+const fs   = require('fs');
+const path = require('path');
 
-const force      = process.argv.includes('--force');
-const skipPrompt = process.argv.includes('--yes') || process.argv.includes('-y');
+const force = process.argv.includes('--force');
 
 // Lee y parsea models.config.yml de forma simple (sin dependencia externa)
 function loadModelConfig() {
@@ -49,16 +46,11 @@ function printTierTable(tiers) {
   console.log('   💡 Edita models.config.yml para cambiar modelos en todo el sistema\n');
 }
 
-// Interfaz de preguntas interactivas
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-function ask(pregunta) {
-  return new Promise(resolve => rl.question(pregunta, r => resolve(r.trim().toLowerCase())));
-}
-
-// Copia archivos respetando el flag --force (para archivos del workspace)
-function copyDir(srcDir, destDir) {
+// Copia archivos respetando el flag --force; permite excluir entradas de nivel superior
+function copyDir(srcDir, destDir, exclude = []) {
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
   fs.readdirSync(srcDir).forEach(file => {
+    if (exclude.includes(file)) return;
     const srcFile  = path.join(srcDir, file);
     const destFile = path.join(destDir, file);
     if (fs.lstatSync(srcFile).isDirectory()) {
@@ -85,89 +77,104 @@ function copyDirAlways(srcDir, destDir) {
   });
 }
 
+// Inicializa context/ (CONTEXT.md, UI-UX.md, screenshots/, wiki/) — NUNCA se sobreescribe con --force,
+// porque acumula conocimiento del proyecto construido por project-onboarding.
+function setupContext(templateSrc, projectDest) {
+  const contextSrc  = path.join(templateSrc, 'context');
+  const contextDest = path.join(projectDest, 'context');
+  if (!fs.existsSync(contextSrc)) return;
+  if (!fs.existsSync(contextDest)) fs.mkdirSync(contextDest, { recursive: true });
+
+  const renameMap = {
+    'CONTEXT.template.md': 'CONTEXT.md',
+    'UI-UX.template.md':   'UI-UX.md',
+  };
+
+  fs.readdirSync(contextSrc).forEach(entry => {
+    const srcPath = path.join(contextSrc, entry);
+    if (fs.lstatSync(srcPath).isDirectory()) {
+      copyDir(srcPath, path.join(contextDest, entry)); // screenshots/, wiki/ (.gitkeep)
+      return;
+    }
+    const destName = renameMap[entry] || entry;
+    const destPath = path.join(contextDest, destName);
+    if (fs.existsSync(destPath)) {
+      console.log('   ⚠️  Skip (ya existe): context/' + destName + ' — no se sobreescribe (contiene contexto del proyecto)');
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  });
+}
+
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('\n🤖 QA Agent Template — Instalador Inteligente');
+  console.log('\n🤖 QA Agent Template — Instalador');
 
   // 0. Mostrar tabla de tiers
   const tiers = loadModelConfig();
   printTierTable(tiers);
 
-  // 1. Copiar archivos del workspace (Template/ → cwd)
-  const templateSrc  = path.join(__dirname, 'Template');
-  const templateDest = process.cwd();
-  copyDir(templateSrc, templateDest);
-  console.log('✅ Archivos de workspace copiados a: ' + templateDest);
+  const projectDest = process.cwd();
+  const templateSrc = path.join(__dirname, 'Template');
 
-  // 2. Instalar skills en ~/.agents/skills/ (SIEMPRE actualiza)
+  // 1. Copiar archivos del workspace (Template/ → proyecto), context/ se maneja aparte
+  copyDir(templateSrc, projectDest, ['context']);
+  console.log('✅ Archivos de workspace copiados a: ' + projectDest);
+
+  // 2. Inicializar context/ (CONTEXT.md, UI-UX.md, screenshots/, wiki/)
+  setupContext(templateSrc, projectDest);
+  console.log('✅ context/ listo — usa el skill "project-onboarding" para completarlo (CONTEXT.md, UI-UX.md)');
+
+  // 3. Instalar skills en .claude/skills/ (SIEMPRE actualiza)
   const skillsSrc  = path.join(__dirname, 'skills');
-  const skillsDest = path.join(os.homedir(), '.agents', 'skills');
+  const skillsDest = path.join(projectDest, '.claude', 'skills');
   if (fs.existsSync(skillsSrc)) {
     copyDirAlways(skillsSrc, skillsDest);
-    console.log('\n✅ Skills actualizados en ' + skillsDest + ':');
+    console.log('\n✅ Skills instalados/actualizados en ' + path.relative(projectDest, skillsDest) + ':');
     fs.readdirSync(skillsSrc).forEach(s => console.log('   📦 ' + s));
     console.log('\n   ⚙️  CONFIGURACIÓN REQUERIDA:');
-    console.log('      zoho_timelog/SKILL.md → Actualiza Portal ID, Project ID y mapeo de US');
-    console.log('      qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
+    console.log('      .claude/skills/zoho_timelog/SKILL.md → Actualiza Portal ID, Project ID y mapeo de US');
+    console.log('      .claude/skills/qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
   }
 
-  // 3. Detectar agentes existentes y preguntar
-  const agentsSrc   = path.join(__dirname, 'agents');
-  const copilotDest = path.join(os.homedir(), '.copilot', 'agents');
-  const claudeDest  = path.join(os.homedir(), '.claude', 'agents');
+  // 4. Instalar agentes (SIEMPRE actualiza) — Claude Code (.claude/agents/) y Copilot (.github/agents/)
+  const agentsSrc        = path.join(__dirname, 'agents');
+  const claudeAgentsDest = path.join(projectDest, '.claude', 'agents');
+  const copilotAgentsDest = path.join(projectDest, '.github', 'agents');
 
   if (fs.existsSync(agentsSrc)) {
-    const hasCopilot = fs.existsSync(copilotDest) && fs.readdirSync(copilotDest).length > 0;
-    const hasClaude  = fs.existsSync(claudeDest)  && fs.readdirSync(claudeDest).length  > 0;
-    let instalar = true;
+    fs.mkdirSync(claudeAgentsDest, { recursive: true });
+    fs.mkdirSync(copilotAgentsDest, { recursive: true });
 
-    if ((hasCopilot || hasClaude) && !skipPrompt) {
-      console.log('\n📋 AGENTES DETECTADOS EN TU EQUIPO:');
-      if (hasCopilot) console.log('   ✅ GitHub Copilot  → ' + copilotDest);
-      if (hasClaude)  console.log('   ✅ Claude Code     → ' + claudeDest);
-      console.log('\n¿Qué deseas hacer?');
-      console.log('   [1] Actualizar todos los agentes (recomendado)');
-      console.log('   [2] Solo instalar los que faltan');
-      console.log('   [3] Saltar — no tocar agentes');
-      const r = await ask('\nTu elección (1/2/3): ');
-      if (r === '3') { instalar = false; console.log('⏭️  Agentes sin cambios'); }
-      else if (r === '2') console.log('📦 Instalando solo faltantes...');
-      else console.log('🔄 Actualizando todos...');
+    // QA-PRO.agent.md y PO-PRO.agent.md → subagente de Claude Code + agente de repo de Copilot
+    ['QA-PRO.agent.md', 'PO-PRO.agent.md'].forEach(f => {
+      const src = path.join(agentsSrc, f);
+      if (!fs.existsSync(src)) return;
+      fs.copyFileSync(src, path.join(claudeAgentsDest, f));
+      fs.copyFileSync(src, path.join(copilotAgentsDest, f));
+    });
+
+    // QA-PRO-AUTHORITY.md → capa de overrides, solo Claude Code (no es un subagente registrable)
+    const authoritySrc = path.join(agentsSrc, 'QA-PRO-AUTHORITY.md');
+    if (fs.existsSync(authoritySrc)) {
+      fs.copyFileSync(authoritySrc, path.join(claudeAgentsDest, 'QA-PRO-AUTHORITY.md'));
     }
 
-    if (instalar) {
-      // 3a. GitHub Copilot
-      if (!hasCopilot || skipPrompt || (await ask('').length === 0)) {
-        copyDirAlways(agentsSrc, copilotDest);
-        console.log('\n✅ GitHub Copilot — agentes instalados');
-        console.log('   📍 ' + copilotDest);
-        console.log('   🎨 QA-PRO (azul #00A9E0) + PO-PRO (morado #7B68EE)');
-      }
-      // 3b. Claude Code
-      if (!hasClaude || skipPrompt || (await ask('').length === 0)) {
-        copyDirAlways(agentsSrc, claudeDest);
-        console.log('\n✅ Claude Code — agentes instalados');
-        console.log('   📍 ' + claudeDest);
-        if (tiers) {
-          console.log('   🤖 Tiers activos:');
-          for (const [id, t] of Object.entries(tiers)) {
-            console.log(`      ${id}: ${t.model}${t.extended_thinking ? ' + extended thinking' : ''}`);
-          }
-        }
+    console.log('\n✅ Agentes instalados/actualizados:');
+    console.log('   📍 .claude/agents/  (Claude Code: QA-PRO, PO-PRO, QA-PRO-AUTHORITY)');
+    console.log('   📍 .github/agents/  (GitHub Copilot: QA-PRO, PO-PRO)');
+    console.log('   🎨 QA-PRO (azul #00A9E0) + PO-PRO (morado #7B68EE)');
+    if (tiers) {
+      console.log('   🤖 Tiers activos:');
+      for (const [id, t] of Object.entries(tiers)) {
+        console.log(`      ${id}: ${t.model}${t.extended_thinking ? ' + extended thinking' : ''}`);
       }
     }
-  }
-
-  // 4. Crear carpeta .agent-state/ si no existe
-  const agentStateDir = path.join(process.cwd(), '.agent-state');
-  if (!fs.existsSync(agentStateDir)) {
-    fs.mkdirSync(agentStateDir, { recursive: true });
-    console.log('\n✅ Carpeta .agent-state/ creada');
   }
 
   // 5. Crear .env.playwright a partir del ejemplo (solo si no existe)
-  const envDest    = path.join(process.cwd(), '.env.playwright');
-  const envExample = path.join(templateDest, '.env.playwright.example');
+  const envDest    = path.join(projectDest, '.env.playwright');
+  const envExample = path.join(projectDest, '.env.playwright.example');
   if (!fs.existsSync(envDest) && fs.existsSync(envExample)) {
     fs.copyFileSync(envExample, envDest);
     console.log('\n✅ .env.playwright creado — completa APP_URL, TEST_USER, TEST_PASS');
@@ -178,11 +185,10 @@ async function main() {
   console.log('\n🚀 Listo! Elige tu agente:');
   console.log('   📎 GitHub Copilot  → Ctrl+Shift+I y escribe "@QA-PRO" o "@PO-PRO"');
   console.log('   🤖 Claude Code     → abre la carpeta con "claude" en terminal');
-  console.log('\n   Lee el README.md para empezar.');
+  console.log('\n   Primer paso recomendado: pide "configura el contexto del proyecto" para completar context/CONTEXT.md y context/UI-UX.md.');
+  console.log('   Lee el README.md para más detalles.');
   console.log('   Para cambiar modelos: edita models.config.yml y re-ejecuta node index.js\n');
-  if (!force) console.log('   Usa --force para sobreescribir archivos del workspace.\n');
-
-  rl.close();
+  if (!force) console.log('   Usa --force para sobreescribir archivos del workspace existentes (no afecta context/).\n');
 }
 
-main().catch(err => { console.error('\n❌ Error:', err.message); rl.close(); process.exit(1); });
+main().catch(err => { console.error('\n❌ Error:', err.message); process.exit(1); });

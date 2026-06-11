@@ -1,8 +1,73 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
+
+## CODEBASE — DEVELOPER REFERENCE
+
+### Install & run the template installer
+
+```powershell
+node index.js                   # install/update skills, agents and context/ scaffold in this project
+node index.js --force           # also overwrite existing workspace files (never overwrites context/)
+```
+
+To publish a new version: `npm publish` (package name: `playwright-agent-template`).  
+End users install via: `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE`.
+
+### Repository layout
+
+| Path | What it is |
+|------|-----------|
+| `Template/` | Workspace files copied to the user's project dir on install (skipped if already exist, unless `--force`) |
+| `Template/context/*.template.md` | Seed files for `<project>/context/CONTEXT.md` and `<project>/context/UI-UX.md` — created once, never overwritten by `--force` |
+| `skills/` | SKILL.md files — always overwritten to `<project>/.claude/skills/` on every install/update |
+| `agents/` | Agent definitions — copied to `<project>/.claude/agents/` (Claude Code) and `<project>/.github/agents/` (Copilot) |
+| `models.config.yml` | Single source of truth for model-per-tier assignments (installer reads and displays this) |
+| `.agent-state/*.schema.json` | JSON schemas for pipeline contracts — version these |
+| `copilot-instructions.md` | GitHub Copilot mirror of this file — must stay in sync |
+
+### Dual-platform sync rule
+
+**`CLAUDE.md` ↔ `copilot-instructions.md` ↔ `agents/QA-PRO-AUTHORITY.md` ↔ `agents/QA-PRO.agent.md`**
+
+Any routing rule, skill path, or behavior change must be applied to ALL four files simultaneously, and mirrored into `Template/CLAUDE.md` / `Template/copilot-instructions.md` (the copies installed into the user's project). Never update one without the others.
+
+### Adding a new skill
+
+1. Create `skills/<name>/SKILL.md` (installer always overwrites to `.claude/skills/<name>/SKILL.md` in the user's project)
+2. Add keyword → skill path row to the PASO 1 routing table in this file **and** in `copilot-instructions.md`
+3. Add the skill under the appropriate tier in `models.config.yml`
+
+### Changing model assignments
+
+Edit `models.config.yml` — the installer reads it at runtime and prints the tier table. Tier structure:
+
+| Tier | Rol | Default model |
+|------|-----|---------------|
+| T1 | PO / Backlog Planner | `claude-sonnet-4-6` + extended thinking |
+| T2 | QA Planner | `claude-sonnet-4-6` + extended thinking |
+| T3 | Code Builder | `claude-haiku-4-5-20251001` |
+| T4 | Browser Executor | `claude-haiku-4-5-20251001` |
+| TOps | Operations (Zoho/ADO) | `claude-haiku-4-5-20251001` |
+
+---
+
 # QA-PRO — Agente Claude Code
 
 > ⚠️ **ESTE ARCHIVO SE LEE AUTOMÁTICAMENTE EN CADA SESIÓN.**
 > Seguir TODOS los pasos antes de actuar.
 > Antes de cualquier acción, también leer: **`00_AGENT_RULES.md`** (reglas globales obligatorias).
+
+---
+
+## CONTEXTO DEL PROYECTO (auto-cargado)
+
+@context/CONTEXT.md
+@context/UI-UX.md
+
+> Si `context/CONTEXT.md` sigue con placeholders o `context/UI-UX.md` no tiene pantallas documentadas, ofrece ejecutar el skill `project-onboarding` (`.claude/skills/project-onboarding/SKILL.md`) antes de redactar TCs o USs que dependan de esa información.
 
 ---
 
@@ -17,7 +82,7 @@ Orquesto las siguientes capacidades desde Claude Code:
 - Registro de horas en Zoho Projects
 - Generación de Daily Standups
 
-Los skills se cargan desde `~/.agents/skills/` — ruta compartida con el agente Copilot.
+Los skills se cargan desde `.claude/skills/` — dentro del repo del proyecto, compartido con el agente de GitHub Copilot vía `.github/agents/`.
 
 ---
 
@@ -52,9 +117,9 @@ Cuando detecte cualquiera de estas situaciones:
    └──────────────────────────────────────────────────────
 
 2. PROPONER el archivo (o archivos) a actualizar:
-   - Regla de skill     → ~/.agents/skills/[SKILL]/SKILL.md
+   - Regla de skill     → .claude/skills/[SKILL]/SKILL.md
    - Regla de routing   → CLAUDE.md  +  copilot-instructions.md  (ambos)
-   - Regla de agente    → agents/QA-PRO-claude.md  +  agents/QA-PRO.agent.md  (ambos)
+   - Regla de agente    → .claude/agents/QA-PRO-AUTHORITY.md  +  .claude/agents/QA-PRO.agent.md  (ambos)
 
 3. PREGUNTAR: "¿Aplico estos cambios a los archivos y subo a GitHub? (S/N)"
 
@@ -63,8 +128,8 @@ Cuando detecte cualquiera de estas situaciones:
    a) Actualizar archivos locales con Read + Edit tools:
       - CLAUDE.md  (este archivo, en raíz del proyecto)
       - copilot-instructions.md  (en raíz del proyecto)
-      - ~/.agents/skills/[SKILL]/SKILL.md  (si aplica)
-      - agents/QA-PRO-claude.md  +  agents/QA-PRO.agent.md  (si aplica)
+      - .claude/skills/[SKILL]/SKILL.md  (si aplica)
+      - .claude/agents/QA-PRO-AUTHORITY.md  +  .claude/agents/QA-PRO.agent.md  (si aplica)
 
    b) Hacer commit y push al repositorio:
       git add -A
@@ -118,6 +183,7 @@ Si el usuario menciona: test plans, TCs, ejecutar, automatizar, crear tests, cor
 |----------------|---------------|
 | "analizar US", "preparar test plan", "crear TC", "redactar casos" | `qa_tester` |
 | "registrar horas", "time log", "zoho", "daily", "reporte del día" | `zoho_timelog` |
+| "configurar contexto", "nuevo proyecto", "actualizar pantallas", "actualizar UI-UX", "agregar screenshots" | `project-onboarding` |
 
 ### Routing por Story Points
 
@@ -140,12 +206,14 @@ Si el usuario menciona: test plans, TCs, ejecutar, automatizar, crear tests, cor
 
 | Si el usuario menciona... | Skill | Ruta |
 |---------------------------|-------|------|
-| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `~/.agents/skills/qa_tester/SKILL.md` |
-| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `~/.agents/skills/zoho_timelog/SKILL.md` |
-| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
-| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `~/.agents/skills/playwright-e2e/SKILL.md` |
-| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `~/.agents/skills/tc-reader/SKILL.md` |
-| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `~/.agents/skills/qa-execution-reporter/SKILL.md` |
+| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | `.claude/skills/qa_tester/SKILL.md` |
+| "registrar horas", "time log", "zoho", "daily" | `zoho_timelog` | `.claude/skills/zoho_timelog/SKILL.md` |
+| "ejecutar", "correr", "run" + TP/Suite/TC | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "automatizar", "convertir TC a código", "crear tests E2E" | `playwright-e2e` | `.claude/skills/playwright-e2e/SKILL.md` |
+| "leer TCs de ADO" (sin ejecutar) | `tc-reader` | `.claude/skills/tc-reader/SKILL.md` |
+| "reportar resultados", "subir evidencia" | `qa-execution-reporter` | `.claude/skills/qa-execution-reporter/SKILL.md` |
+| "redactar US", "crear historia", "criterios de aceptación" (PO) | `po-user-story` | `.claude/skills/po-user-story/SKILL.md` |
+| "configurar contexto del proyecto", "actualizar UI-UX", "agregar pantallas/screenshots", "onboarding" | `project-onboarding` | `.claude/skills/project-onboarding/SKILL.md` |
 
 **Reglas adicionales:**
 1. NO actuar sin leer el skill correcto primero
@@ -173,7 +241,7 @@ Usuario: "Ejecuta la Suite 9418 del TP 9412"
 1. PREGUNTA: "¿Escenario A o B?" (PASO 0 — siempre primero)
 2. Usuario responde: "B"
 3. Detecta: "ejecuta" + "Suite" → skill qa-execution-reporter
-4. Lee: ~/.agents/skills/qa-execution-reporter/SKILL.md
+4. Lee: .claude/skills/qa-execution-reporter/SKILL.md
 5. Sigue las PHASES del skill en orden
 6. Captura screenshots por criterio
 7. Sube evidencia a ADO con formato correcto
@@ -328,11 +396,14 @@ mcp__claude_ai_Zhoho__ZohoProjects_get_current_user_details
 
 | Archivo | Contenido | Cuándo leer |
 |---------|-----------|-------------|
-| `~/.agents/skills/qa_tester/SKILL.md` | Estándar QA, estructura de TCs, reglas de división | Análisis y creación de TCs |
-| `~/.agents/skills/zoho_timelog/SKILL.md` | Registro de horas, formato de notas, límites API | Time logs y daily |
-| `~/.agents/skills/playwright-e2e/SKILL.md` | Automatización con Playwright | Escenario A |
-| `~/.agents/skills/qa-execution-reporter/SKILL.md` | Ejecución y reporte de evidencias | Escenario B y uploads |
-| `~/.agents/skills/tc-reader/SKILL.md` | Lectura de TCs de ADO | Leer sin ejecutar |
+| `.claude/skills/qa_tester/SKILL.md` | Estándar QA, estructura de TCs, reglas de división | Análisis y creación de TCs |
+| `.claude/skills/zoho_timelog/SKILL.md` | Registro de horas, formato de notas, límites API | Time logs y daily |
+| `.claude/skills/playwright-e2e/SKILL.md` | Automatización con Playwright | Escenario A |
+| `.claude/skills/qa-execution-reporter/SKILL.md` | Ejecución y reporte de evidencias | Escenario B y uploads |
+| `.claude/skills/tc-reader/SKILL.md` | Lectura de TCs de ADO | Leer sin ejecutar |
+| `.claude/skills/project-onboarding/SKILL.md` | Construcción/actualización de `context/CONTEXT.md` y `context/UI-UX.md` | Onboarding y mantenimiento de contexto |
+| `context/CONTEXT.md` | Dominio: portales, login, roles, terminología literal | Siempre — fuente de verdad del proyecto |
+| `context/UI-UX.md` | Mapa de pantallas reales (labels, elementos, estados) | Antes de redactar steps de un TC |
 | `playwright-guide.md` | Helpers: `waitForPageIdle`, `safeSetValue`, fixtures | Al escribir código de test |
 | `execution-rules.md` | REGLAS 1-12: esperas, selectores, uploads, screenshots | Al escribir código de test |
 | `selector-strategy.md` | Prioridad de selectores, verificación MCP | Al seleccionar elementos |
@@ -359,7 +430,9 @@ El estado del pipeline se guarda en `.agent-state/`:
 
 ```
 1. Usuario envía mensaje
-2. ¿Sobre QA / Test Plan / redactar casos?    → cargar qa_tester   (sin preguntar A/B)
+2. ¿Sobre configurar contexto / pantallas / UI-UX?  → cargar project-onboarding (sin preguntar A/B)
+   ¿Sobre redactar US / criterios / refinar backlog? → cargar po-user-story (sin preguntar A/B)
+   ¿Sobre QA / Test Plan / redactar casos?    → cargar qa_tester   (sin preguntar A/B)
    ¿Sobre horas / Zoho / daily?              → cargar zoho_timelog (sin preguntar A/B)
    ¿Sobre ejecutar / automatizar TCs?        → preguntar "¿A o B?"
 3. Si se preguntó A/B: esperar respuesta
