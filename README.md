@@ -226,12 +226,13 @@ Cuando pides ejecutar o automatizar TCs, el agente pregunta:
 
 ```
 mi-proyecto/
-├── CLAUDE.md                      ← El "cerebro" del agente en Claude Code — NO editar
+├── AGENTS.md                      ← El "cerebro" del agente (todas las reglas) — fuente única
+├── CLAUDE.md                      ← Entrada de Claude Code → apunta a AGENTS.md — NO editar
 ├── .claude/
 │   ├── skills/                    ← Capacidades del agente (qa_tester, zoho_timelog, ...)
-│   └── agents/                    ← QA-PRO, PO-PRO, QA-PRO-AUTHORITY (Claude Code)
+│   └── agents/                    ← QA-PRO, PO-PRO (Claude Code)
 ├── .github/
-│   ├── copilot-instructions.md    ← El "cerebro" del agente en Copilot — NO editar
+│   ├── copilot-instructions.md    ← Entrada de Copilot → apunta a AGENTS.md — NO editar
 │   └── agents/                    ← QA-PRO, PO-PRO (GitHub Copilot)
 ├── context/                       ← El contexto de TU proyecto (versionable)
 │   ├── CONTEXT.md                 ← Dominio: portales, login, roles, terminología
@@ -239,13 +240,15 @@ mi-proyecto/
 │   └── screenshots/               ← Imágenes referenciadas desde UI-UX.md
 ├── .agent-state/                  ← Estado interno del agente — NO editar
 ├── TPlans/                        ← Aquí van los tests generados (Escenario A)
-├── 00_AGENT_RULES.md              ← Reglas globales del agente
 ├── playwright.config.ts           ← Configuración de velocidad, video, screenshots
 ├── playwright-guide.md            ← Referencia técnica para desarrolladores
 ├── execution-rules.md             ← Reglas para escribir tests
 ├── selector-strategy.md           ← Estrategia de selectores CSS/XPath
 └── agent-architecture.md          ← Arquitectura del pipeline de agentes
 ```
+
+> **Todas las reglas del agente viven en `AGENTS.md`** (una sola fuente). `CLAUDE.md` y
+> `.github/copilot-instructions.md` solo apuntan a él y traducen los nombres de las tools de cada plataforma.
 
 > **Sube `context/`, `.claude/` y `.github/agents/` a tu propio repositorio.** Ahí vive la configuración
 > afinada de tu proyecto — así queda disponible para el equipo y en futuras sesiones.

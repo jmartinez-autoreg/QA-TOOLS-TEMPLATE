@@ -117,9 +117,22 @@ async function main() {
   const projectDest = process.cwd();
   const templateSrc = path.join(__dirname, 'Template');
 
-  // 1. Copiar archivos del workspace (Template/ → proyecto), context/ se maneja aparte
-  copyDir(templateSrc, projectDest, ['context']);
+  // 1. Copiar archivos del workspace (Template/ → proyecto). Excluir:
+  //    - context/ → se maneja aparte (setupContext)
+  //    - copilot-instructions.md → Copilot lo lee desde .github/, no desde la raíz (paso 1b)
+  copyDir(templateSrc, projectDest, ['context', 'copilot-instructions.md']);
   console.log('✅ Archivos de workspace copiados a: ' + projectDest);
+
+  // 1b. Entrada de Copilot → .github/copilot-instructions.md (ubicación nativa que Copilot lee)
+  const copilotInstrSrc  = path.join(templateSrc, 'copilot-instructions.md');
+  const copilotInstrDest = path.join(projectDest, '.github', 'copilot-instructions.md');
+  if (fs.existsSync(copilotInstrSrc)) {
+    fs.mkdirSync(path.dirname(copilotInstrDest), { recursive: true });
+    if (force || !fs.existsSync(copilotInstrDest)) {
+      fs.copyFileSync(copilotInstrSrc, copilotInstrDest);
+      console.log('✅ Entrada de Copilot en .github/copilot-instructions.md');
+    }
+  }
 
   // 2. Inicializar context/ (CONTEXT.md, UI-UX.md, screenshots/, wiki/)
   setupContext(templateSrc, projectDest);
@@ -146,7 +159,8 @@ async function main() {
     fs.mkdirSync(claudeAgentsDest, { recursive: true });
     fs.mkdirSync(copilotAgentsDest, { recursive: true });
 
-    // QA-PRO.agent.md y PO-PRO.agent.md → subagente de Claude Code + agente de repo de Copilot
+    // QA-PRO.agent.md y PO-PRO.agent.md → subagentes gemelos: Claude Code + Copilot (mismo contenido)
+    // Cada uno es la fuente única de las reglas de su rol; las reglas globales viven en AGENTS.md.
     ['QA-PRO.agent.md', 'PO-PRO.agent.md'].forEach(f => {
       const src = path.join(agentsSrc, f);
       if (!fs.existsSync(src)) return;
@@ -154,14 +168,8 @@ async function main() {
       fs.copyFileSync(src, path.join(copilotAgentsDest, f));
     });
 
-    // QA-PRO-AUTHORITY.md → capa de overrides, solo Claude Code (no es un subagente registrable)
-    const authoritySrc = path.join(agentsSrc, 'QA-PRO-AUTHORITY.md');
-    if (fs.existsSync(authoritySrc)) {
-      fs.copyFileSync(authoritySrc, path.join(claudeAgentsDest, 'QA-PRO-AUTHORITY.md'));
-    }
-
     console.log('\n✅ Agentes instalados/actualizados:');
-    console.log('   📍 .claude/agents/  (Claude Code: QA-PRO, PO-PRO, QA-PRO-AUTHORITY)');
+    console.log('   📍 .claude/agents/  (Claude Code: QA-PRO, PO-PRO)');
     console.log('   📍 .github/agents/  (GitHub Copilot: QA-PRO, PO-PRO)');
     console.log('   🎨 QA-PRO (azul #00A9E0) + PO-PRO (morado #7B68EE)');
     if (tiers) {

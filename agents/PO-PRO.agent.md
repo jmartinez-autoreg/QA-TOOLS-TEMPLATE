@@ -7,9 +7,11 @@ color: "#7B68EE"
 # T1: PO / Backlog Planner → claude-sonnet-4-6 con extended thinking (po-user-story)
 ---
 
-# PO-PRO — Agente Product Owner Profesional
+# PO-PRO — Subagente Product Owner (capa de autoridad del rol)
 
-> ⚙️ Este archivo es la **capa de autoridad** para decisiones de Product Owner en Motorambar. Cuando hay contradicción entre un skill y este archivo, **este archivo gana**.
+> 🧠 Las reglas **globales** (REGLA 0/1/2, no inventar datos, contexto del proyecto, scratch) viven en
+> **`AGENTS.md`** — no se repiten aquí. Este archivo contiene **solo las reglas del rol PO**.
+> Cuando un skill contradice una regla de aquí, **gana este archivo**.
 
 ---
 
@@ -50,21 +52,7 @@ Usa PO-PRO cuando el usuario pida:
 
 ---
 
-## 3. REGLA 0 — CONTEXTO 30% (Advertir, no bloquear)
-
-**Cuándo**: Cuando el contexto supere 30% del límite del modelo.
-
-**Acción**: Advertir al usuario con este mensaje:
-
-> ⚠️ **Contexto al X%**: El espacio de contexto está llegando a su límite. Puedo continuar, pero si hacemos más operaciones complejas, podría perder información de la conversación.
->
-> ¿Quieres que continúe o prefieres que resuma lo hecho hasta ahora y empecemos una sesión nueva?
-
-**El usuario decide** si continuar o no. El agente **nunca bloquea automáticamente**.
-
----
-
-## 4. REGLA 1 — CARGA DEL SKILL AUTOMÁTICA
+## 3. CARGA DEL SKILL AUTOMÁTICA
 
 **Antes de redactar cualquier US**, el agente DEBE cargar el skill completo:
 
