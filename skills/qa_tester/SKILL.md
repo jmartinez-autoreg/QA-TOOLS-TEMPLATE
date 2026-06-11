@@ -110,6 +110,12 @@ Recibir US → Analizar criterios de aceptación
 
       ⚠️ Usar SIEMPRE estos valores por defecto. Solo cambiar si el usuario indica explícitamente un valor distinto.
       ⚠️ Al CERRAR una tarea: CompletedWork = horas reales trabajadas, RemainingWork = 0.
+
+      > **Nota:** Estos valores son la convención vigente del equipo (confirmada 2026-06-09), distinta
+      > de los valores por defecto de la Tabla 10 oficial (PROC-QA-Generales de calidad v1.07 §18.1):
+      > Preparar Test Plan 1h/1h/0, Ejecutar Test Plan 1h/1h/0, Ejecutar Pruebas 1h/1h/0, QA Demo
+      > 0.25h/0.25h/0, QA Apoyo 0.5h/0.5h/0. La divergencia es intencional — NO "corregir"
+      > automáticamente hacia la Tabla 10 (REGLA 1 de AGENTS.md).
 → [ADO] Cerrar tarea "QA - Preparar Test Plan" (System.State = Closed)
 → Generar tabla tareas ADO (Preparar TP + Ejecutar TP + QA Demo con horas y estados)
 → ⚠️ ANTES de generar Daily y tabla de tiempo: si no está claro qué tareas realizó el usuario hoy,
@@ -208,6 +214,11 @@ Las PRECONDs se numeran **secuencialmente desde 0**. Incluir **solo** las catego
 >
 > ⚠️ **SIN EXPECTED RESULT:** Las filas de PRECOND en ADO llevan únicamente el campo **Action** con el texto de la precondición. El campo **Expected Result debe quedar vacío** en todas las filas de PRECOND. Solo los pasos de ejecución llevan Expected Result.
 
+> **Notación adicional** (detalle completo en `create-test-cases/SKILL.md` §3.1, fuente: GUÍA-QA-Redacción de casos de pruebas v1.00 §3.3):
+> - Letras (`1A`, `1B`...) cuando hay más de una PRECOND del mismo tipo en la misma posición.
+> - `PRECOND 0: TC Ejecutado` + lista `- {ID}: {título}` cuando el TC depende de otro TC ya ejecutado.
+> - Referencias inline `(PRECOND N)` / `(PRECOND 1A)` dentro del texto de un paso, para citar de dónde provienen los datos usados.
+
 ### Estructura de Pasos
 
 Cada paso del TC tiene:
@@ -240,6 +251,9 @@ Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realm
 1. **Pantalla diferente** — el escenario ocurre en una pantalla o módulo distinto al flujo principal
 2. **Rol de usuario diferente** — el escenario requiere un usuario con permisos distintos que no pueden coexistir en la misma sesión
 3. **El escenario negaría el estado** — ejecutar el escenario negativo destruiría los datos necesarios para el escenario positivo (y no se puede restablecer en el mismo TC)
+
+> Estos 3 criterios corresponden a los criterios C/D/E de la Tabla 9 (GUÍA-QA-Redacción de casos
+> de pruebas v1.00, §6 — división de Test Cases).
 
 #### ❌ NO dividir en estos casos (errores frecuentes):
 
@@ -497,13 +511,44 @@ Bug 105867: Al Guardar, presenta mensaje inesperado
 <img src="https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments/{GUID}?fileName=escenario-1.png" width="720" style="border:1px solid #ccc;" />
 ```
 
-### Variante — Historia en On Hold
+### Variante — Historia en On Hold (PROC-QA-Manejar situaciones bloqueantes v1.00 §2)
+
+Cuando una situación impide continuar (codificación o calidad): cambiar el estado de la US a
+`On Hold` y documentar en la Discussion con este formato (3 líneas, la 3ra solo si aplica):
 
 ```
-QA ON HOLD / Sprint Test
+[Rol primario] On Hold
+[Tipo de situación]
+[Dependencia: incluir enlace a la historia]
+```
 
-Razón: [Descripción clara del bloqueante]
-Acción requerida: [Qué necesita ocurrir para desbloquear]
+Ejemplos reales:
+```
+PO On Hold
+Ambiente de desarrollo no configurado.
+```
+```
+DEV On Hold
+Dependencia de historia
+User Story 95072: DE Alerts: Integración Proceso Envío Cartas Determinación.
+```
+
+**Resolución** (al desbloquear): actualizar el estado de la US (`New`, `Active`, `Resolved`) y
+documentar (opcional) con este formato:
+
+```
+[Responsable] [Estado]
+[Descripción de resolución]
+```
+
+Ejemplos reales:
+```
+PO New
+Ambiente de desarrollo configurado.
+```
+```
+DEV Resolved
+Dependencia de historia resuelta.
 ```
 
 ### Variante — Ejecutar Pruebas sin Test Plan (16.2)
@@ -547,32 +592,117 @@ Al encontrar un defecto durante la ejecución:
 
 ```
 [ADO] Crear Bug (mcp_ado_wit_create_work_item, type: Bug):
-  - Título: [Portal/Módulo] — [Descripción corta del problema] — [US ID]
+  - Título: [Portal/Módulo] — [Descripción corta del problema] — [US ID] (sin la palabra "Error" — ver regla abajo)
   - Assigned To: DEV responsable
-  - Steps to Reproduce: pasos detallados
+  - Steps to Reproduce: pasos detallados (ver Formato 1 / Formato 2 abajo)
   - Expected / Actual behavior
   - Severity: Critical / High / Medium / Low
+  - Tipo de desviación: ver Tabla 2 abajo (campo complementario a Severity)
 
 [ADO] Vincular Bug a la US (mcp_ado_wit_link_work_item)
 [ADO] Comentar en la US con el ID del bug
 [ADO] Enviar mensaje al DEV (comentario en el Bug)
 ```
 
-### Mensaje al DEV (template)
+### Tipo de desviación (Tabla 2, GUÍA-QA-Redacción de desviaciones v1.01 §3)
+
+Campo **complementario** a Severity (Severity = impacto; Tipo de desviación = categoría):
+
+| Tipo | Descripción | Ejemplo |
+|---|---|---|
+| Lógica | Errores en la implementación de la lógica de negocio | Cálculos incorrectos en un sistema de facturación |
+| Interfaz | Visuales o de diseño que afectan apariencia y experiencia de usuario | Elementos desalineados, errores gramaticales u ortográficos |
+| Usabilidad | Afectan la facilidad con la que los usuarios pueden interactuar | Botones mal ubicados o difíciles de encontrar |
+| Seguridad | Comprometen integridad, confidencialidad y disponibilidad | Accesos no autorizados a datos/módulos/pantallas/funcionalidades |
+| Datos | Manejo incorrecto de datos: pérdida, corrupción o inconsistencia | Datos de una solicitud que se pierden tras editar/actualizar |
+| Integración | No se comunica correctamente con otros sistemas o componentes externos | Fallos al sincronizar con BD externa o al enviar un correo |
+| Rendimiento | Afectan y degradan el rendimiento | Tarda demasiado en cargar/responder a las acciones del usuario |
+| Compatibilidad | No funciona correctamente en distintos entornos (SO, navegadores, dispositivos) | No se visualiza correctamente en dispositivos móviles |
+
+### Título del bug — regla "no usar Error" (PROC-QA-Generales de calidad v1.07 §15.1.3)
+
+⛔ La palabra **"Error"** no debe usarse en títulos de defectos.
+✅ Única excepción: cuando "error" es 1) título de pantalla, 2) título de informe o 3) nombre de
+campo — en ese caso, entre comillas dobles: `"Informe de Errores"`, `"Cantidad de errores"`.
+
+### Formato 1 — Defecto con pasos (estándar, GUÍA-QA-Redacción de desviaciones v1.01 §5.1)
+
+Usar por defecto. Estructura:
+```
+[Precondiciones]
+[Descripción]
+Pasos
+1. [Instructivo de actividad]
+2. [Instructivo de actividad]
+...
+[Msg Error]
+
+[N]. [Título de imagen]
+[imagen]
+```
+
+Ejemplo real (Bug 107041 — "Al oprimir Regresar presentar filtros previamente escogidos"):
+```
+Repro Steps
+A ingresar filtros, navegar a pantalla de Historial de Custodio y oprimir Regresar, no
+presenta filtros previamente seleccionados.
+Pasos
+1. En pantalla Pedido de Libro, pestaña Solicitudes de Libros
+2. Ingresar Filtros y oprimir Buscar (ver imagen)
+3. En resultados oprimir Acciones Ver Libro Asignado
+4. En libro oprimir Acciones Historial de Custodio
+5. En pantalla Admin Inventario con pestaña Historial de Custodio, oprimir Regresar
+6. En pantalla Pedido de Libro, pestaña Solicitudes de Libros, filtros previos no
+   seleccionados (ver imagen)
+
+2. Imagen Filtros
+6. Imagen Filtros no seleccionados
+```
+
+### Formato 2 — Defecto de mensajes (alternativa, GUÍA-QA-Redacción de desviaciones v1.01 §5.2)
+
+Solo cuando la US ya define la navegación y no hace falta detallar pasos. Estructura:
+```
+[Precondiciones]
+[Descripción]
+[Msg Error]
+
+[Título de imagen]
+[imagen]
+```
+
+Ejemplo real (Bug 105867 — "Al Guardar, presenta mensaje"):
+```
+Repro Steps
+PRECOND 1: Solicitud: PL2024-00-00052
+PRECOND 2: Libro: LB2024-11-00084
+Al oprimir Guardar, presenta msg:
+{
+    "errors": {
+        "errors": [
+            "An error occurred while updating the entries. See the inner exception for details."
+        ]
+    },
+    "message": "An error occurred while updating the entries. See the inner exception for details."
+}
+
+Mensaje en pantalla
+[imagen]
+```
+
+### Mensaje al DEV (formato oficial, PROC-QA-Generales de calidad v1.07 §15.1.4)
 
 ```
-🐛 Bug encontrado en [US ID] — [Título US]
+Saludos
+[Número]: [Título historia]
+[Número]: [Título defecto]
+```
 
-Defecto: [Descripción concisa del problema]
-Pasos para reproducir:
-  1. [Paso 1]
-  2. [Paso 2]
-  3. ...
-Resultado actual: [Lo que pasa]
-Resultado esperado: [Lo que debería pasar]
-Entorno: [URL + browser/versión si aplica]
-
-Bug registrado: #[BUG_ID]
+Ejemplo real:
+```
+Saludos, favor ver bug en US. Cualquier pregunta a las órdenes
+User Story 83894: Manejo de tarjetas: Reclamación
+Bug 84821: En tarjetas Canceladas, no presentando en Acciones la opción Reclamación
 ```
 
 ---

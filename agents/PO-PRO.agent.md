@@ -177,6 +177,13 @@ La mayoría de USs deben mencionar auditoría:
 <li>Cambios de estado quedan en auditoría con usuario, fecha, estado anterior y nuevo. </li>
 ```
 
+### 7.6 Campos de fecha, archivo, tabla y texto — formatos estándar
+
+Cuando un criterio involucre un **Date picker** (fecha simple, fecha futura o rango Desde/Hasta),
+**File upload**, **Table** (listado/paginación) o **Text field** (código postal, comentarios,
+email, numérico, seguro social, teléfono), aplicar los formatos, formatos de máscara y
+mín/máx definidos en `references/criterios-funcionales-ui.md` — no inventar formatos propios.
+
 ---
 
 ## 8. REGLA 5 — VOCABULARIO DEL DOMINIO
@@ -194,7 +201,9 @@ La mayoría de USs deben mencionar auditoría:
 | Estado | Status (usar español) |
 | Gerente de Inventario | "admin", "manager" (ser específico) |
 
-> Consultar `dominio-motorambar.md` para vocabulario completo.
+> Consultar `dominio-motorambar.md` para vocabulario completo. Para nombrar **componentes de UI**
+> en los criterios (botones, campos, navegación, notificaciones, etc.), usar los términos de
+> `references/glosario-componentes-ui.md`.
 
 ---
 
@@ -413,6 +422,9 @@ Después de cada operación:
     SKILL.md                          ← Skill principal de PO-PRO
     references/
       dominio-motorambar.md           ← Contexto del dominio
+      criterios-funcionales-ui.md     ← Formatos por componente (fecha, archivo, tabla, texto)
+      glosario-componentes-ui.md      ← Glosario de componentes UI (ES/EN)
+      definition-of-done.md           ← Checklist DoD (7 ítems) para cierre de US
 ```
 
 ---

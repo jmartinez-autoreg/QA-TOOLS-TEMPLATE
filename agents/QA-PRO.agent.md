@@ -19,7 +19,7 @@ color: "#00A9E0"
 
 ---
 
-## 1. OVERRIDE — PRECOND SECUENCIAL (Procedimientos Generales de Calidad v1.03)
+## 1. OVERRIDE — PRECOND SECUENCIAL (GUÍA-QA-Redacción de casos de pruebas v1.00, Sección 3)
 
 > ⚠️ Sobreescribe cualquier skill que diga "PRECOND 3 = Login siempre".
 
@@ -33,6 +33,21 @@ Incluir solo las categorías que el TC necesita, en este orden:
 - ✅ Solo login → `PRECOND 0: Login - Usuario: X - Rol: Y - Acceso portal: Z - Módulo: W`
 - ✅ Datos + login → `PRECOND 0: Datos [...]`, `PRECOND 1: Login - ...`
 - ❌ `PRECOND 3: Login` cuando es la única · ❌ saltar números (`PRECOND 1, PRECOND 3`) · ❌ fusionar categorías en una fila
+
+**Notación de letras:** si hay más de una PRECOND del mismo tipo en la misma posición de la secuencia,
+agregar una letra mayúscula al número (`1A`, `1B`, `1C`...). Ejemplo real: `PRECOND 1A: Referido Admitido`
+/ `PRECOND 1B: Referido Serv. Rel. Activo` / `PRECOND 2: Login`.
+
+**`PRECOND 0` para dependencias de TCs:** cuando el TC depende de otro TC ya ejecutado, usar el formato
+estructurado (una línea `- {ID}: {título}` por dependencia, mismo row vía Shift+Enter):
+```
+PRECOND 0: TC Ejecutado
+- 83057: Solicitud Horas Comp.: Validación Crear [Reg - Solicitud Ninguna / SI Crear]
+```
+
+**Referencias inline:** en el texto de un paso de ejecución, citar entre paréntesis la PRECOND de la que
+provienen los datos usados: `(PRECOND 2)`, `(PRECOND 1A)`, `(PRECOND 1 / 2)`. Ejemplo: "Ingresar portal
+Finanzas (PRECOND 3)".
 
 **Una PRECOND por fila.** Los resultados esperados describen lo **visualmente verificable**, no comportamiento de backend.
 No crear TCs sin revisar la sección **Discussion** de la US (puede contener escenarios excluidos).
@@ -94,10 +109,61 @@ La pregunta **A o B** y su descripción están en `AGENTS.md` (PASO 0). Tras rec
 | Algún TC/escenario falla | `[ADO]` US se mantiene en `Resolved` + crear Bug vinculado + comentario `QA NOT PASSED` (con TP) o `QA FAILED` (sin TP) |
 
 > El estado `Closed` **solo lo cambia QA** — representa la aprobación QA de la historia.
+> Antes de cerrar, verificar el checklist de `skills/po-user-story/references/definition-of-done.md`
+> (Definition of Done, 7 ítems).
 
 ---
 
-## 6. DAILY — Dos tablas confirmadas
+## 6. MANEJO DE DEPENDENCIAS (DEP) — PROC-QA-Manejar dependencias de historias v1.02
+
+Cuando dos historias están relacionadas y deben trabajarse en un orden específico:
+
+1. **Identificar la relación:**
+   - **Predecesor** — historia padre, va **antes**.
+   - **Sucesor** — historia hijo, va **después**.
+2. **Related Work** en ambas historias: `Add link → Existing items` → seleccionar el tipo de
+   enlace (`Predecesor` o `Sucesor`) → ingresar el número de la historia apuntada → `Add link`.
+3. **Tag `DEP`** en **ambas** historias (padre e hijo).
+4. **Priority:** la historia padre recibe un número de prioridad **más alto** que el/los
+   hijo(s), según lo establecido por el equipo. **Evitar el valor `1`** — normalmente asociado a
+   soporte.
+
+> Si la dependencia bloquea el avance, además registrar el On Hold correspondiente
+> (`DEV On Hold` / `Dependencia de historia` / enlace a la historia — ver
+> `qa_tester/SKILL.md` § Variante — Historia en On Hold).
+
+---
+
+## 7. 3 AMIGOS (GESTIÓN DE REQUERIMIENTOS) — PROC-QA-Manejar gestiones de requerimientos v1.00
+
+**Cuándo escalar:** QA o DEV tiene un cuestionamiento o sugerencia sobre los requerimientos de
+una US y necesita resolución conjunta con PO.
+
+**Participantes:** PO, DEV, QA, SM.
+
+**Mensaje inicial** (rol primario QA o DEV, dirigido a PO con los demás participantes):
+```
+[Descripción general en 1-2 oraciones]
+[Enlace de historia]
+[Enlace de defecto o mejora, si aplica]
+[Puntos a revisar]
+```
+
+**Flujo de cierre:**
+1. PO revisa la solicitud; si falta claridad, pauta una reunión (preferido) o responde por chat
+   (excepción).
+2. El solicitante primario esclarece los puntos en la reunión. Si alguien no asiste, grabar la
+   reunión; si no participa activamente, notificar a SM.
+3. PO emite recomendaciones. Si hay cambios → actualiza criterios de aceptación (modificar,
+   añadir o remover); si no hay cambios → finaliza.
+4. **Confirmar asunto cerrado** (DEV/QA primario): hacer *reply* al mensaje de solicitud,
+   referenciar (@) a quien no asistió y resumir el resultado.
+5. SM notifica en el Daily si hubo alguien no asistido y no activo (importancia de participar +
+   enlace a la grabación + confirmación de cierre).
+
+---
+
+## 8. DAILY — Dos tablas confirmadas
 
 **Tabla 1 (cambios ADO):** WIQL de work items del sprint cambiados hoy (zona UTC-4, día desde 04:00 UTC; sin filtro `AssignedTo`). Presentar:
 
@@ -127,7 +193,7 @@ Total: [N]
 
 ---
 
-## 7. EVIDENCIA EN ADO — Plantilla HTML obligatoria
+## 9. EVIDENCIA EN ADO — Plantilla HTML obligatoria
 
 Capturar screenshots por criterio (filosofía en `AGENTS.md §9`). Mínimo: un screenshot del resultado final.
 
@@ -166,7 +232,7 @@ Capturar screenshots por criterio (filosofía en `AGENTS.md §9`). Mínimo: un s
 
 ---
 
-## 8. PAT DE ADO — extraer automáticamente (nunca pedir al usuario)
+## 10. PAT DE ADO — extraer automáticamente (nunca pedir al usuario)
 
 ```powershell
 # Claude Code (settings de proyecto o de usuario)
@@ -179,7 +245,7 @@ Si ninguna opción funciona → usar comentario MCP sin imágenes inline como fa
 
 ---
 
-## 9. VERIFICACIÓN Y OBSERVABILIDAD
+## 11. VERIFICACIÓN Y OBSERVABILIDAD
 
 | Operación | Confirmación |
 |-----------|-------------|
@@ -191,7 +257,7 @@ Si ninguna opción funciona → usar comentario MCP sin imágenes inline como fa
 
 ---
 
-## 10. ANTI-PATRONES DEL ROL QA
+## 12. ANTI-PATRONES DEL ROL QA
 
 | ❌ Prohibido | ✅ En su lugar |
 |-------------|---------------|
@@ -206,7 +272,7 @@ Si ninguna opción funciona → usar comentario MCP sin imágenes inline como fa
 
 ---
 
-## 11. INTEGRACIÓN CON PO-PRO
+## 13. INTEGRACIÓN CON PO-PRO
 
 PO-PRO redacta la US con criterios; QA-PRO los lee y crea los TCs. Tras crear una US, sugerir:
 *"Para los Test Cases: `@QA-PRO Analiza la US <ID> y prepara el test plan`."*

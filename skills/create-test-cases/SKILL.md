@@ -90,6 +90,32 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 4. Clic en el botón 'Crear Pedido'|Se presenta el formulario de creación con los campos Nombre, Cantidad y Fecha habilitados
 ```
 
+### 3.1 Notación de letras, `PRECOND 0` "TC Ejecutado" y referencias inline
+
+(Fuente: GUÍA-QA-Redacción de casos de pruebas v1.00, §3.3)
+
+**Notación de letras:** cuando hay más de una PRECOND del mismo tipo en la misma posición de la
+secuencia, agregar una letra mayúscula al número (`1A`, `1B`, `1C`...). Ejemplo real (TC 82981):
+```
+PRECOND 1A: Referido Admitido
+PRECOND 1B: Referido Serv. Rel. Activo
+PRECOND 2: Login - ...
+```
+
+**`PRECOND 0` para dependencias de TCs (formato "TC Ejecutado"):** cuando el TC depende de otro TC
+ya ejecutado, usar este formato — una línea `- {ID}: {título del TC}` por dependencia, dentro del
+mismo row vía Shift+Enter (ejemplo real, TC 83070):
+```
+PRECOND 0: TC Ejecutado
+- 83057: Solicitud Horas Comp.: Validación Crear [Reg - Solicitud Ninguna / SI Crear]
+```
+
+**Referencias inline:** dentro del texto de un paso de ejecución, citar entre paréntesis la PRECOND
+de la que provienen los datos usados en ese paso: `(PRECOND 2)`, `(PRECOND 1A)`, `(PRECOND 1 / 2)`.
+Ejemplos reales:
+- "Ingresar portal Finanzas (PRECOND 3)"
+- "En búsqueda ingresar filtros (PRECOND 1A) y oprimir Buscar"
+
 ---
 
 ## 4. Reglas de calidad — OBLIGATORIO cumplir todas
@@ -112,6 +138,39 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 - ❌ Crear TCs separados para escenarios que ocurren en la misma pantalla/popup y comparten el mismo flujo de navegación
 - ❌ Resultados vagos como "funciona correctamente" o "se actualiza la página"
 - ❌ Usar comillas dobles `"` dentro del texto de pasos (causa problemas de escape XML/JSON) — preferir comillas simples o describir sin comillas
+
+### Niveles de detalle de las acciones (Tabla 5, GUÍA-QA-Redacción de casos de pruebas v1.00 §4.3)
+
+| Nivel | Acciones detalladas | Resultados detallados | Pasos | Ejemplo |
+|---|---|---|---|---|
+| **Resumido** | No | No | 1 | "Ingresar al portal Académico." |
+| **Compuesto** | No | No | 1 (multi-acción) | "Ir al módulo PEI y tarjeta 'Crear/Modificar PEI'. En búsqueda rápida ingresar SIE (PRECOND 1), oprimir Buscar y luego Seleccionar." |
+| **Separado** | Sí | Sí, una por cada acción | 1 acción = 1 paso | Pasos separados: "Ingresar nombre", "Ingresar apellido paterno"... cada uno con su propio resultado |
+
+> Elegir el nivel según cuánto detalle pida el requerimiento/criterio de aceptación. Un mismo TC
+> puede combinar pasos Resumidos/Compuestos para navegación y pasos Separados para el flujo
+> crítico que el criterio detalla.
+
+### Resultados esperados — 7 aspectos (Tabla 6, GUÍA-QA-Redacción de casos de pruebas v1.00 §5.1)
+
+Al redactar el resultado esperado de un paso, considerar estos aspectos (no todos aplican siempre):
+
+| Aspecto | Qué describe | Ejemplo |
+|---|---|---|
+| Validación de datos | Mensajes de validación por campo | "El campo 'Fecha' muestra el mensaje 'Campo requerido' en rojo" |
+| Mensaje de éxito o error | Texto literal entre comillas | "Se presenta el mensaje 'Pedido creado correctamente'" |
+| Cambios en la interfaz de usuario | Elementos que aparecen/cambian, incluyendo la notación `botón (seleccionado)` para el botón resaltado/con foco en una alerta | "Se presenta alerta con los botones 'Sí' y 'No (seleccionado)'" |
+| Seguridad | Mensajes de error de credenciales/permisos | "Se presenta el mensaje 'Usuario o contraseña incorrectos'" |
+| Estado del sistema | Redirecciones, datos guardados, valores reflejados | "Se redirige a la lista de pedidos y el nuevo pedido aparece en la primera fila" |
+| Interacción con otros sistemas | Envío de correo, sincronización externa | "Se envía un correo de confirmación a la dirección registrada" |
+| Rendimiento | Tiempos de respuesta esperados | "La búsqueda retorna resultados en menos de 2 segundos" |
+
+### Nivel de detalle del resultado (Tabla 7, GUÍA-QA-Redacción de casos de pruebas v1.00 §5.2)
+
+| Nivel | Descripción | Ejemplo |
+|---|---|---|
+| **Resumen** | Sin detalle del mensaje/alerta | "Presenta pantalla de inicio" |
+| **Detallado** | Mensaje de validación + alerta con botón seleccionado, texto literal completo | "Presenta alerta 'Tiene cambios sin guardar. ¿Desea cancelar?' con botones 'Sí' y 'No (seleccionado)'" |
 
 ---
 

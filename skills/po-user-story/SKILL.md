@@ -319,4 +319,7 @@ Formato HTML que va al campo `Microsoft.VSTS.Common.AcceptanceCriteria`. Usa `<u
 
 ## Referencias adicionales
 
-Si necesitas más detalle sobre el dominio de Motorambar, consulta el archivo `references/dominio-motorambar.md` incluido en este skill.
+- Dominio de Motorambar (vocabulario, estados de vehículo, roles): `references/dominio-motorambar.md`.
+- Formatos por componente UI (fecha, archivo, tabla, campos de texto, ortografía/gramática): `references/criterios-funcionales-ui.md`.
+- Glosario de componentes UI (ES/EN) para nombrar elementos en los criterios: `references/glosario-componentes-ui.md`.
+- Checklist de Definition of Done (7 ítems) para el cierre de una US: `references/definition-of-done.md`.

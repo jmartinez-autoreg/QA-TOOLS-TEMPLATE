@@ -60,6 +60,40 @@ US 10801 - Discussion - UN comentario:
 
 ---
 
+## ESTADOS DE EJECUCIÓN DE TCs (Tabla 9, PROC-QA-Generales de calidad v1.07 §14)
+
+Ciclo de vida oficial de un Test Case durante su ejecución en ADO Test Plans:
+
+| Estado | Descripción | Cuándo se usa |
+|---|---|---|
+| Active | Ejecución no comenzada | Al crear el caso de pruebas |
+| In Progress | Ejecución en progreso | Al comenzar la ejecución |
+| Blocked | No puede continuarse | Imprevisto/impedimento; vuelve a `In Progress` al resolverse |
+| Paused | Se retoma luego | QA debe atender algo de mayor prioridad; vuelve a `In Progress` al regresar |
+| Not Applicable | No vigente | TC ya completado (Ready) pero la corrida se descarta por cambios de requerimientos o no aplica al sprint |
+| Failed | No cumple un resultado esperado | QA registra desviación y notifica a DEV; se re-ejecuta tras la corrección |
+| Passed | Cumple todos los resultados esperados | QA registra éxito |
+
+> Este skill genera el comentario simplificado (`QA PASSED` / `QA NOT PASSED`) que corresponde a
+> los estados terminales **Passed** / **Failed**. Los estados intermedios (`Active`, `In
+> Progress`, `Blocked`, `Paused`, `Not Applicable`) se reflejan en la corrida manual del Test Plan
+> que el usuario ejecuta en el paso "ACCIÓN REQUERIDA" (PASO 3.4).
+
+### Sub-procedimiento al marcar un TC como `Failed` (PROC-QA-Generales de calidad v1.07 §15.1.1)
+
+1. En el paso (STEP) que falla, agregar un comentario con el título del defecto a registrar.
+2. Marcar el **paso** como `Failed (x)`.
+3. Adjuntar evidencia (imagen requerida; documento o video opcional).
+4. `Save` y `Create bug` — usar los formatos de `qa_tester/SKILL.md` § Registrar Bug / Defecto
+   (Tipo de desviación + Formato 1/2 + mensaje a DEV).
+5. Marcar el **caso de pruebas** como `Failed`.
+
+> El ciclo de estados de **historias** (US) es independiente — Tabla 3: `New` / `Active` /
+> `Resolved` / `Closed` / `On Hold` (ver `agents/QA-PRO.agent.md` § Documentación de US
+> Post-Ejecución). `Closed` ocurre cuando el Test Plan/prueba se ejecutó y dio `Passed`.
+
+---
+
 ## INPUT DEL USUARIO
 
 ```
@@ -234,7 +268,8 @@ for (const tc of testCases) {
   }
   
   tc.screenshots = screenshots;
-  tc.status = "PASSED";  // o "FAILED" si algo falló
+  tc.status = "PASSED";  // o "FAILED" — si FAILED, seguir el sub-procedimiento de
+                          // "ESTADOS DE EJECUCIÓN DE TCs" antes de continuar
   
   // ⚠️ VALIDACIÓN: ¿Capturamos suficientes screenshots?
   // Contar solo STEPs con Expected Result (excluir PRECONDs)
