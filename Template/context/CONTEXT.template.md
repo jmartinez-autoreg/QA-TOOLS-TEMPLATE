@@ -8,15 +8,16 @@
 
 ## Configuración del Agente
 
-> Usado por el skill `activity-logger` (fecha/hora local + carpetas de bitácora) y por la regla de
-> idioma de interacción (AGENTS.md §8.9). Se completa una vez con `project-onboarding`, o se
-> pregunta en la primera interacción si falta.
+> Usado por el skill `activity-logger` (fecha/hora local + carpetas de bitácora), por la regla de
+> idioma de interacción (AGENTS.md §8.9) y por el comando "actualiza el template" (AGENTS.md §6.1).
+> Se completa una vez con `project-onboarding`, o se pregunta cuando se necesita por primera vez.
 
 | Campo | Valor |
 |-------|-------|
 | Idioma de interacción | `[Ej: Español]` |
 | Zona horaria | `[Ej: America/Caracas (UTC-4)]` |
 | Sprint actual | `[Ej: Sprint 24]` |
+| Ruta local de QA-TOOLS-TEMPLATE | `[Ej: C:\Users\Usuario\Documents\IA\QA-TOOLS-TEMPLATE]` |
 
 > Actualiza "Sprint actual" al iniciar cada sprint nuevo — define el nombre de carpeta de la bitácora.
 

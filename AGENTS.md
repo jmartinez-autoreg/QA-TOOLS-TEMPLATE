@@ -130,29 +130,73 @@ llamada MCP falla por algo prevenible con una mejor regla.
 1. NOTIFICAR:
    ┌──────────────────────────────────────────────
    │ ⚠️  AUTO-APRENDIZAJE DETECTADO
+   │  Categoría  : [TEMPLATE | PROYECTO] (ver clasificación abajo)
    │  Problema   : [qué salió mal]
    │  Causa raíz : [regla faltante o incorrecta]
    │  Fix         : [qué texto cambiaría y en qué archivo]
    └──────────────────────────────────────────────
 
-2. PROPONER el archivo único donde vive esa regla:
-   - Regla global / routing / prohibición  → AGENTS.md
-   - Regla de rol (QA o PO)                → .claude/agents/QA-PRO.agent.md  o  .claude/agents/PO-PRO.agent.md
-   - Mecánica de una tarea                → .claude/skills/[SKILL]/SKILL.md
-   - Nombre de tool / entrada de plataforma → CLAUDE.md  o  .github/copilot-instructions.md
+2. CLASIFICAR (TEMPLATE vs PROYECTO) y PROPONER el archivo único donde vive esa regla:
 
-3. PREGUNTAR: "¿Aplico el cambio y lo subo a GitHub? (S/N)"
+   TEMPLATE — define CÓMO se comporta el agente o qué ESTRUCTURA tienen sus archivos; aplica a
+   CUALQUIER proyecto que use este template. Vive en el repo QA-TOOLS-TEMPLATE:
+   - Regla global / routing / prohibición           → AGENTS.md
+   - Regla de rol (QA o PO)                         → .claude/agents/QA-PRO.agent.md  o  .claude/agents/PO-PRO.agent.md
+   - Mecánica de una tarea                          → .claude/skills/[SKILL]/SKILL.md
+   - Nombre de tool / entrada de plataforma         → CLAUDE.md  o  .github/copilot-instructions.md
+   - Nueva sección/campo de context/*.md (estructura, no valor) → Template/context/*.template.md
+
+   PROYECTO — es un DATO/VALOR real de este proyecto (URL, credencial, terminología, flujo de
+   pantalla, convención de equipo); NUNCA se sube a QA-TOOLS-TEMPLATE:
+   - Dominio, portales, roles, terminología, flujos reales → context/CONTEXT.md o context/UI-UX.md (este proyecto)
+   - Convenciones de bitácora/horas propias de este equipo → .workspace/
+
+3. PREGUNTAR: "¿Aplico el cambio [y lo subo a GitHub]? (S/N)"
 
 4. Si confirma:
-   a) Editar el ÚNICO archivo que corresponde (no hay copias que sincronizar).
-      Si tocaste un subagente, replicar el cambio en su gemelo .github/agents/ ↔ .claude/agents/.
-   b) git add -A && git commit -m "fix(agent): [descripción corta]" && git push origin main
-   c) Confirmar: "✅ Fix aplicado y subido a GitHub."
+   - PROYECTO → editar el archivo de este proyecto, luego:
+     git add -A && git commit -m "fix(context): [descripción corta]" && git push origin main
+     Confirmar: "✅ Fix de proyecto aplicado y subido."
+   - TEMPLATE:
+     a) Editar el archivo LOCAL correspondiente (toma efecto ya en este proyecto).
+        Si tocaste un subagente, replicar el cambio en su gemelo .github/agents/ ↔ .claude/agents/.
+     b) Si esta sesión está dentro del repo QA-TOOLS-TEMPLATE:
+        git add -A && git commit -m "fix(agent): [descripción corta]" && git push origin main
+        Confirmar: "✅ Fix aplicado y subido a GitHub."
+     c) Si esta sesión está en OTRO proyecto:
+        Confirmar: "✅ Fix de TEMPLATE aplicado localmente. Decime 'actualiza el template' para
+        llevarlo a QA-TOOLS-TEMPLATE (§6.1)."
 ```
 
 > Gracias al modelo de fuente única, una regla vive en **un solo lugar**: no hay versiones Claude/Copilot que
 > mantener en sync. La única excepción son los subagentes, que se espejan `.claude/agents/` ↔ `.github/agents/`.
 > **Un error no reportado = fallo crítico del agente.**
+
+### 6.1 Comando "actualiza el template"
+
+Cuando el usuario diga "actualiza el template" / "actualizar template" / equivalente:
+
+1. **Si esta sesión ya está dentro del repo QA-TOOLS-TEMPLATE** → los fixes TEMPLATE de esta sesión
+   ya se commitearon/pushearon ahí directamente (paso 4b de REGLA 1). Confirmar que no hay nada
+   pendiente y terminar.
+
+2. **Si esta sesión está en otro proyecto:**
+   - Repasar los fixes clasificados como TEMPLATE y aplicados localmente durante **esta misma
+     sesión** (REGLA 1, paso 4c). Si no hubo ninguno → avisar "No detecto fixes de tipo TEMPLATE
+     pendientes en esta sesión" y terminar.
+   - Leer `context/CONTEXT.md` § "Configuración del Agente" → "Ruta local de QA-TOOLS-TEMPLATE".
+     Si está vacío o con placeholder → **preguntar** la ruta absoluta al repo en disco y guardarla
+     en ese campo.
+   - Para cada fix TEMPLATE pendiente: aplicar el mismo cambio dentro de esa ruta (espejando
+     AGENTS.md → Template/AGENTS.md cuando corresponda).
+   - Mostrar el resumen de cambios a portar y preguntar: "¿Confirmo el commit y push a
+     QA-TOOLS-TEMPLATE (main)? (S/N)"
+   - Si confirma: `git add -A && git commit -m "..." && git push origin main` **dentro de esa
+     ruta** (nunca en el repo del proyecto actual). Confirmar: "✅ Template actualizado en
+     QA-TOOLS-TEMPLATE (<hash>)."
+
+⛔ Nunca portar `context/`, `.workspace/` ni datos de dominio del proyecto actual hacia
+QA-TOOLS-TEMPLATE — solo archivos clasificados como TEMPLATE.
 
 ---
 
@@ -238,6 +282,7 @@ Así, cambiar de plataforma no toca ninguna regla — solo la tabla de mapeo.
 | Dar una llamada MCP por hecha | Ejecutar y confirmar con resultado real |
 | Dejar archivos temporales en la raíz | Mandarlos a `.workspace/` |
 | Duplicar una regla en varios archivos | Escribirla **una vez** en su archivo dueño (este, subagente o skill) |
+| Subir un fix de PROYECTO a QA-TOOLS-TEMPLATE, o uno de TEMPLATE solo al repo del proyecto sin avisar | Clasificar TEMPLATE vs PROYECTO en REGLA 1 (§6) antes de aplicar/subir |
 | Completar una actividad sin anexarla a la bitácora | Append silencioso vía `activity-logger` (AGENTS.md §8.10) |
 | Publicar/actualizar un comentario de ADO citando rutas del repo o sin confirmación | Justificar en términos de la app/UI + mostrar texto y esperar ✅ (AGENTS.md §8.11) |
 | Detectar un error y no reportarlo | Activar REGLA 1 |
