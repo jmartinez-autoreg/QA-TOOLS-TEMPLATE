@@ -128,6 +128,9 @@ Cuando dos historias están relacionadas y deben trabajarse en un orden específ
    hijo(s), según lo establecido por el equipo. **Evitar el valor `1`** — normalmente asociado a
    soporte.
 
+> Para historias **sin** relación `DEP`, ver la escala general de Priority (1-4) en
+> `agents/PO-PRO.agent.md` §12.2.
+
 > Si la dependencia bloquea el avance, además registrar el On Hold correspondiente
 > (`DEV On Hold` / `Dependencia de historia` / enlace a la historia — ver
 > `qa_tester/SKILL.md` § Variante — Historia en On Hold).

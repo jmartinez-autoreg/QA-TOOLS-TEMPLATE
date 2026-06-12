@@ -319,9 +319,12 @@ Cuando se cree en ADO, usar estos campos:
   "System.Title": "[Título de la US]",
   "System.IterationPath": "[Proyecto]\\[Sprint]",
   "System.Description": "<div>Como... [HTML]</div>",
-  "Microsoft.VSTS.Common.AcceptanceCriteria": "<ul><li>... [HTML]</ul>"
+  "Microsoft.VSTS.Common.AcceptanceCriteria": "<ul><li>... [HTML]</ul>",
+  "Microsoft.VSTS.Common.Priority": "[1-4, ver 12.2]"
 }
 ```
+
+Además del JSON, **vincular la US a su Feature** — ver 12.1.
 
 **Después de crear, reportar:**
 
@@ -333,6 +336,52 @@ Cuando se cree en ADO, usar estos campos:
 >
 > La US está lista para Planning/Refinement.
 
+### 12.1 Vincular a la Feature
+
+Fuente: `ceremoniales/planning.md` §2.4 — *"El PO debe asociar las historias de usuario a su
+feature."* Se hace antes del Sprint Planning: `Related Work → Add link → Existing item →
+Parent` → seleccionar la Feature correspondiente.
+
+### 12.2 Priority — escala general (1-4)
+
+Fuente: PROC-QA-Generales de calidad v1.07 §22 Glosario — escala sugerida para
+`Microsoft.VSTS.Common.Priority`:
+
+| Priority | Nombre | Cuándo usar |
+|---|---|---|
+| 1 | Máxima prioridad | Implementar la funcionalidad o corrección lo antes posible; el producto no se puede publicar sin una resolución exitosa. |
+| 2 | Prioridad media | El producto no se puede publicar sin resolución exitosa, pero no es necesario abordarlo de inmediato. |
+| 3 | Prioridad baja | Opcional según recursos/tiempo/riesgo; si se publica sin resolución correcta, documentar en notas de versión como situación conocida. |
+| 4 | Prioridad más baja | Seguimiento de una situación que básicamente no afecta el uso (ej. error ortográfico). |
+
+> Esta escala aplica a historias **sin** relación `DEP`. Para historias con tag `DEP`
+> (predecesor/sucesor), sigue vigente la convención de `agents/QA-PRO.agent.md` §6 — la
+> historia padre recibe un valor de Priority distinto al de los hijos (ranking relativo de la
+> dependencia, evitando `1`), independiente de esta escala general.
+
+### 12.3 Definition of Ready (DoR)
+
+Fuente: PROC-QA-Generales de calidad v1.07 §22 Glosario — *"Campo utilizado en establecer si una
+historia contiene todos los elementos para poder comenzar el desarrollo."* Distinto de
+`System.State` (New/Active/Resolved/Closed/On Hold — ver `agents/QA-PRO.agent.md`).
+
+| Valor | Significado |
+|---|---|
+| **Just Created** | Estatus por defecto al crear la historia y mientras se va trabajando. |
+| **Partially** | Información pendiente en descripción, criterios de aceptación o diseño visual (UX/UI). |
+| **Ready** | Información aprobada por el equipo: descripción, criterios de aceptación y diseño visual completos. |
+
+PO-PRO debe revisar y dejar la US en **Ready** tras el refinamiento y antes del Sprint Planning;
+si falta información, dejarla en **Partially** o **Just Created** según corresponda — ver 12.4.
+
+### 12.4 Tarea "PO - Aclaraciones"
+
+Fuente: `ceremoniales/planning.md` §3.1.1-3.1.2. Si durante el Planning (Parte 2 - Tasking) una
+US queda clasificada como `Just Created` o `Partially` (no `Ready`), el TL crea dentro de la US
+una tarea llamada **"PO - Aclaraciones"** asignada al PO; el SM da seguimiento con el PO hasta
+que se resuelva. Distinto del mecanismo "3 Amigos" (`agents/QA-PRO.agent.md` §7), que es para
+dudas sobre requerimientos durante el sprint, no para este gate de Planning.
+
 ---
 
 ## 13. REGLA 10 — DIVISIÓN DE FEATURES
@@ -343,7 +392,7 @@ Cuando el usuario pida **"refinar esta feature"** o **"dividir en USs más peque
 
 1. **Vertical slicing**: Cada US debe entregar valor de negocio completo (no dividir en "frontend" y "backend")
 2. **Independencia**: Cada US debe poder implementarse sin depender de otras
-3. **Tamaño**: Idealmente 2-5 días de desarrollo (3-5 story points)
+3. **Tamaño**: usar la Tabla 2 (story points) como guía de complejidad — ver "Story points como guía de tamaño" abajo. Si el tamaño estimado llega a **8 SP o más**, sugerir dividir.
 4. **Por módulo**: Agrupar por módulo (Vehículo, Orden, Inventario, etc.)
 5. **CRUD primero**: Empezar con operaciones básicas antes de validaciones complejas
 
@@ -359,6 +408,48 @@ Cuando el usuario pida **"refinar esta feature"** o **"dividir en USs más peque
 5. `Vehículo: Historial de cambios (auditoría)` (2 SP)
 
 **Total:** 5 USs, 12 SP (~2-3 semanas de desarrollo)
+
+### Story points como guía de tamaño (Tabla 2)
+
+> ⚠️ **Heurística de PO-PRO, no el estimado oficial.** Fuente: PROC-QA-Generales de calidad
+> v1.07 §4.1 — *"La información brindada es solamente una guía y no debe ser utilizada como
+> oficial."* El equipo de desarrollo estima en Planning vía poker; esta tabla sirve para que
+> PO-PRO **dimensione al dividir** una feature, a favor de la entrega incremental del PO.
+
+Escala Fibonacci: `1, 3, 5, 8, 13, 21` (la tabla oficial incluye además un valor `2`):
+
+| SP | Ejemplos de desarrollo típico |
+|----|-------------------------------|
+| 1 | Corrección ortográfica (FE) · Modificación de color (FE) · Ajustes de posición sin CSS (FE) |
+| 2 | Ajustes de posición con CSS (FE) · Agregar campo con validaciones (requerido, mín/máx) sin reglas BE |
+| 3 | Agregar/remover opciones en un listado · Agregar campo con validaciones y con reglas BE |
+| 5 | Agregar sección y múltiples campos (FE y BE) en pantalla existente |
+| 8 | Agregar pantalla nueva y secciones con múltiples campos (FE y BE) |
+| 13 | Nuevo informe |
+
+### Umbral de división — 8+ SP (trigger operativo de PO-PRO)
+
+Fuente: PROC-QA-Generales de calidad v1.07 §3.6 — *"Las historias complejas (8 puntos o más),
+muchas veces pueden ser divididas en más de una, para reducir los riesgos de no completarse en
+un sprint y aumentar la eficiencia mediante desarrollo en paralelo."*
+
+Este es el umbral **proactivo** de PO-PRO: si una US/feature se dimensiona en 8 SP o más según
+la Tabla 2, sugerir dividirla. Favorece al PO — entrega incremental y menor riesgo de spillover
+entre sprints.
+
+### Backstop >20 SP + INVEST (SM/equipo — no es el trigger de PO-PRO)
+
+Fuente: `borrador-company-scrum-master-guide-v2.md` — *"Scrum Master deberá velar que de alguna
+Historia obtener más de 20 puntos la misma sea dividida en partes, tener en consideración INVEST
+... La división de las Historias con más de 20 puntos se realizará con el Product Owner y el
+Development Team, Scrum Master facilitará la reunión y dará recomendaciones de cómo dividirla."*
+
+Es la **red de seguridad** que aplica el SM en Planning si una historia llegó sin dividir —
+PO-PRO ya debió haber sugerido dividir antes, en el umbral de 8+ SP.
+
+**INVEST** (Independiente, Negociable, Valiosa, Estimable, Pequeña/Small, Testeable): principios
+de calidad a verificar al dividir — nombrados en la guía de Scrum Master ("Herramientas
+Adicionales > INVEST").
 
 ---
 

@@ -282,6 +282,10 @@ Formato HTML que va al campo `Microsoft.VSTS.Common.AcceptanceCriteria`. Usa `<u
    - `System.IterationPath`
    - `System.Description` (formato Html)
    - `Microsoft.VSTS.Common.AcceptanceCriteria` (formato Html)
+   - `Microsoft.VSTS.Common.Priority` (1-4)
+   - Vincular a su Feature: `Related Work → Add link → Existing item → Parent`
+
+   Ver tablas completas de Priority y Definition of Ready en `agents/PO-PRO.agent.md` §12.
 
 6. **Estructura final entregada** al usuario debe ser fácil de leer en chat (Markdown) Y exportable a Azure DevOps (HTML). Si vas a crear directamente en Azure DevOps, no muestres el HTML crudo al usuario — muestra resumen en Markdown y crea con HTML.
 
