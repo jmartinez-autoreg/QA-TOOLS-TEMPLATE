@@ -8,11 +8,13 @@
 
 ## Configuración del Agente
 
-> Usado por el skill `activity-logger` para calcular la fecha/hora local y nombrar las carpetas
-> de la bitácora de actividad (`.workspace/bitacora/`). Se completa una vez con `project-onboarding`.
+> Usado por el skill `activity-logger` (fecha/hora local + carpetas de bitácora) y por la regla de
+> idioma de interacción (AGENTS.md §8.9). Se completa una vez con `project-onboarding`, o se
+> pregunta en la primera interacción si falta.
 
 | Campo | Valor |
 |-------|-------|
+| Idioma de interacción | `[Ej: Español]` |
 | Zona horaria | `[Ej: America/Caracas (UTC-4)]` |
 | Sprint actual | `[Ej: Sprint 24]` |
 

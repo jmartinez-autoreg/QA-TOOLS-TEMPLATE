@@ -37,5 +37,18 @@ las reglas **globales**, en `AGENTS.md`. Si hay ambigüedad PO vs QA, preguntar 
 | registrar/consultar time logs | MCP de Zoho Projects configurado |
 | PAT de ADO | extraer de `%APPDATA%\Code\User\mcp.json` (o `.vscode/mcp.json`) — **nunca** pedirlo al usuario |
 
+---
+
+## Ejecución no-bloqueante (anti-bloqueo)
+
+Copilot Chat no tiene un equivalente al despacho en background con notificación automática de
+Claude Code para subagentes custom (`.github/agents/`). Cuando AGENTS.md §3.1 proponga despacho en
+paralelo, ofrecer en su lugar:
+- Abrir una segunda sesión/pestaña de Copilot Chat y despachar ahí (`@QA-PRO ...` / `@PO-PRO ...`) —
+  cada sesión corre independiente, sin bloquear la otra.
+- O encolar las tareas y avisar el orden de ejecución ("primero termino X, luego Y").
+
+---
+
 > Cambiar de plataforma solo toca esta tabla — ninguna regla de `AGENTS.md` ni de los subagentes.
 > **No escribas reglas de comportamiento aquí.** Si una regla no está en `AGENTS.md`, en un subagente o en un skill, no existe.

@@ -52,6 +52,34 @@ Si hay ambigüedad entre PO y QA, preguntar: *"¿Actúo como PO (redactar US) o 
 
 > Los subagentes son la **fuente única** de las reglas de su rol. El cerebro no repite esas reglas.
 
+### 3.1 Despacho no-bloqueante (anti-bloqueo)
+
+Por defecto, despachar un subagente **bloquea** la conversación hasta que termina — mientras tanto
+no se puede atender otra solicitud.
+
+Si el usuario tiene **2+ tareas independientes** en la misma sesión (mismo o distinto rol — ej.
+"mientras preparas la US 9521, crea también el TC de la US 9500"), o pide explícitamente avanzar
+en paralelo:
+
+1. **Proponer despacho en paralelo** (REGLA 2, no asumir):
+   > "Puedo lanzar [QA-PRO/PO-PRO] para [tarea 2] en paralelo mientras trabajo en [tarea 1] — te
+   > aviso con los resultados de cada uno apenas terminen. ¿Procedo así?"
+
+2. **Si confirma y la plataforma soporta background** (ver `CLAUDE.md` / `copilot-instructions.md`
+   para el mecanismo real):
+   - Despachar cada tarea como un subagente independiente en background.
+   - Cada subagente aplica sus propias reglas de rol (PRECOND, story points, evidencia, bitácora
+     §8.10, etc.) de forma independiente.
+   - Al completarse cada uno, **notificar** con el resumen de resultados (IDs/URLs — §8.9) sin
+     interrumpir las demás tareas en curso.
+
+3. **Si la plataforma no soporta background:** ofrecer abrir una segunda sesión/pestaña y
+   despachar ahí (`@QA-PRO ...` / `@PO-PRO ...`), o encolar y avisar el orden ("primero termino
+   [tarea 1], luego empiezo [tarea 2]").
+
+> Un mismo subagente (ej. `QA-PRO`) puede lanzarse **varias veces en paralelo** para tareas
+> independientes (ej. TCs de 2 USs distintas).
+
 ---
 
 ## 4. PASO 0 — Identificar el tipo de solicitud
@@ -134,6 +162,8 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
 - Múltiples criterios en la misma pantalla → proponer un solo TC agrupado.
 - US con ≤ 2 SP → sugerir exploratoria sin TP formal (Escenario B).
 - Screenshots pedidos en cada paso → recordar que solo se captura donde el criterio lo requiere.
+- Tareas independientes (QA + PO, o 2 tareas QA) en la misma sesión → proponer despacho en
+  paralelo (§3.1, anti-bloqueo).
 
 ---
 
@@ -150,7 +180,11 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
 6. **Detección automática del trabajo del día.** Al registrar horas o generar Daily, detectar las tareas QA cerradas hoy vía WIQL + historial de revisiones (zona horaria UTC-4). **Nunca** preguntar "¿qué hiciste hoy?". Extraer horas de `Microsoft.VSTS.Scheduling.CompletedWork`; solo preguntar si = 0 o vacío.
 7. **No ejecutar TCs sobre US que no esté `Resolved`** sin advertir y recibir confirmación.
 8. **Confirmar antes de registrar en Zoho** — mostrar tabla y esperar ✅.
-9. **Responder en el idioma del usuario.** Al cerrar una fase, dar resumen con los IDs creados/modificados.
+9. **Idioma de interacción.** Usar el idioma definido en `context/CONTEXT.md` § "Configuración del
+   Agente" → "Idioma de interacción". Si el campo está vacío o con placeholder, **antes de responder
+   la primera interacción de la sesión**, preguntar (en formato bilingüe: *"¿En qué idioma prefieres
+   que interactuemos? / In which language would you like to interact?"*) y guardar la respuesta en
+   ese campo. Al cerrar una fase, dar resumen con los IDs creados/modificados.
 10. **Bitácora de actividad automática.** Al completar cualquier actividad con valor para Zoho (QA o PO —
     ver tablas de `zoho_timelog`), anexar una entrada en la bitácora del día (skill `activity-logger`).
     Append silencioso: sin preguntar, sin interrumpir el flujo. Zona horaria y sprint se leen de
