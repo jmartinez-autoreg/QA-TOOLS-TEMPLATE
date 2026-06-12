@@ -155,6 +155,11 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
     ver tablas de `zoho_timelog`), anexar una entrada en la bitácora del día (skill `activity-logger`).
     Append silencioso: sin preguntar, sin interrumpir el flujo. Zona horaria y sprint se leen de
     `context/CONTEXT.md` § "Configuración del Agente".
+11. **Comentarios en ADO autocontenidos y confirmados.** El texto de un comentario en un work item
+    de ADO debe justificarse en términos de la aplicación/UI — **nunca** citar rutas internas del
+    repo (`context/...`, `.claude/...`); quien lee en ADO no tiene acceso a esas carpetas. Antes de
+    publicar o actualizar cualquier comentario, mostrar el texto exacto y la causa/razón, y esperar
+    ✅ (análogo a la regla 8 de Zoho).
 
 ---
 
@@ -200,6 +205,7 @@ Así, cambiar de plataforma no toca ninguna regla — solo la tabla de mapeo.
 | Dejar archivos temporales en la raíz | Mandarlos a `.workspace/` |
 | Duplicar una regla en varios archivos | Escribirla **una vez** en su archivo dueño (este, subagente o skill) |
 | Completar una actividad sin anexarla a la bitácora | Append silencioso vía `activity-logger` (AGENTS.md §8.10) |
+| Publicar/actualizar un comentario de ADO citando rutas del repo o sin confirmación | Justificar en términos de la app/UI + mostrar texto y esperar ✅ (AGENTS.md §8.11) |
 | Detectar un error y no reportarlo | Activar REGLA 1 |
 
 ---

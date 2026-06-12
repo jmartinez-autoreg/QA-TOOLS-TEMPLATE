@@ -51,7 +51,12 @@ Al recibir una US el agente DEBE seguir este orden:
 3. **Identificar** portal, módulo, pantalla para el nombre del TC
 4. **Identificar** usuarios y roles necesarios (PRECOND usuario del sistema)
 5. **Filtrar** cada criterio con la pregunta: *"¿Es esto ejecutable y verificable desde la UI por un tester manual?"*
-   - Si **todos** responden NO → US es **Cobertura DEV**: NO crear TC ni TP formal. Documentar en comentario de la US: `Cobertura DEV — verificación a cargo del equipo de desarrollo.`
+   - Si **todos** responden NO → US es **Cobertura DEV**: NO crear TC ni TP formal. Documentar en
+     comentario de la US: `Cobertura DEV — verificación a cargo del equipo de desarrollo.` + una
+     justificación breve **en términos de la aplicación/UI** (ej. "la aplicación no cuenta con
+     pantalla/acción para que el usuario final notifique al Administrador"). ⛔ Nunca citar rutas
+     internas del repo (`context/UI-UX.md`, `.claude/...`) — quien lee el comentario en ADO no
+     tiene acceso a esa carpeta.
    - Si **algunos** responden NO → excluir esos criterios del TC, incluir solo pasos UI verificables
    - **Señales de Cobertura DEV:** "query en BD", "estructura de tablas", "acceso a base de datos", "código/programación", "appsettings", "worker/Service Bus", "infraestructura", "tabla de settings", "script SQL"
 6. **Preguntar** al usuario si falta información antes de crear cualquier TC
