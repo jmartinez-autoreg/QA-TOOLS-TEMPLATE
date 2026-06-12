@@ -39,6 +39,14 @@ El conocimiento del proyecto vive en `context/` dentro de este repo:
 Si `context/CONTEXT.md` sigue con placeholders o `context/UI-UX.md` no tiene pantallas documentadas →
 ofrecer ejecutar el skill `project-onboarding` **antes** de tareas que dependan de ese contexto.
 
+**Organización/Proyecto ADO por defecto.** Toda llamada MCP a Azure DevOps que requiera
+`organization`/`project` usa por defecto `context/CONTEXT.md` § "Organización ADO" → Organización
+/ Proyecto. ⛔ **Nunca preguntar** cuál organización/proyecto de ADO usar si ese campo ya está
+completo (no placeholder) — el repo/proyecto activo ya determina cuál es. Si el usuario menciona
+explícitamente otra organización o proyecto en su mensaje (ej. "en Autoreg…"), usar esa en su
+lugar para esa solicitud, sin modificar `context/CONTEXT.md`. Si el campo está vacío o con
+placeholder → preguntar una vez y ofrecer `project-onboarding`.
+
 ---
 
 ## 3. SUBAGENTES — a quién despachar
