@@ -172,8 +172,14 @@ llamada MCP falla por algo prevenible con una mejor regla.
         git add -A && git commit -m "fix(agent): [descripción corta]" && git push origin main
         Confirmar: "✅ Fix aplicado y subido a GitHub."
      c) Si esta sesión está en OTRO proyecto:
-        Confirmar: "✅ Fix de TEMPLATE aplicado localmente. Decime 'actualiza el template' para
-        llevarlo a QA-TOOLS-TEMPLATE (§6.1)."
+        - Leer `context/CONTEXT.md` § "Configuración del Agente" → "Ruta local de
+          QA-TOOLS-TEMPLATE". Si está vacío o con placeholder → preguntar la ruta absoluta al
+          repo en disco y guardarla en ese campo.
+        - Aplicar el MISMO cambio dentro de esa ruta (espejando AGENTS.md → Template/AGENTS.md,
+          CLAUDE.md ↔ Template/CLAUDE.md, copilot-instructions.md ↔ Template/copilot-instructions.md
+          cuando corresponda) y, **dentro de esa ruta**:
+          git add -A && git commit -m "fix(agent): [descripción corta]" && git push origin main
+        - Confirmar: "✅ Fix aplicado en este proyecto y subido a QA-TOOLS-TEMPLATE (<hash>)."
 ```
 
 > Gracias al modelo de fuente única, una regla vive en **un solo lugar**: no hay versiones Claude/Copilot que
@@ -182,29 +188,51 @@ llamada MCP falla por algo prevenible con una mejor regla.
 
 ### 6.1 Comando "actualiza el template"
 
-Cuando el usuario diga "actualiza el template" / "actualizar template" / equivalente:
+Cuando el usuario diga "actualiza el template" / "actualizar template" / "trae los cambios del
+template" / equivalente — trae hacia ESTE proyecto los archivos TEMPLATE más recientes de
+QA-TOOLS-TEMPLATE. Es la operación **inversa** al paso 4c de REGLA 1 (que sube un fix puntual hacia
+allá): aquí se **bajan** (pull) los cambios acumulados en QA-TOOLS-TEMPLATE hacia este proyecto.
 
-1. **Si esta sesión ya está dentro del repo QA-TOOLS-TEMPLATE** → los fixes TEMPLATE de esta sesión
-   ya se commitearon/pushearon ahí directamente (paso 4b de REGLA 1). Confirmar que no hay nada
-   pendiente y terminar.
+1. **Si esta sesión ya está dentro del repo QA-TOOLS-TEMPLATE** → no hay un "template" externo del
+   cual traer cambios. Avisar y terminar.
 
 2. **Si esta sesión está en otro proyecto:**
-   - Repasar los fixes clasificados como TEMPLATE y aplicados localmente durante **esta misma
-     sesión** (REGLA 1, paso 4c). Si no hubo ninguno → avisar "No detecto fixes de tipo TEMPLATE
-     pendientes en esta sesión" y terminar.
    - Leer `context/CONTEXT.md` § "Configuración del Agente" → "Ruta local de QA-TOOLS-TEMPLATE".
      Si está vacío o con placeholder → **preguntar** la ruta absoluta al repo en disco y guardarla
      en ese campo.
-   - Para cada fix TEMPLATE pendiente: aplicar el mismo cambio dentro de esa ruta (espejando
-     AGENTS.md → Template/AGENTS.md cuando corresponda).
-   - Mostrar el resumen de cambios a portar y preguntar: "¿Confirmo el commit y push a
-     QA-TOOLS-TEMPLATE (main)? (S/N)"
-   - Si confirma: `git add -A && git commit -m "..." && git push origin main` **dentro de esa
-     ruta** (nunca en el repo del proyecto actual). Confirmar: "✅ Template actualizado en
-     QA-TOOLS-TEMPLATE (<hash>)."
+   - Comparar, archivo por archivo, este proyecto contra QA-TOOLS-TEMPLATE: `AGENTS.md` ↔
+     `<ruta>/AGENTS.md`, `.claude/skills/*/SKILL.md` ↔ `<ruta>/skills/*/SKILL.md`,
+     `.claude/agents/*.agent.md` / `.github/agents/*.agent.md` ↔ `<ruta>/agents/*.agent.md`,
+     `CLAUDE.md` ↔ `<ruta>/Template/CLAUDE.md`, `.github/copilot-instructions.md` ↔
+     `<ruta>/Template/copilot-instructions.md`, y la **estructura** (secciones/campos nuevos, no
+     valores) de `context/CONTEXT.md` / `context/UI-UX.md` ↔ `<ruta>/Template/context/*.template.md`.
+     Descartar los archivos idénticos.
+   - Mostrar los archivos con diferencias como **lista numerada** (ej. "1. AGENTS.md — nuevo §6.1",
+     "2. skills/qa_tester/SKILL.md — nueva sección PRECOND") y preguntar cuáles traer (acepta
+     números, "todos" o "ninguno").
+   - **Para cada archivo seleccionado**, diff línea a línea entre la versión local y la entrante:
+     - Si lo local es subconjunto de lo entrante (la versión nueva no pierde nada de lo local, p.
+       ej. solo agrega secciones/campos) → aplicar directo, sin preguntar de nuevo.
+     - Si lo local tiene contenido que la versión entrante **no** tiene (un fix/ajuste propio de
+       este proyecto que se perdería al reemplazar) → mostrar ese contenido local en conflicto,
+       **preguntar** "¿Reemplazo con la versión del template? (S/N)" y dar una **recomendación**:
+       - Si ese contenido local parece ya cubierto/superado (en otra forma) por la versión entrante
+         → recomendar **reemplazar**.
+       - Si ese contenido local es una personalización propia sin relación con el cambio entrante →
+         recomendar **mantener lo local** (no reemplazar ese archivo; fusionar manualmente si
+         hiciera falta).
+   - Aplicar los archivos confirmados, espejando `.claude/agents/*.agent.md` ↔
+     `.github/agents/*.agent.md` cuando corresponda. En `context/CONTEXT.md` / `UI-UX.md` solo
+     **agregar** secciones/campos nuevos (placeholders) — nunca tocar valores ya completados.
+   - Mostrar el resumen final (archivos actualizados / omitidos) y preguntar: "¿Confirmo el commit
+     en este proyecto? (S/N)"
+   - Si confirma: `git add -A && git commit -m "chore: sincronizar con QA-TOOLS-TEMPLATE"` **en el
+     repo de este proyecto** (sin push salvo que el usuario lo pida). Confirmar: "✅ Proyecto
+     actualizado con los cambios seleccionados del template."
 
-⛔ Nunca portar `context/`, `.workspace/` ni datos de dominio del proyecto actual hacia
-QA-TOOLS-TEMPLATE — solo archivos clasificados como TEMPLATE.
+⛔ Nunca traer valores de `context/CONTEXT.md` / `context/UI-UX.md` de QA-TOOLS-TEMPLATE hacia este
+proyecto — solo estructura nueva desde `Template/context/*.template.md`, sin pisar datos de
+dominio ya documentados.
 
 ---
 
