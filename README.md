@@ -289,6 +289,7 @@ Los skills son las "capacidades" del agente. Se instalan automáticamente en `.c
 | `playwright-e2e` | Automatizar TCs con código Playwright (Escenario A) | "automatizar", "crear tests E2E" |
 | `qa-execution-reporter` | Ejecutar TCs y subir evidencia a ADO (Escenario B) | "ejecutar TC", "correr Suite" |
 | `tc-reader` | Leer y analizar TCs desde ADO | "leer TCs", "mostrar pasos del TC" |
+| `activity-logger` | Bitácora automática de lo que hace el agente (QA/PO), lista para alimentar el registro en Zoho | "qué hice hoy", "mi bitácora", "pendientes del sprint" |
 | `debugger` | Diagnosticar y corregir tests fallidos | "el test falla", "debug este test" |
 | `create-test-cases` | Crear TCs básicos en ADO | "crear test case rápido en ADO" |
 | `find-skills` | Descubrir capacidades disponibles | "¿qué puedes hacer?", "¿tienes skill para X?" |

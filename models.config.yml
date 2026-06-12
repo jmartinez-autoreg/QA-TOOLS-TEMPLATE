@@ -68,6 +68,7 @@ tiers:
     skills:
       - "zoho_timelog"
       - "create-test-cases"
+      - "activity-logger"
 
 # ============================================================
 # Referencia de modelos disponibles (Anthropic — Junio 2026):

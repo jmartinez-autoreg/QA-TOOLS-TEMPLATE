@@ -6,6 +6,20 @@
 
 ---
 
+## Configuración del Agente
+
+> Usado por el skill `activity-logger` para calcular la fecha/hora local y nombrar las carpetas
+> de la bitácora de actividad (`.workspace/bitacora/`). Se completa una vez con `project-onboarding`.
+
+| Campo | Valor |
+|-------|-------|
+| Zona horaria | `[Ej: America/Caracas (UTC-4)]` |
+| Sprint actual | `[Ej: Sprint 24]` |
+
+> Actualiza "Sprint actual" al iniciar cada sprint nuevo — define el nombre de carpeta de la bitácora.
+
+---
+
 ## Portales y URLs
 
 | Portal | URL | Descripción |

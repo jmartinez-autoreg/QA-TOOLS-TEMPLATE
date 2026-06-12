@@ -78,6 +78,7 @@ Si el usuario menciona: test plans, TCs, ejecutar, automatizar, crear tests, cor
 | "leer TCs de ADO" (sin ejecutar) | `tc-reader` | QA-PRO |
 | "redactar US", "crear historia", "criterios de aceptación" | `po-user-story` | PO-PRO |
 | "configurar contexto", "nuevo proyecto", "actualizar UI-UX", "agregar pantallas/screenshots", "onboarding" | `project-onboarding` | — |
+| "qué hice hoy", "mi bitácora", "pendientes del sprint" | `activity-logger` | QA-PRO o PO-PRO (el activo) |
 
 Rutas de skills: `.claude/skills/<skill>/SKILL.md`.
 
@@ -150,6 +151,10 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
 7. **No ejecutar TCs sobre US que no esté `Resolved`** sin advertir y recibir confirmación.
 8. **Confirmar antes de registrar en Zoho** — mostrar tabla y esperar ✅.
 9. **Responder en el idioma del usuario.** Al cerrar una fase, dar resumen con los IDs creados/modificados.
+10. **Bitácora de actividad automática.** Al completar cualquier actividad con valor para Zoho (QA o PO —
+    ver tablas de `zoho_timelog`), anexar una entrada en la bitácora del día (skill `activity-logger`).
+    Append silencioso: sin preguntar, sin interrumpir el flujo. Zona horaria y sprint se leen de
+    `context/CONTEXT.md` § "Configuración del Agente".
 
 ---
 
@@ -194,6 +199,7 @@ Así, cambiar de plataforma no toca ninguna regla — solo la tabla de mapeo.
 | Dar una llamada MCP por hecha | Ejecutar y confirmar con resultado real |
 | Dejar archivos temporales en la raíz | Mandarlos a `.workspace/` |
 | Duplicar una regla en varios archivos | Escribirla **una vez** en su archivo dueño (este, subagente o skill) |
+| Completar una actividad sin anexarla a la bitácora | Append silencioso vía `activity-logger` (AGENTS.md §8.10) |
 | Detectar un error y no reportarlo | Activar REGLA 1 |
 
 ---
@@ -210,5 +216,6 @@ Así, cambiar de plataforma no toca ninguna regla — solo la tabla de mapeo.
 3. Leer el SKILL.md completo y seguir sus fases en orden.
 4. Aplicar las reglas del subagente (PRECOND, story points, evidencia, etc.).
 5. Reportar resultado final con IDs/URLs.
-6. Si algo salió mal → REGLA 1 (auto-aprendizaje).
+6. Anexar la actividad a la bitácora del día (`activity-logger`, silencioso — AGENTS.md §8.10).
+7. Si algo salió mal → REGLA 1 (auto-aprendizaje).
 ```
