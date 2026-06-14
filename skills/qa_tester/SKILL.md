@@ -254,6 +254,11 @@ Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realm
 #### ⛔ Solo dividir en TCs separados cuando se cumple al menos UNA de estas condiciones:
 
 1. **Pantalla diferente** — el escenario ocurre en una pantalla o módulo distinto al flujo principal
+   > ⚠️ **Excepción:** si el escenario de la 2ª pantalla es **consecuencia directa / uso** de lo
+   > configurado o creado en la 1ª (ej. configurar un mapeo → usar esa misma configuración para
+   > importar), dentro del mismo flujo de prueba, sin requerir otro rol/sesión ni destruir el
+   > estado previo → **no aplica este criterio**. Agrupar en **1 solo TC** con pasos secuenciales
+   > que cubran ambas pantallas en el orden del flujo.
 2. **Rol de usuario diferente** — el escenario requiere un usuario con permisos distintos que no pueden coexistir en la misma sesión
 3. **El escenario negaría el estado** — ejecutar el escenario negativo destruiría los datos necesarios para el escenario positivo (y no se puede restablecer en el mismo TC)
 
@@ -269,6 +274,7 @@ Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realm
 | Validar estado inicial de un elemento (ej. botón deshabilitado) | Paso de verificación al inicio del TC del flujo feliz |
 | Escenarios que comparten las mismas precondiciones | Un solo TC — las precondiciones son las mismas |
 | "Hay muchos criterios" sin que ninguno cambie de pantalla o rol | Agrupar todos, optimizar los pasos para cubrir solo lo necesario |
+| Configurar algo en una pantalla y usar esa configuración como entrada del siguiente paso en otra pantalla del mismo flujo (ej. configurar mapeo de columnas → importar archivo usando ese mapeo) | Un solo TC — pasos secuenciales: configurar en la 1ª pantalla, luego usar/verificar el resultado en la 2ª |
 
 #### Ejemplo correcto — 4 criterios en la misma pantalla → 1 TC
 
