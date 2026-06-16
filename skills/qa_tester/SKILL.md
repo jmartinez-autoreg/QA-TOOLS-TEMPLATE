@@ -291,14 +291,77 @@ NO crear 4 TCs separados.
 
 ---
 
+## Evaluación de Sprint — ¿Cuáles USs califican para TP?
+
+> Cuando el usuario pida evaluar un conjunto de USs del sprint para decidir cuáles necesitan Test Plan,
+> aplicar **TRES FILTROS en este orden exacto** para cada US antes de evaluar SP.
+
+### FILTRO 1 — ¿Ya tiene Test Plan en ADO?
+
+```
+→ Consultar: testplan_list_test_plans (project, planName o buscar por US ID en el título/descripción)
+→ Si ya existe un TP vinculado a la US → clasificar como "Ya tiene TP" — NO proponer crear uno nuevo
+→ No saltar este filtro aunque el usuario no lo mencione — verificar siempre
+```
+
+### FILTRO 2 — ¿Es Cobertura DEV? (criterios no testeables por QA)
+
+```
+→ Leer descripción + criterios de aceptación de la US
+→ Si TODOS los criterios son técnicos/infraestructura → clasificar como "Cobertura DEV — no aplica TP"
+→ Una US puede tener SP > 2 y aún ser 100% Cobertura DEV
+
+Señales de Cobertura DEV a nivel de US:
+  - "infraestructura Azure", "acceso a repositorio", "script SQL", "worker", "Service Bus"
+  - "appsettings", "tabla de BD", "base de datos", "acceso a servidor"
+  - "documento inventario", "generar documento técnico"
+  - US sin UI, sin criterios de pantalla, solo configuración de backend/cloud
+  - Tareas administrativas (dar acceso a un usuario, permisos de sistema)
+
+⚠️ Si ALGUNOS criterios son Cobertura DEV y OTROS son UI verificables:
+   → La US SÍ califica para TP, pero excluir los criterios Cobertura DEV al redactar los TCs
+```
+
+### FILTRO 3 — ¿Tiene criterios de aceptación verificables?
+
+```
+→ Si la US no tiene descripción, no tiene criterios de aceptación o están vacíos
+→ Clasificar como "Requiere refinamiento PO" — no aplica TP hasta tener criterios definidos
+→ Aunque tenga SP altos, sin criterios no hay base para crear TCs
+```
+
+### Las 5 categorías de resultado (SIEMPRE usar las 5)
+
+| Categoría | Condición | Acción |
+|-----------|-----------|--------|
+| ✅ **Califica para TP formal** | > 2 SP + criterios UI verificables + sin TP existente | Crear TP → TCs → ejecutar |
+| ⚡ **Exploratoria directa** | ≤ 2 SP + criterios UI verificables + sin TP existente | Escenario B sin TP formal |
+| 📋 **Ya tiene TP** | Existe Test Plan en ADO vinculado a esta US | No crear nuevo TP — ejecutar el existente |
+| 🔧 **Cobertura DEV** | Todos los criterios son técnicos/no verificables por QA desde UI | No crear TC ni TP. Documentar: "Cobertura DEV" en la US |
+| ❌ **No califica** | Sin descripción/criterios, tarea admin, o requiere refinamiento PO | Bloquear hasta tener criterios. Escalar a PO si tiene SP altos (≥ 3) |
+
+### Formato de tabla de resultado para análisis de sprint
+
+```
+| US ID | Título | SP | Categoría | Razón |
+|-------|--------|----|-----------|-------|
+| XXXX  | ...    | N  | ✅ / ⚡ / 📋 / 🔧 / ❌ | [razón concreta — qué filtro activó la decisión] |
+```
+
+> ⚠️ **NUNCA omitir las categorías 📋 y 🔧** — son los matices que más se pasan por alto.
+> Una US clasificada como ✅ o ⚡ sin haber pasado los 3 filtros = análisis incompleto.
+
+---
+
 ## Regla de Story Points
 
-> Antes de crear un Test Plan formal, evaluar los Story Points de la US.
+> Se aplica **solo después** de pasar los 3 filtros de evaluación anteriores.
 
 | Story Points | Decisión |
 |---|---|
 | **≤ 2 SP** | **No crear Test Plan formal en ADO.** Ejecutar pruebas exploratorias directas (Escenario B) sin TCs formales. Documentar resultado en la US con formato §16.2 (`QA PASSED` / `QA FAILED`). |
 | **> 2 SP** | Flujo completo: crear TP → TCs → ejecutar → documentar con §16.1 (`QA PASSED` / `QA NOT PASSED`). |
+| **Sin SP** | Tratar como caso especial: evaluar si los criterios son verificables por QA. Si sí → proponer al usuario si crear TP o exploratoria. Si no → Cobertura DEV o Requiere refinamiento PO. |
 
 > ⚠️ Si la US tiene ≤ 2 SP y el usuario pide crear un TP formal → advertir y proponer exploratoria directa. No bloquear si el usuario insiste, pero **siempre avisar**.
 
