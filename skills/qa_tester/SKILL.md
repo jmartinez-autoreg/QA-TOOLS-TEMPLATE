@@ -78,6 +78,33 @@ Al recibir una US el agente DEBE seguir este orden:
 
 ## Fases de Trabajo
 
+### Fase 0 — Verificar estado del Test Plan (obligatorio antes de cualquier acción)
+
+```
+1. Obtener la US con expand=relations:
+   mcp_ado_wit_get_work_item (id: US_ID, expand: "relations")
+
+2. Verificar campo Custom.TestPlanCompleted:
+   → Si = True → la US ya tiene TP registrado
+
+3. Verificar si existe relación tipo "Microsoft.VSTS.Common.TestedBy-Forward":
+   → Si existe → hay al menos un TC vinculado a esta US
+
+4. Decisión:
+   → Si Custom.TestPlanCompleted = True  O  existe relación TestedBy-Forward:
+     Informar: "⚠️ Esta US ya tiene un Test Plan asociado (TC: [work item ID]).
+                No se creará un nuevo TP para evitar duplicados."
+     STOP — no continuar a Fase 1 sin confirmación explícita del usuario.
+
+   → Si ninguna de las dos condiciones existe:
+     Proceder a Fase 1 normalmente.
+```
+
+> ⚠️ Esta fase es obligatoria — nunca saltar aunque el usuario diga "crea el TP".
+> Si el usuario insiste después del aviso → confirmar explícitamente antes de proceder.
+
+---
+
 ### Fase 1 — Preparar Test Plan
 
 ```
