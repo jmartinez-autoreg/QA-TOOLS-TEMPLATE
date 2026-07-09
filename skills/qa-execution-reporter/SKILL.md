@@ -584,7 +584,7 @@ Después de ejecutar todo, confirmar al usuario:
 
 ⚠️  ACCIÓN REQUERIDA:
 1. Ejecuta manualmente el TC desde el Test Plan:
-   https://dev.azure.com/AutoregPR/Motorambar/_testPlans/execute?planId=10939&suiteId=10940
+   https://dev.azure.com/{ORG}/{PROJECT}/_testPlans/execute?planId=10939&suiteId=10940
 2. Copia el link del Test Run generado
 3. Actualiza el comentario en la US 10801 reemplazando el placeholder
 ```

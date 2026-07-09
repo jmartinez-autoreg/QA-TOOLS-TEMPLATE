@@ -1,6 +1,6 @@
 ---
 name: tc-reader
-description: 'Lee Test Cases de Azure DevOps y produce un plan estructurado en .agent-state/plan-output.json. Usar cuando el orquestador necesita obtener los pasos, datos de prueba y metadatos de uno o varios TCs antes de iniciar automatización o ejecución directa. NO toca el browser, NO escribe código TypeScript, NO ejecuta tests. Solo consume ADO.'
+description: 'Lee Test Cases de Azure DevOps y produce un plan estructurado en .agent-state/plan-<TC_ID>.json. Usar cuando el orquestador necesita obtener los pasos, datos de prueba y metadatos de uno o varios TCs antes de iniciar automatización o ejecución directa. NO toca el browser, NO escribe código TypeScript, NO ejecuta tests. Solo consume ADO.'
 argument-hint: 'TC IDs + org ADO + proyecto. Ej: "TC 9400, 9401 — org: AutoregPR, proyecto: AUTOREG"'
 ---
 
@@ -8,7 +8,7 @@ argument-hint: 'TC IDs + org ADO + proyecto. Ej: "TC 9400, 9401 — org: Autoreg
 
 **Rol:** QA Analyst  
 **Input:** TC IDs (individuales o batch) + org ADO + proyecto  
-**Output:** `.agent-state/plan-output.json` por cada TC, `.agent-state/session.json` con estado del pipeline  
+**Output:** `.agent-state/plan-<TC_ID>.json` por cada TC, `.agent-state/session.json` con estado del pipeline  
 **Herramientas permitidas:** MCP Azure DevOps únicamente  
 **PROHIBIDO:** Abrir browser, escribir código TypeScript, ejecutar terminal, crear specs/fixtures
 

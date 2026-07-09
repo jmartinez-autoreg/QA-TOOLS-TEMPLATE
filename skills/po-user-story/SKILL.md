@@ -1,11 +1,16 @@
 ---
 name: po-user-story
-description: Redactar User Stories profesionales para Motorambar (sistema de distribución de vehículos). Usa este skill SIEMPRE que el usuario pida redactar, crear, escribir o estructurar User Stories, USs, historias de usuario, criterios de aceptación, requerimientos funcionales, items de backlog o tareas para Azure DevOps — incluso si no menciona explícitamente "user story". También usa este skill cuando convierta requerimientos en USs, refine el backlog, prepare sprints, divida features en USs más pequeñas, redacte criterios de aceptación, o cuando pida "esto sería una US" o "agregar al sprint". El skill produce USs listas para pegar en Azure DevOps con HTML en descripción y criterios de aceptación.
+description: Redactar User Stories profesionales para el dominio del proyecto activo (context/CONTEXT.md; los ejemplos usan un dominio de referencia de distribución de vehículos). Usa este skill SIEMPRE que el usuario pida redactar, crear, escribir o estructurar User Stories, USs, historias de usuario, criterios de aceptación, requerimientos funcionales, items de backlog o tareas para Azure DevOps — incluso si no menciona explícitamente "user story". También usa este skill cuando convierta requerimientos en USs, refine el backlog, prepare sprints, divida features en USs más pequeñas, redacte criterios de aceptación, o cuando pida "esto sería una US" o "agregar al sprint". El skill produce USs listas para pegar en Azure DevOps con HTML en descripción y criterios de aceptación.
 ---
 
-# Redacción de User Stories para Motorambar
+# Redacción de User Stories profesionales
 
-Este skill está diseñado para producir User Stories **profesionales y específicas** para el sistema de distribución de vehículos Motorambar. Las USs van a Azure DevOps y se renderizan con HTML, así que tanto descripción como criterios de aceptación se redactan con tags HTML.
+Este skill produce User Stories **profesionales y específicas** para el dominio del proyecto
+activo. El dominio real (módulos, roles, terminología, estados) se lee de `context/CONTEXT.md` —
+⚠️ los ejemplos de este skill usan un **dominio de referencia** (distribución de vehículos:
+VIN, inventario, órdenes) que ilustra el nivel de especificidad esperado, **no** vocabulario a
+copiar literalmente en otros proyectos. Las USs van a Azure DevOps y se renderizan con HTML, así
+que tanto descripción como criterios de aceptación se redactan con tags HTML.
 
 ## Por qué este skill existe
 
@@ -25,7 +30,7 @@ Las User Stories genéricas ("Como usuario quiero ver una pantalla") no aportan 
 
 **Variante** entre corchetes para distinguir flujos del mismo tema (Crear, Editar, Ver, Solo lectura, Cambiar estado, etc.).
 
-Ejemplos para Motorambar:
+Ejemplos (dominio de referencia — distribución de vehículos):
 - `Vehículo: Registro de nuevo vehículo en inventario`
 - `Vehículo: Cambio de estado [Available → Reserved]`
 - `Orden: Asignación de vehículo a cliente`
@@ -297,7 +302,7 @@ Patrones adicionales obligatorios dentro de los escenarios Gherkin:
 
 4. **Genera siempre**: título, descripción HTML, criterios HTML.
 
-5. **Si vas a crear en Azure DevOps**, usa el proyecto `Motorambar` (o el activo) y `System.IterationPath` correspondiente. Los campos clave son:
+5. **Si vas a crear en Azure DevOps**, usa la Organización/Proyecto de `context/CONTEXT.md` § "Organización ADO" (AGENTS.md §2) y el `System.IterationPath` correspondiente. Los campos clave son:
    - `System.Title`
    - `System.IterationPath`
    - `System.Description` (formato Html)
@@ -305,7 +310,7 @@ Patrones adicionales obligatorios dentro de los escenarios Gherkin:
    - `Microsoft.VSTS.Common.Priority` (1-4)
    - Vincular a su Feature: `Related Work → Add link → Existing item → Parent`
 
-   Ver tablas completas de Priority y Definition of Ready en `agents/PO-PRO.agent.md` §12.
+   Ver tablas completas de Priority y Definition of Ready en `.claude/agents/PO-PRO.agent.md` §9.
 
 6. **Estructura final entregada** al usuario debe ser fácil de leer en chat (Markdown) Y exportable a Azure DevOps (HTML). Si vas a crear directamente en Azure DevOps, no muestres el HTML crudo al usuario — muestra resumen en Markdown y crea con HTML.
 

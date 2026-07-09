@@ -5,6 +5,12 @@
 Cada agente es un archivo SKILL.md en `.claude/skills/<name>/SKILL.md`.
 Los agentes se comunican via JSON en `.agent-state/` — no hay estado volátil en memoria del LLM.
 
+> ⚖️ **Arbitraje de flujos (Escenario A):** el flujo **por defecto** del routing (QA-PRO §3) es
+> `playwright-e2e` (monolítico, interactivo, escribe en la raíz `tests/` + `fixtures/`).
+> El **pipeline** de este documento (tc-reader → discovery → code-builder → executor → debugger,
+> escribe en `TPlans/`) es la variante multi-agente para **lotes de TCs** — se usa solo cuando el
+> usuario lo pide explícitamente o el orquestador propone batch y el usuario confirma.
+
 ---
 
 ## Agentes disponibles
@@ -16,7 +22,7 @@ Los agentes se comunican via JSON en `.agent-state/` — no hay estado volátil 
 | `code-builder` | Auto Dev — genera código | `plan-<TC_ID>.json` + `discovery-<TC_ID>.json` | `TPlans/fixtures/*.ts` + `TPlans/tests/*.spec.ts` |
 | `executor` | QA Executor — corre tests | `session.json` + spec path | `execution-<TC_ID>.json` |
 | `debugger` | Auto Dev — diagnostica | `execution-<TC_ID>.json` | fix aplicado + `session.json` actualizado |
-| `playwright-e2e` | Legacy monolítico | Todo — flujo completo sin ADO | specs completos |
+| `playwright-e2e` | Flujo A por defecto (monolítico — routing en QA-PRO §3) | Todo — flujo completo | specs completos en raíz |
 | `create-test-cases` | QA — crea TCs en ADO | descripción del flujo | TCs creados en ADO |
 | `qa-execution-reporter` | QA — reporta resultados | resultados de ejecución | reporte en ADO |
 

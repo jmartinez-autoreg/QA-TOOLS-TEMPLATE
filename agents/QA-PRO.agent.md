@@ -7,7 +7,7 @@ color: "#00A9E0"
 # T2: QA Planner       → claude-sonnet-4-6        (qa_tester, tc-reader, discovery)
 # T3: Code Builder     → claude-haiku-4-5-20251001 (code-builder, debugger)
 # T4: Browser Executor → claude-haiku-4-5-20251001 (qa-execution-reporter, executor)
-# TOps: Operations     → claude-haiku-4-5-20251001 (zoho_timelog)
+# TOps: Operations     → claude-haiku-4-5-20251001 (zoho_timelog, create-test-cases, activity-logger)
 ---
 
 # QA-PRO — Subagente QA (capa de autoridad del rol)
@@ -156,7 +156,7 @@ La pregunta **A o B** y su descripción están en `AGENTS.md` (PASO 0). Tras rec
 | Algún TC/escenario falla | `[ADO]` US se mantiene en `Resolved` + crear Bug vinculado + publicar evidencia vía `qa-execution-reporter` |
 
 > El estado `Closed` **solo lo cambia QA** — representa la aprobación QA de la historia.
-> Antes de cerrar, verificar el checklist de `skills/po-user-story/references/definition-of-done.md`
+> Antes de cerrar, verificar el checklist de `.claude/skills/po-user-story/references/definition-of-done.md`
 > (Definition of Done, 7 ítems).
 
 > ⛔ **BLOQUEANTE — ANTES de publicar CUALQUIER comentario en ADO:**
@@ -182,7 +182,7 @@ Cuando dos historias están relacionadas y deben trabajarse en un orden específ
    soporte.
 
 > Para historias **sin** relación `DEP`, ver la escala general de Priority (1-4) en
-> `agents/PO-PRO.agent.md` §12.2.
+> `.claude/agents/PO-PRO.agent.md` §9.2.
 
 > Si la dependencia bloquea el avance, además registrar el On Hold correspondiente
 > (`DEV On Hold` / `Dependencia de historia` / enlace a la historia — ver
