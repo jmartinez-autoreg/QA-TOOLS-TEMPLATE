@@ -70,15 +70,14 @@ Edit `models.config.yml` — the installer reads it at runtime and prints the ti
 
 ---
 
-## Cerebro y contexto (auto-cargados)
+## Cerebro (auto-cargado)
 
 @AGENTS.md
-@context/CONTEXT.md
-@context/UI-UX.md
 
-Si `context/CONTEXT.md` sigue con placeholders o `context/UI-UX.md` no tiene pantallas documentadas,
-ofrecer ejecutar el skill `project-onboarding` (`.claude/skills/project-onboarding/SKILL.md`) antes de
-redactar TCs o USs que dependan de esa información.
+> ℹ️ **Este repo ES el template** — no tiene `context/` propio, así que aquí no se importan
+> `@context/CONTEXT.md` / `@context/UI-UX.md` (esos imports viven en `Template/CLAUDE.md`, que el
+> instalador copia a cada proyecto). Las reglas que dependen de `context/` (idioma §8.9, org ADO
+> §2, zona horaria/sprint) aplican en los proyectos instalados, no dentro de este repo.
 
 ---
 

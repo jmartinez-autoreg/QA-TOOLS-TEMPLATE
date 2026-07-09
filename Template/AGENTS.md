@@ -62,31 +62,11 @@ Si hay ambigüedad entre PO y QA, preguntar: *"¿Actúo como PO (redactar US) o 
 
 ### 3.1 Despacho no-bloqueante (anti-bloqueo)
 
-Por defecto, despachar un subagente **bloquea** la conversación hasta que termina — mientras tanto
-no se puede atender otra solicitud.
+Si el usuario tiene **2+ tareas independientes** en la misma sesión, proponer (REGLA 2, no asumir):
+> "Puedo lanzar [QA-PRO/PO-PRO] para [tarea 2] en paralelo mientras trabajo en [tarea 1] — te aviso al terminar cada uno. ¿Procedo así?"
 
-Si el usuario tiene **2+ tareas independientes** en la misma sesión (mismo o distinto rol — ej.
-"mientras preparas la US 9521, crea también el TC de la US 9500"), o pide explícitamente avanzar
-en paralelo:
-
-1. **Proponer despacho en paralelo** (REGLA 2, no asumir):
-   > "Puedo lanzar [QA-PRO/PO-PRO] para [tarea 2] en paralelo mientras trabajo en [tarea 1] — te
-   > aviso con los resultados de cada uno apenas terminen. ¿Procedo así?"
-
-2. **Si confirma y la plataforma soporta background** (ver `CLAUDE.md` / `copilot-instructions.md`
-   para el mecanismo real):
-   - Despachar cada tarea como un subagente independiente en background.
-   - Cada subagente aplica sus propias reglas de rol (PRECOND, story points, evidencia, bitácora
-     §8.10, etc.) de forma independiente.
-   - Al completarse cada uno, **notificar** con el resumen de resultados (IDs/URLs — §8.9) sin
-     interrumpir las demás tareas en curso.
-
-3. **Si la plataforma no soporta background:** ofrecer abrir una segunda sesión/pestaña y
-   despachar ahí (`@QA-PRO ...` / `@PO-PRO ...`), o encolar y avisar el orden ("primero termino
-   [tarea 1], luego empiezo [tarea 2]").
-
-> Un mismo subagente (ej. `QA-PRO`) puede lanzarse **varias veces en paralelo** para tareas
-> independientes (ej. TCs de 2 USs distintas).
+Si confirma → despachar cada tarea como subagente en background (mecanismo en `CLAUDE.md`). Un mismo subagente puede lanzarse varias veces en paralelo para tareas independientes.
+Si la plataforma no soporta background → ofrecer segunda sesión o encolar y avisar el orden.
 
 ---
 
@@ -109,7 +89,8 @@ Si el usuario menciona: test plans, TCs, ejecutar, automatizar, crear tests, cor
 
 | Palabras clave | Skill | Subagente |
 |---|---|---|
-| "analizar US", "preparar TP", "crear TC", "redactar caso" | `qa_tester` | QA-PRO |
+| "analizar US", "preparar TP", "crear TC" (desde una US, flujo completo) | `qa_tester` | QA-PRO |
+| "crear TCs sueltos/genéricos" (sin US de origen, solo redacción/carga en ADO) | `create-test-cases` | QA-PRO |
 | "registrar horas", "time log", "zoho", "daily", "reporte del día" | `zoho_timelog` | QA-PRO |
 | "leer TCs de ADO" (sin ejecutar) | `tc-reader` | QA-PRO |
 | "redactar US", "crear historia", "criterios de aceptación" | `po-user-story` | PO-PRO |
@@ -257,7 +238,7 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
 3. **Lectura obligatoria del skill.** No actuar ni generar código sin haber leído completo el `SKILL.md` correspondiente. Seguir sus fases en orden, sin saltarlas.
 4. **Verificación MCP.** Confirmar cada llamada MCP con su resultado real. Nunca dar una llamada por hecha sin ejecutarla. Nunca ejecutar un upload dos veces — verificar en ADO ante la duda.
 5. **Scratch en `.workspace/`.** Todo output exploratorio o temporal (CSVs/JSON de análisis, scripts de un solo uso, reportes ad-hoc, dumps) va a `.workspace/` (gitignored), **nunca** suelto en la raíz del repo. Los artefactos permanentes (`context/`, TCs, skills, agentes) van a su ruta versionada.
-6. **Detección automática del trabajo del día.** Al registrar horas o generar Daily, detectar las tareas QA cerradas hoy vía WIQL + historial de revisiones (zona horaria UTC-4). **Nunca** preguntar "¿qué hiciste hoy?". Extraer horas de `Microsoft.VSTS.Scheduling.CompletedWork`; solo preguntar si = 0 o vacío.
+6. **Detección automática del trabajo del día.** Al registrar horas o generar Daily, detectar las tareas QA cerradas hoy vía WIQL + historial de revisiones (zona horaria de `context/CONTEXT.md` § "Configuración del Agente"). **Nunca** preguntar "¿qué hiciste hoy?". Extraer horas de `Microsoft.VSTS.Scheduling.CompletedWork`; solo preguntar si = 0 o vacío.
 7. **No ejecutar TCs sobre US que no esté `Resolved`** sin advertir y recibir confirmación.
 8. **Confirmar antes de registrar en Zoho** — mostrar tabla y esperar ✅.
 9. **Idioma de interacción.** Usar el idioma definido en `context/CONTEXT.md` § "Configuración del

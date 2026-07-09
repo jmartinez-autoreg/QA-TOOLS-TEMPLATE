@@ -41,6 +41,8 @@ tiers:
       - "qa_tester"
       - "tc-reader"
       - "discovery"
+      - "project-onboarding"
+      - "playwright-e2e"   # flujo A monolítico (discovery + código + debug en un solo skill)
 
   T3:
     name: "Code Builder"
@@ -69,6 +71,8 @@ tiers:
       - "zoho_timelog"
       - "create-test-cases"
       - "activity-logger"
+
+# Sin tier: find-skills (utilidad genérica del ecosistema de skills — no participa del pipeline QA/PO)
 
 # ============================================================
 # Referencia de modelos disponibles (Anthropic — Junio 2026):
