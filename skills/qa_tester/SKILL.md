@@ -443,8 +443,8 @@ Señales de Cobertura DEV a nivel de US:
 
 | Story Points | Decisión |
 |---|---|
-| **≤ 2 SP** | **No crear Test Plan formal en ADO.** Ejecutar pruebas exploratorias directas (Escenario B) sin TCs formales. Documentar resultado en la US con formato §16.2 (`QA PASSED` / `QA FAILED`). |
-| **> 2 SP** | Flujo completo: crear TP → TCs → ejecutar → documentar con §16.1 (`QA PASSED` / `QA NOT PASSED`). |
+| **≤ 2 SP** | **No crear Test Plan formal en ADO.** Ejecutar pruebas exploratorias directas (Escenario B) sin TCs formales. Documentar resultado en la US con el formato sin TP de `qa-execution-reporter` (`QA PASSED` / `QA FAILED`). |
+| **> 2 SP** | Flujo completo: crear TP → TCs → ejecutar → documentar vía `qa-execution-reporter` (`QA PASSED` / `QA NOT PASSED`). |
 | **Sin SP** | Tratar como caso especial: evaluar si los criterios son verificables por QA. Si sí → proponer al usuario si crear TP o exploratoria. Si no → Cobertura DEV o Requiere refinamiento PO. |
 
 > ⚠️ Si la US tiene ≤ 2 SP y el usuario pide crear un TP formal → advertir y proponer exploratoria directa. No bloquear si el usuario insiste, pero **siempre avisar**.
@@ -511,163 +511,15 @@ Ejemplo — datos + login (dos rows separados):
 
 ## Documentar Resultados en la US
 
-> **Regla fundamental:** Cada escenario de prueba se documenta en un **hilo separado** en la sección Discussion de la US. Un escenario = un comentario/hilo.
+> ⛔ **BLOQUEANTE — este skill NO define el formato del comentario de evidencia ni su proceso de upload.**
+> Para publicar CUALQUIER resultado/evidencia en la US, leer COMPLETO
+> `.claude/skills/qa-execution-reporter/SKILL.md` y seguir sus fases en orden: formato del
+> comentario, extracción del PAT, upload de attachments, confirmación con el usuario
+> (AGENTS.md §8.11) y verificación post-publicación. Aplica igual con o sin Test Plan —
+> el skill cubre ambos casos.
 >
-> ⛔ **SCREENSHOTS OBLIGATORIOS:** Antes de publicar cualquier comentario de resultado, capturar screenshot de la pantalla que muestra el resultado del escenario. Sin screenshot = evidencia incompleta. NO publicar el hilo sin haberlo capturado.
-
-### Flujo de documentación por escenario
-
-> ⚠️ **No existe herramienta MCP para subir archivos binarios a ADO.** El upload del screenshot DEBE hacerse con PowerShell. Sin este paso, la imagen no existe en ADO y el `<img>` no renderiza.
-
-```
-1. Ejecutar el escenario y capturar screenshot:
-   mcp_playwright_browser_take_screenshot
-   → filename: "e2e/results/{WI_ID}/escenario-{N}.png"
-   → Verificar que el archivo exista: Get-ChildItem "e2e\results\{WI_ID}\"
-
-2. Extraer PAT del MCP config (PowerShell):
-```
-
-```powershell
-$pat = $null
-foreach ($f in @("$env:APPDATA\Code\User\mcp.json", ".vscode\mcp.json")) {
-  if (Test-Path $f) {
-    $c = Get-Content $f -Raw | ConvertFrom-Json -EA SilentlyContinue
-    $srv = if ($c.servers) { $c.servers } elseif ($c.mcp.servers) { $c.mcp.servers } else { $null }
-    if ($srv) {
-      foreach ($k in ($srv | Get-Member -MemberType NoteProperty).Name) {
-        $v = $srv.$k.env.AZURE_DEVOPS_EXT_PAT
-        if ($v -and $v -notlike '${env:*}') { $pat = $v; break }
-      }
-    }
-    if ($pat) { break }
-  }
-}
-if (-not $pat) { $pat = $env:AZURE_DEVOPS_EXT_PAT }
-$auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
-Write-Host "PAT listo."
-```
-
-```
-3. Subir screenshot como adjunto ADO (PowerShell):
-```
-
-```powershell
-$ORG     = "{ORG}"       # ej: AutoregPR
-$PROJECT = "{PROJECT}"   # ej: Motorambar
-$WI_ID   = "{WI_ID}"
-$N       = "{N}"         # número de escenario
-$fileName = "escenario-$N.png"
-$filePath = "e2e/results/$WI_ID/$fileName"
-
-$bytes = [System.IO.File]::ReadAllBytes((Resolve-Path $filePath))
-$uploadUri = "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/attachments?fileName=$fileName&api-version=7.0"
-$resp = Invoke-RestMethod -Uri $uploadUri -Method Post `
-  -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/octet-stream" } `
-  -Body $bytes
-$attachmentUrl = $resp.url
-Write-Host "URL adjunto: $attachmentUrl"
-```
-
-```
-4. Publicar comentario con imagen inline (PowerShell):
-   → Construir el HTML del comentario según el formato oficial
-   → Pegar la URL del adjunto en el <img src>
-```
-
-```powershell
-$commentHtml = @"
-PRECOND: Login - Usuario: {USUARIO} - Rol: {ROL} - Acceso portal: {PORTAL} - Acceso módulo/tarjeta: {MODULO}
-
-QA PASSED / Sprint Test
-[{NOMBRE_ESCENARIO}]
-
-{URL_TEST_RUN}
-
-<img src="$attachmentUrl" width="720" style="border:1px solid #ccc;" />
-"@
-
-$body = @{ text = $commentHtml } | ConvertTo-Json -Depth 3
-$commentUri = "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/workItems/$WI_ID/comments?api-version=7.0-preview.3"
-Invoke-RestMethod -Uri $commentUri -Method Post `
-  -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/json" } `
-  -Body $body
-Write-Host "Comentario publicado en WI $WI_ID."
-```
-
-> ⚠️ Repetir pasos 1–4 por cada escenario. Cada escenario = su propio PNG + su propio comentario.
-> ⚠️ Si el MCP Browser fue cerrado antes de capturar: indicar `[Evidencia no disponible — browser cerrado]` y publicar el comentario sin `<img>`.
-
-
-### Formato oficial por hilo (Procedimientos Generales de Calidad)
-
-> ⛔ **EL COMENTARIO SOLO CONTIENE LOS CAMPOS DEL FORMATO. NADA MÁS.**
-> - NO agregar descripciones de lo que ocurrió ("El sistema mostró...", "Se presentó la acción...")
-> - NO agregar listas de escenarios dentro del hilo
-> - NO agregar texto de método de ejecución ("Ejecución directa vía MCP Browser")
-> - NO agregar el ID del TC ni el número de escenario en el texto libre
-> - NO agrupar 2 o más escenarios en un mismo hilo — uno por uno, siempre
-
-```html
-PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
-
-QA PASSED / Sprint Test
-[Nombre del escenario]
-
-[URL de la corrida del caso de prueba en ADO Test Plans]
-
-<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
-```
-
-```html
-PRECOND: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
-
-QA NOT PASSED / Sprint Test
-[Nombre del escenario]
-
-Bug [ID]: [descripción corta del defecto]
-
-<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
-```
-
-### Reglas del formato
-
-| Campo | Regla |
-|-------|-------|
-| **PRECOND** | Siempre primera línea del hilo. Formato exacto: `Login - Usuario: X - Rol: X - Acceso portal: X - Acceso módulo/tarjeta: X` |
-| **Resultado** | `QA PASSED` o `QA NOT PASSED` — sin texto adicional en esa línea |
-| **Ambiente** | `Sprint Test` por defecto. Alternativas: `Pre-Prod`, `Prod` |
-| **[Escenario]** | Nombre del escenario entre corchetes en la línea siguiente al resultado |
-| **Enlace** | URL del Test Run en ADO (si PASSED) o `Bug [ID]: descripción` (si NOT PASSED) |
-| **Evidencia** | Screenshot subido como adjunto ADO e incluido como `<img>` inline. **OBLIGATORIO.** |
-| **Un hilo por escenario** | Si hay 4 escenarios → 4 comentarios separados. Nunca "Escenarios 1 y 2" en uno. |
-| **Cero texto libre** | No agregar descripciones, listas, notas de método, IDs de TC ni ningún texto que no sea parte del template |
-
-### Ejemplo — PASSED
-
-```html
-PRECOND: Login - Usuario: admin - Rol: Administrador - Acceso portal: Académico - Acceso módulo/tarjeta: PEI / Solicitud de Asistencia Técnica
-
-QA PASSED / Sprint Test
-[Guardar Administrador]
-
-https://dev.azure.com/.../runs/XXXXX
-
-<img src="https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments/{GUID}?fileName=escenario-1.png" width="720" style="border:1px solid #ccc;" />
-```
-
-### Ejemplo — NOT PASSED
-
-```html
-PRECOND: Login - Usuario: graciagc - Rol: AdminIL - Acceso portal: Académico - Acceso módulo/tarjeta: PEI / Solicitud de Asistencia Técnica
-
-QA NOT PASSED / Sprint Test
-[Guardar AdminIL]
-
-Bug 105867: Al Guardar, presenta mensaje inesperado
-
-<img src="https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit/attachments/{GUID}?fileName=escenario-1.png" width="720" style="border:1px solid #ccc;" />
-```
+> Recordatorio de alcance (no de formato): sin al menos un screenshot del resultado final no hay
+> evidencia publicable (AGENTS.md §9).
 
 ### Variante — Historia en On Hold (PROC-QA-Manejar situaciones bloqueantes v1.00 §2)
 
@@ -709,38 +561,12 @@ DEV Resolved
 Dependencia de historia resuelta.
 ```
 
-### Variante — Ejecutar Pruebas sin Test Plan (16.2)
+### Variante — Ejecutar Pruebas sin Test Plan
 
-Cuando se ejecutan pruebas **sin Test Cases formales** (flujo "Ejecutar Pruebas"):
-- Se usan PRECONDs numeradas secuencialmente desde 0: datos del sistema primero, login al final
-- No hay `[Escenario]` entre corchetes
-- No hay URL de Test Run
-- Resultado exitoso: `QA PASSED / Sprint Test`
-- Resultado con fallo: `QA FAILED / Sprint Test` (⚠️ sin TP formal → `FAILED`, no `NOT PASSED`)
-
-**Plantilla — PASSED:**
-```html
-PRECOND 0: [Condición de datos en el sistema]
-- [Campo]: [Valor]
-PRECOND 1: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
-
-QA PASSED / Sprint Test
-
-<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
-```
-
-**Plantilla — FAILED (sin TP):**
-```html
-PRECOND 0: [Condición de datos en el sistema]
-- [Campo]: [Valor]
-PRECOND 1: Login - Usuario: [usuario] - Rol: [rol] - Acceso portal: [portal] - Acceso módulo/tarjeta: [módulo / pantalla]
-
-QA FAILED / Sprint Test
-
-Bug [ID]: [descripción corta del defecto]
-
-<img src="{URL_ADJUNTO}" width="720" style="border:1px solid #ccc;" />
-```
+Cuando se ejecutan pruebas **sin Test Cases formales** (flujo "Ejecutar Pruebas", ≤ 2 SP):
+- Resultado con fallo → `QA FAILED` (⚠️ sin TP formal es `FAILED`, no `NOT PASSED`).
+- El formato del comentario (PRECONDs incluidas, sin URL de Test Run) vive en
+  `qa-execution-reporter` § "Sin Test Plan" — leer ese skill antes de publicar.
 
 ---
 
@@ -1044,7 +870,7 @@ Total: 6
 □ Evidencias adjuntas (screenshots por paso crítico)
 □ Estado del TC actualizado (Passed / Failed)
 □ Si falló: Bug registrado y vinculado a la US
-□ Comentario de resultado en la US (una de las 4 variantes)
+□ Comentario de resultado en la US (formato y proceso de `qa-execution-reporter`)
 □ Historia cerrada si todos los TCs pasaron
 □ Tabla de tiempo actualizada
 ```

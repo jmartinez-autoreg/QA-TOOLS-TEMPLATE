@@ -249,53 +249,31 @@ Total: [N]
 
 ---
 
-## 9. EVIDENCIA EN ADO — Plantilla HTML obligatoria
+## 9. EVIDENCIA EN ADO
 
 Capturar screenshots por criterio (filosofía en `AGENTS.md §9`). Mínimo: un screenshot del resultado final.
 
-```html
-<h2>📋 {TC_ID} — {TC_TITLE} {OVERALL_ICON}</h2>
-<p><b>Plan:</b> {PLAN_ID} | <b>Suite:</b> {SUITE} | <b>Fecha:</b> {DATE}</p>
-<table border="1" cellpadding="10" cellspacing="0" style="border-collapse:collapse;width:100%;">
-  <thead>
-    <tr style="background:#0078d4;color:white;font-weight:bold;">
-      <th style="width:10%;">Fase</th><th style="width:38%;">Acción</th>
-      <th style="width:38%;">Resultado Esperado</th><th style="width:14%;">Estado</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>STEP 1</b></td><td>{ACTION}</td><td>{EXPECTED}</td>
-      <td style="color:#1a7f37;font-weight:bold;">✅ PASSED</td>
-    </tr>
-    <!-- repetir por cada paso -->
-  </tbody>
-</table>
-<br/><b>📎 Evidencia</b><br/><br/>
-<p><b>STEP 1 — {LABEL}</b></p>
-<a href="{ATTACHMENT_URL}" target="_blank">
-  <img src="{ATTACHMENT_URL}" width="720" style="border:1px solid #ccc;" />
-</a>
-<!-- repetir por cada screenshot -->
-<hr/><small>🤖 QA-PRO — Escenario {A|B} — {DATE}</small>
-```
+> ⛔ **Este archivo NO define ninguna plantilla de comentario.** El formato del comentario, el
+> proceso de upload (PAT, REST, attachments) y las reglas de publicación viven ÚNICAMENTE en
+> `.claude/skills/qa-execution-reporter/SKILL.md` (bloqueante de §5). Cualquier plantilla aquí
+> sería un duplicado destinado a desincronizarse.
 
-- `OVERALL_ICON`: `✅ PASSED` si todos pasan, `❌ FAILED` si alguno falla. Verde `#1a7f37` / rojo `#c0392b`.
-- Imágenes **debajo** de la tabla, cada una con su label. Nunca dentro de las celdas.
-
-**Orden de upload:** (1) subir cada PNG como attachment → recibir URL; (2) construir el HTML con esas URLs;
-(3) publicar el comentario en el Work Item. Nunca ejecutar el upload dos veces (regla global, AGENTS.md §8.4).
+**Orden de upload (resumen conceptual — detalle en el skill):** (1) subir cada PNG como attachment → recibir URL;
+(2) construir el comentario con esas URLs; (3) confirmar el texto con el usuario (AGENTS.md §8.11);
+(4) publicar en la **US** y verificar que aparece. Nunca ejecutar el upload dos veces (regla global, AGENTS.md §8.4).
 
 ---
 
 ## 10. PAT DE ADO — extraer automáticamente (nunca pedir al usuario)
 
 ```powershell
-# Claude Code (settings de proyecto o de usuario)
-$s = Get-Content ".claude\settings.json" -Raw | ConvertFrom-Json
+# Claude Code — probar en orden: .mcp.json (proyecto), settings de proyecto, settings de usuario
+$s = Get-Content ".mcp.json" -Raw | ConvertFrom-Json
 $env:ADO_PAT = $s.mcpServers.'azure-devops-Autoreg'.env.AZURE_DEVOPS_EXT_PAT
-# Fallback usuario: "$env:USERPROFILE\.claude\settings.json"
+# Fallback 1: ".claude\settings.json" → .mcpServers...
+# Fallback 2: "$env:USERPROFILE\.claude\settings.json"
 # Copilot / VS Code: "$env:APPDATA\Code\User\mcp.json" → .servers.ado.env.AZURE_DEVOPS_EXT_PAT
+# (lista completa de rutas en qa-execution-reporter PASO 3.1)
 ```
 Si ninguna opción funciona → usar comentario MCP sin imágenes inline como fallback.
 

@@ -34,9 +34,12 @@ US 10801 - Discussion - UN comentario:
 - ❌ SIN PRECONDs (están en el TC del Test Plan)
 - ❌ SIN tabla de pasos
 - ❌ SIN labels en imágenes ("STEP 1", "CA-02", etc.)
-- ✅ Placeholder `[Link del resultado aquí]` — el usuario debe ejecutar el TC manualmente desde el Test Plan y actualizar con el link real
+- ✅ **Línea de link — REGLA ÚNICA (aplica en todo el skill):**
+  1. Si existe un **Test Run real** en ADO → usar su URL.
+  2. Si el TC se ejecutará **manualmente** desde el Test Plan → placeholder `[Link del resultado aquí]` (el usuario lo actualiza tras la corrida — ver PASO 3.7).
+  3. Si el test corrió por **Playwright CLI sin run en ADO** → `[Test Regresión]`.
 - ✅ **1 screenshot por CADA STEP con Expected Result** (PRECONDs NO necesitan screenshots)
-- ✅ SOLO: Resultado + Placeholder + Imágenes apiladas
+- ✅ SOLO: Resultado + Línea de link + Imágenes apiladas
 
 ### Sin Test Plan (pruebas exploratorias, ≤2 SP):
 
@@ -57,6 +60,7 @@ US 10801 - Discussion - UN comentario:
 - ✅ SÍ PRECONDs (no hay TC formal)
 - ❌ SIN URL de Test Run (no existe)
 - ❌ SIN labels en imágenes
+- ⚠️ Resultado con fallo sin TP → `QA FAILED` (no `QA NOT PASSED`)
 
 ---
 
@@ -77,19 +81,19 @@ Ciclo de vida oficial de un Test Case durante su ejecución en ADO Test Plans:
 > Este skill genera el comentario simplificado (`QA PASSED` / `QA NOT PASSED`) que corresponde a
 > los estados terminales **Passed** / **Failed**. Los estados intermedios (`Active`, `In
 > Progress`, `Blocked`, `Paused`, `Not Applicable`) se reflejan en la corrida manual del Test Plan
-> que el usuario ejecuta en el paso "ACCIÓN REQUERIDA" (PASO 3.4).
+> que el usuario ejecuta en el paso "ACCIÓN REQUERIDA" (PASO 3.7).
 
 ### Sub-procedimiento al marcar un TC como `Failed` (PROC-QA-Generales de calidad v1.07 §15.1.1)
 
 1. En el paso (STEP) que falla, agregar un comentario con el título del defecto a registrar.
 2. Marcar el **paso** como `Failed (x)`.
 3. Adjuntar evidencia (imagen requerida; documento o video opcional).
-4. `Save` y `Create bug` — usar los formatos de `qa_tester/SKILL.md` § Registrar Bug / Defecto
+4. `Save` y `Create bug` — usar los formatos de `.claude/skills/qa_tester/SKILL.md` § Registrar Bug / Defecto
    (Tipo de desviación + Formato 1/2 + mensaje a DEV).
 5. Marcar el **caso de pruebas** como `Failed`.
 
 > El ciclo de estados de **historias** (US) es independiente — Tabla 3: `New` / `Active` /
-> `Resolved` / `Closed` / `On Hold` (ver `agents/QA-PRO.agent.md` § Documentación de US
+> `Resolved` / `Closed` / `On Hold` (ver `.claude/agents/QA-PRO.agent.md` § Documentación de US
 > Post-Ejecución). `Closed` ocurre cuando el Test Plan/prueba se ejecutó y dio `Passed`.
 
 ---
@@ -119,7 +123,7 @@ URL: https://motorambar.autoregpr.com
 Por cada TC ID:
 
 ```
-mcp_ado_work_items_get(id: {TC_ID})
+mcp_ado_wit_get_work_item(id: {TC_ID})
 ```
 
 ### PASO 1.2: Extraer información
@@ -324,6 +328,33 @@ $screenshots = Get-ChildItem "test-results" -Recurse -Filter "*.png" | Sort-Obje
 > ⛔ **NO ofrecer "opciones" cuando el procedimiento está claro.**
 > Si el test corrió y hay PNGs en `test-results/`, subirlos y publicar el comentario.
 
+### PASO 3.0: Leer discusión existente de la US
+
+> ⛔ **ANTES de construir el comentario**, leer los comentarios actuales de la US con
+> `wit_list_work_item_comments` para ver si ya existe un comentario de evidencia QA.
+> El formato del nuevo comentario DEBE ser consistente con el existente.
+>
+> **Formato establecido por el equipo** (fuente: discusión real de las USs):
+> ```
+> QA PASSED ✅   ← o QA NOT PASSED ❌
+>
+> [línea de link — REGLA ÚNICA de "FORMATO DE SALIDA"]
+>
+> ![nombre.png](URL_attachment)
+> ![nombre.png](URL_attachment)
+> ```
+>
+> ⛔ **PROHIBIDO** publicar en la US:
+> - Listas de pasos ejecutados o resultados por step
+> - Información de framework (Playwright v1.x, Chromium, etc.)
+> - Permisos del usuario autenticado
+> - Rutas locales de archivos (`Automated_Testing/screenshots-ado/`)
+> - Scripts para ejecutar (`.\upload-to-ado.ps1`)
+> - Cualquier información técnica que no sea: status + link + imágenes
+>
+> ⛔ **El comentario va en la US, NUNCA en el TC.**
+> Los TCs son los receptores de attachments; la US es donde se publica la evidencia visible.
+
 ### PASO 3.1: Extraer PAT de ADO
 
 > ⛔ **NUNCA pedir el PAT al usuario.**
@@ -336,6 +367,7 @@ $pat = $null
 
 # Todas las ubicaciones conocidas de config MCP por plataforma
 $searchPaths = @(
+  ".mcp.json",                                      # Claude Code (MCP de proyecto — ubicación más común)
   ".claude\settings.json",                          # Claude Code (proyecto)
   "$env:USERPROFILE\.claude\settings.json",         # Claude Code (usuario global)
   ".vscode\mcp.json",                               # VS Code / Copilot (workspace)
@@ -386,87 +418,58 @@ $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
 
 **✅ OUTPUT:** `$auth` contiene el token de autenticación.
 
-### PASO 3.2: Subir screenshots como attachments
+### PASO 3.2: Localizar y subir screenshots como attachments (POR TC)
 
-**Objetivo:** Por cada PNG, subirlo a ADO y obtener su URL.
-
-### PASO 4.1: Localizar y subir screenshots
+**Objetivo:** Por cada PNG, subirlo a ADO y obtener su URL, **mapeando las URLs al TC dueño**.
 
 ```powershell
 $attachmentUrls = @{}
 
-# Detectar origen de screenshots según el escenario
-$allScreenshots = @()
+foreach ($tc in $testCases) {
+  # Localizar los PNGs de ESTE TC según el origen
+  $files = @()
 
-# Escenario A (Playwright testInfo.attach): buscar en test-results/
-if (Test-Path "test-results") {
-  $allScreenshots = Get-ChildItem "test-results" -Recurse -Filter "*.png" | Sort-Object Name
-}
+  # Escenario B (MCP Browser): e2e/results/<TC_ID>/
+  $dir = "e2e/results/$($tc.tcId)"
+  if (Test-Path $dir) { $files = Get-ChildItem $dir -Filter "*.png" | Sort-Object Name }
 
-# Escenario B (MCP Browser): buscar en e2e/results/<TC_ID>/
-if (-not $allScreenshots -and (Test-Path "e2e/results")) {
-  foreach ($tc in $testCases) {
-    $dir = "e2e/results/$($tc.tcId)"
-    if (Test-Path $dir) {
-      $allScreenshots += Get-ChildItem $dir -Filter "*.png" | Sort-Object Name
+  # Escenario A (Playwright testInfo.attach): test-results/ — filtrar por carpeta que contiene el TC ID
+  if (-not $files -and (Test-Path "test-results")) {
+    $files = Get-ChildItem "test-results" -Recurse -Filter "*.png" |
+             Where-Object { $_.FullName -match [regex]::Escape("$($tc.tcId)") } | Sort-Object Name
+    if (-not $files -and $testCases.Count -eq 1) {
+      # Un solo TC en la sesión → todos los PNGs de test-results son suyos
+      $files = Get-ChildItem "test-results" -Recurse -Filter "*.png" | Sort-Object Name
     }
   }
-}
 
-if (-not $allScreenshots) {
-  Write-Host "⚠️ No se encontraron screenshots en test-results/ ni e2e/results/" -ForegroundColor Yellow
-  Write-Host "   Verificar que el test corrió y generó imágenes antes de continuar." -ForegroundColor Yellow
-}
+  if (-not $files) {
+    Write-Host "⚠️ TC $($tc.tcId): sin screenshots en e2e/results/ ni test-results/ — verificar antes de continuar" -ForegroundColor Yellow
+    continue
+  }
 
-# Subir cada PNG vía REST API
-$tcUrls = @()
-foreach ($file in $allScreenshots) {
-  $filename = $file.Name
-  $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
-  $uploadUri = "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/attachments?fileName=$filename&api-version=7.0"
-  
-  $resp = Invoke-RestMethod -Uri $uploadUri -Method Post `
-    -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/octet-stream" } `
-    -Body $bytes
-  
-  $tcUrls += $resp.url
-  Write-Host "✅ Screenshot subido: $filename → $($resp.url)"
-}
+  # Subir cada PNG vía REST API
+  $tcUrls = @()
+  foreach ($file in $files) {
+    $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
+    $uploadUri = "https://dev.azure.com/$ORG/$PROJECT/_apis/wit/attachments?fileName=$($file.Name)&api-version=7.0"
 
-# Asignar todas las URLs al primer (o único) TC
-$attachmentUrls[$testCases[0].tcId] = $tcUrls
+    $resp = Invoke-RestMethod -Uri $uploadUri -Method Post `
+      -Headers @{ Authorization = "Basic $auth"; "Content-Type" = "application/octet-stream" } `
+      -Body $bytes
+
+    $tcUrls += $resp.url
+    Write-Host "✅ Screenshot subido: $($file.Name) → $($resp.url)"
+  }
+
+  # ⚠️ Mapear las URLs a SU TC — NUNCA asignar todo al primer TC de la lista
+  $attachmentUrls[$tc.tcId] = $tcUrls
+}
 ```
 
-**✅ OUTPUT:** `$attachmentUrls` = `@{ 10941 = @("https://...", "https://...") }`
+**✅ OUTPUT:** `$attachmentUrls` = `@{ 10941 = @("https://..."); 10942 = @("https://...") }` — una entrada **por cada TC**.
 
-### PASO 3.0 (PREVIO): Leer discusión existente de la US
-
-> ⛔ **ANTES de construir el comentario**, leer los comentarios actuales de la US con
-> `wit_list_work_item_comments` para ver si ya existe un comentario de evidencia QA.
-> El formato del nuevo comentario DEBE ser consistente con el existente.
->
-> **Formato establecido por el equipo** (fuente: discusión real de las USs):
-> ```
-> QA PASSED ✅   ← o QA NOT PASSED ❌
->
-> [URL del test run]   ← o "[Test Regresión]" si el test corrió por CLI sin crear run en ADO
->
-> ![nombre.png](URL_attachment)
-> ![nombre.png](URL_attachment)
-> ```
->
-> ⛔ **PROHIBIDO** publicar en la US:
-> - Listas de pasos ejecutados o resultados por step
-> - Información de framework (Playwright v1.x, Chromium, etc.)
-> - Permisos del usuario autenticado
-> - Rutas locales de archivos (`Automated_Testing/screenshots-ado/`)
-> - Scripts para ejecutar (`.\upload-to-ado.ps1`)
-> - Cualquier información técnica que no sea: status + link de run + imágenes
->
-> ⛔ **El comentario va en la US, NUNCA en el TC.**
-> Los TCs son los receptores de attachments; la US es donde se publica la evidencia visible.
-
-### PASO 3.2b: Resolver US vinculada al TC (OBLIGATORIO si vienes del flujo playwright-e2e)
+### PASO 3.3: Resolver US vinculada al TC (OBLIGATORIO si vienes del flujo playwright-e2e)
 
 > ⛔ **El comentario va en la US, NUNCA en el TC.**
 > Si llegaste aquí desde `playwright-e2e` solo tienes el TC ID — necesitas la US antes de publicar.
@@ -478,7 +481,17 @@ mcp_ado_wit_get_work_item(id: <TC_ID>)
 
 ⛔ Si no encuentras la US vinculada → preguntar al usuario el ID de la US. **No publicar en el TC.**
 
-### PASO 3.3: Construir comentario y publicar en la US
+### PASO 3.4: Confirmar el comentario con el usuario (OBLIGATORIO — AGENTS.md §8.11)
+
+> ⛔ **PROHIBIDO publicar sin esta confirmación.**
+> Antes de publicar, mostrar al usuario:
+> 1. El **texto exacto** del comentario (status + línea de link + lista de imágenes que incluirá)
+> 2. La US destino y la causa/razón del comentario
+>
+> y esperar ✅. Si el usuario pide cambios → ajustar y volver a mostrar.
+> El texto publicado en PASO 3.5 debe ser **idéntico** al confirmado aquí.
+
+### PASO 3.5: Construir comentario y publicar en la US
 
 > ⛔ **SIEMPRE usar `add_work_item_comment` — NUNCA `update_work_item_comment`.**
 > La API de UPDATE acepta el comando aunque el comentario no exista y falla silenciosamente
@@ -489,9 +502,11 @@ mcp_ado_wit_get_work_item(id: <TC_ID>)
 foreach ($tc in $testCases) {
   $status = if ($tc.status -eq "PASSED") { "QA PASSED ✅" } else { "QA NOT PASSED ❌" }
 
-  # Para tests Playwright CLI sin run ADO: usar "[Test Regresión]" como placeholder
-  # Para tests con run ADO: usar la URL real del run
-  $runLink = if ($tc.runUrl) { $tc.runUrl } else { "[Test Regresión]" }
+  # Línea de link — REGLA ÚNICA (ver "FORMATO DE SALIDA"):
+  #   run real → URL | corrida manual pendiente → "[Link del resultado aquí]" | CLI sin run → "[Test Regresión]"
+  $runLink = if ($tc.runUrl) { $tc.runUrl }
+             elseif ($tc.manualRunPending) { "[Link del resultado aquí]" }
+             else { "[Test Regresión]" }
 
   # Formato Markdown (format:0 — el mismo que usa el equipo)
   $md = "$status`n`n$runLink`n`n"
@@ -512,7 +527,7 @@ foreach ($tc in $testCases) {
 
 **✅ OUTPUT:** Comentario en la US con formato `QA PASSED/NOT PASSED + link + imágenes inline`.
 
-### PASO 3.3b: Verificar que el comentario existe (OBLIGATORIO)
+### PASO 3.6: Verificar que el comentario existe (OBLIGATORIO)
 
 > ⛔ **PROHIBIDO decir "listo" basándose solo en el "éxito" de la llamada MCP.**
 > La API puede devolver éxito y no haber escrito nada (fallo silencioso).
@@ -523,10 +538,10 @@ mcp_ado_wit_list_work_item_comments(workItemId: <US_ID>)
 ```
 Confirmar que el comentario recién creado aparece en la lista (verificar por ID o por contenido).
 
-- Si aparece → continuar a PASO 3.4.
+- Si aparece → continuar a PASO 3.7.
 - Si NO aparece → **no decir "listo"**. Intentar `add_work_item_comment` una vez más y verificar de nuevo.
 
-### PASO 3.4: Informar al usuario
+### PASO 3.7: Informar al usuario
 
 ```powershell
 Write-Host "`n⚠️  ACCIÓN REQUERIDA:" -ForegroundColor Yellow
@@ -549,11 +564,11 @@ foreach ($tc in $testCases) {
 ```
 USER: "Ejecuta Test Plan 10939, Suite 10940, TC 10941"
 
-↓ PHASE 1: mcp_ado_work_items_get → Extraer steps, US vinculada
+↓ PHASE 1: mcp_ado_wit_get_work_item → Extraer steps, US vinculada
 ↓ PHASE 2: MCP Browser → Ejecutar + capturar screenshots
-↓ PHASE 3: REST API → Subir PNGs + Publicar comentario con placeholder
+↓ PHASE 3: REST API → Subir PNGs (por TC) + Confirmar texto con el usuario (✅) + Publicar
 
-✅ DONE — Usuario debe ejecutar TC manualmente desde Test Plan
+✅ DONE — Usuario debe ejecutar TC manualmente desde Test Plan (si aplica placeholder)
 ```
 
 ---
@@ -601,21 +616,15 @@ Después de ejecutar todo, confirmar al usuario:
 | Publicar comentario con rutas locales, scripts o info técnica | Solo: `QA PASSED ✅` + link (o `[Test Regresión]`) + imágenes inline |
 | Preguntar al usuario el PAT si el MCP de ADO ya funcionó en la sesión | Extraer el PAT de los archivos de config según la plataforma |
 | Publicar sin confirmar con `✅` que el upload fue exitoso | Verificar `$resp.url` para cada imagen antes de construir el comentario |
-| Publicar en el TC porque es el ID que se tiene del flujo de automatización | Resolver la US vinculada vía `System.Parent` del TC antes de publicar (PASO 3.2b) |
+| Publicar en el TC porque es el ID que se tiene del flujo de automatización | Resolver la US vinculada vía `System.Parent` del TC antes de publicar (PASO 3.3) |
 | Usar `update_work_item_comment` para publicar evidencia | Siempre `add_work_item_comment` — UPDATE falla silenciosamente si el ID no existe |
-| Decir "listo" basándose en el "éxito" de la API sin verificar en ADO | Leer los comentarios de la US después de publicar y confirmar que aparece (PASO 3.3b) |
-
----
-
-## ANTI-PATRONES (NUNCA HACER)
-
-❌ NO crear múltiples comentarios (uno por TC) — consolidar todos en uno
-❌ NO agregar labels a las imágenes ("STEP 1", "CA-02")
-❌ NO incluir tabla de pasos en el comentario
-❌ NO incluir PRECONDs cuando hay Test Plan (solo cuando es exploratorio)
-❌ NO generar archivos JavaScript — ejecutar directamente con PowerShell
-❌ NO poner link real del Test Run — usar placeholder `[Link del resultado aquí]`
-❌ NO intentar actualizar resultados del Test Run programáticamente — no funciona
-❌ **NO capturar screenshots de PRECONDs** — Son setup previo, no validaciones
-❌ **NO saltarse screenshots de STEPs con Expected Result** — Cada STEP con criterio REQUIERE su screenshot
-❌ NO capturar screenshots "selectivamente" — Cobertura completa de STEPs es OBLIGATORIA
+| Decir "listo" basándose en el "éxito" de la API sin verificar en ADO | Leer los comentarios de la US después de publicar y confirmar que aparece (PASO 3.6) |
+| Publicar sin mostrar el texto exacto y esperar ✅ del usuario | Confirmar primero (PASO 3.4 — AGENTS.md §8.11) |
+| Crear un comentario por ejecución por cada escenario/TC de la misma corrida | Consolidar todas las evidencias de la ejecución en UN comentario |
+| Agregar labels a las imágenes ("STEP 1", "CA-02") o tabla de pasos | Solo status + línea de link + imágenes apiladas |
+| Incluir PRECONDs cuando hay Test Plan | PRECONDs solo en el formato exploratorio (sin TP) |
+| Generar archivos JavaScript para el upload | Ejecutar directamente con PowerShell |
+| Elegir la línea de link "a criterio" en cada caso | Aplicar la REGLA ÚNICA de "FORMATO DE SALIDA" (run real / placeholder / `[Test Regresión]`) |
+| Intentar actualizar resultados del Test Run programáticamente | No funciona — la corrida manual la hace el usuario (PASO 3.7) |
+| Capturar screenshots de PRECONDs | Son setup previo, no validaciones |
+| Saltarse screenshots de STEPs con Expected Result o capturar "selectivamente" | Cobertura completa: cada STEP con criterio requiere su screenshot |
