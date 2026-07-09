@@ -862,6 +862,7 @@ Total: 6
 □ Estado del TC actualizado (Passed / Failed)
 □ Si falló: Bug registrado y vinculado a la US
 □ Comentario de resultado en la US (formato y proceso de `qa-execution-reporter`)
+□ context/UI-UX.md sincronizado con las pantallas que tocó la US (checkpoint QA-PRO §5.4)
 □ Historia cerrada si todos los TCs pasaron
 □ Tabla de tiempo actualizada
 ```

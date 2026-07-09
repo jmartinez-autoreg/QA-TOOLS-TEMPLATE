@@ -1,6 +1,6 @@
 ---
 name: project-onboarding
-description: 'Construye y mantiene el contexto local del proyecto en context/CONTEXT.md y context/UI-UX.md a partir de lo que el usuario entrega (datos de dominio, screenshots de pantallas, wiki, acceso al repo real). Usar cuando el usuario pida "configurar contexto del proyecto", "onboarding", "primera vez", "agregar pantallas al UI-UX", "actualizar contexto", o cuando context/CONTEXT.md siga siendo el placeholder del template.'
+description: 'Construye y mantiene el contexto local del proyecto en context/CONTEXT.md y context/UI-UX.md a partir de lo que el usuario entrega (datos de dominio, screenshots de pantallas, wiki, acceso al repo real). Usar cuando el usuario pida "configurar contexto del proyecto", "onboarding", "primera vez", "agregar pantallas al UI-UX", "actualizar contexto", o cuando context/CONTEXT.md siga siendo el placeholder del template. También se invoca PASIVAMENTE (PHASE 2b) desde cualquier otra tarea: cuando el usuario comparte screenshots de la app (AGENTS.md §8.12) o cuando QA-PRO cierra una US que tocó pantallas nuevas/cambiadas (QA-PRO §5.4).'
 argument-hint: '"configurar contexto del proyecto" / screenshots adjuntos / link de wiki / ruta al repo real'
 ---
 
@@ -82,6 +82,27 @@ Cuando el usuario adjunte una o más imágenes de pantallas:
 4. Si ya existe una entrada para esa pantalla, **actualizarla** (no duplicar) — preguntar al usuario si la imagen reemplaza/complementa la anterior.
 
 ⛔ Nunca "rellenar" elementos que no se ven claramente en la imagen — preguntar al usuario o dejar la celda vacía.
+
+---
+
+## PHASE 2b — Ingesta pasiva (invocada desde CUALQUIER otra tarea)
+
+Esta fase **no requiere** que el usuario pida "onboarding". Se invoca automáticamente desde
+cualquier flujo (QA-PRO o PO-PRO) en dos disparadores:
+
+| Disparador | Regla que lo ordena | Qué ingestar |
+|---|---|---|
+| El usuario compartió screenshot(s) de la app durante una tarea (US, TC, bug, duda) | AGENTS.md §8.12 | Cada screenshot → PHASE 2 (copiar imagen + entrada/actualización en `UI-UX.md`) |
+| QA-PRO va a cerrar una US (`Closed`) | QA-PRO §5.4 (checkpoint de contexto) | Pantallas nuevas o cambiadas que tocó la US, usando los screenshots de la ejecución |
+
+Reglas de la ingesta pasiva:
+1. **No interrumpir la tarea principal** — completar primero el objetivo del usuario; la ingesta
+   se hace al cierre de la tarea (batch), no en medio del flujo.
+2. Aplicar la misma mecánica de PHASE 2 (leer imagen, extraer labels literales, copiar a
+   `context/screenshots/`, entrada en `UI-UX.md`). Si la pantalla ya existe → actualizar, no duplicar.
+3. Si falta un dato de la entrada (nombre de pantalla, ruta) → una sola pregunta corta al cierre;
+   si el usuario no responde, dejar la celda `_(pendiente)_` — nunca inventar.
+4. Reportar en el resumen final de la tarea: pantallas documentadas/actualizadas.
 
 ---
 

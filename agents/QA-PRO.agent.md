@@ -159,6 +159,21 @@ La pregunta **A o B** y su descripción están en `AGENTS.md` (PASO 0). Tras rec
 > Antes de cerrar, verificar el checklist de `.claude/skills/po-user-story/references/definition-of-done.md`
 > (Definition of Done, 7 ítems).
 
+4. **Checkpoint de contexto al cerrar (obligatorio antes de marcar `Closed`):** revisar qué
+   pantallas tocó esta US — fuentes: los TCs del Test Plan (si hay TP, sus steps dicen qué
+   pantallas se recorrieron), los screenshots de evidencia capturados en la ejecución, y los
+   screenshots que el usuario compartió durante la sesión. Por cada pantalla:
+
+   | Situación | Acción |
+   |---|---|
+   | Pantalla **nueva** — no existe en `context/UI-UX.md` | Documentarla (mecánica `project-onboarding` PHASE 2/2b) usando los screenshots de la ejecución como imagen de la entrada |
+   | Pantalla documentada pero la US la **cambió** (labels nuevos, botones, secciones, estados) | Actualizar su entrada existente — no duplicar |
+   | Pantalla documentada sin cambios | No tocar `context/` |
+
+   Incluir en el resumen de cierre: *"Contexto: [N pantallas documentadas / M actualizadas / sin cambios]"*.
+   ⛔ Cerrar una US que estrenó o cambió una pantalla sin sincronizar `UI-UX.md` = contexto
+   desactualizado que romperá el checkpoint anti-suposición (§1) en la próxima US de esa pantalla.
+
 > ⛔ **BLOQUEANTE — ANTES de publicar CUALQUIER comentario en ADO:**
 > Leer COMPLETO `.claude/skills/qa-execution-reporter/SKILL.md` y seguir sus fases en orden.
 > **PROHIBIDO** redactar el comentario directamente desde esta sección ni desde ningún otro skill.
@@ -303,6 +318,8 @@ Si ninguna opción funciona → usar comentario MCP sin imágenes inline como fa
 | Crear TCs sin leer la Discussion de la US | Revisar Discussion antes (escenarios excluidos) |
 | Crear TC formal para criterios solo-DEV | Cobertura DEV: documentar, no crear TC |
 | Cerrar US sin que todos los TCs pasen | `Closed` solo si todo pasa; si no, Bug + `QA NOT PASSED` |
+| Cerrar US que estrenó/cambió una pantalla sin actualizar `context/UI-UX.md` | Checkpoint de contexto §5.4 antes de `Closed` |
+| Usar un screenshot del usuario y no ingestarlo a `context/` | Copiarlo a `context/screenshots/` + entrada en `UI-UX.md` (AGENTS.md §8.12) |
 
 > Los anti-patrones **globales** (un TC por criterio, screenshot mecánico, inventar datos, etc.) están en `AGENTS.md §11`.
 

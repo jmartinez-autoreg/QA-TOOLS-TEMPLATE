@@ -255,6 +255,15 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
     repo (`context/...`, `.claude/...`); quien lee en ADO no tiene acceso a esas carpetas. Antes de
     publicar o actualizar cualquier comentario, mostrar el texto exacto y la causa/razón, y esperar
     ✅ (análogo a la regla 8 de Zoho).
+12. **Ingesta automática de screenshots al contexto.** Todo screenshot de una pantalla de la app
+    que el usuario comparta en la sesión — sin importar para qué lo compartió (redactar US, crear
+    TC, reportar bug, aclarar una duda) — debe terminar **documentado en `context/`** antes de
+    cerrar la tarea: copiar la imagen a `context/screenshots/` y crear/actualizar la entrada de esa
+    pantalla en `context/UI-UX.md` (mecánica: `project-onboarding` PHASE 2 / 2b). No esperar a que
+    el usuario lo pida — es parte de completar la tarea. Si la pantalla ya está documentada →
+    complementar la entrada existente, no duplicar. Reportar en el resumen final qué pantallas se
+    documentaron/actualizaron. ⛔ Usar un screenshot y descartarlo sin ingestarlo = contexto que se
+    pierde y volverá a preguntarse.
 
 ---
 
@@ -301,6 +310,8 @@ Así, cambiar de plataforma no toca ninguna regla — solo la tabla de mapeo.
 | Duplicar una regla en varios archivos | Escribirla **una vez** en su archivo dueño (este, subagente o skill) |
 | Subir un fix de PROYECTO a QA-TOOLS-TEMPLATE, o uno de TEMPLATE solo al repo del proyecto sin avisar | Clasificar TEMPLATE vs PROYECTO en REGLA 1 (§6) antes de aplicar/subir |
 | Completar una actividad sin anexarla a la bitácora | Append silencioso vía `activity-logger` (AGENTS.md §8.10) |
+| Usar un screenshot del usuario para la tarea y no documentarlo en `context/` | Ingestarlo a `context/screenshots/` + `UI-UX.md` antes de cerrar la tarea (AGENTS.md §8.12) |
+| Cerrar una US sin sincronizar `context/UI-UX.md` con las pantallas que tocó | Checkpoint de contexto al cerrar (QA-PRO §5.4) |
 | Publicar/actualizar un comentario de ADO citando rutas del repo o sin confirmación | Justificar en términos de la app/UI + mostrar texto y esperar ✅ (AGENTS.md §8.11) |
 | Detectar un error y no reportarlo | Activar REGLA 1 |
 
@@ -317,7 +328,9 @@ Así, cambiar de plataforma no toca ninguna regla — solo la tabla de mapeo.
    QA exec/auto → preguntar A o B, luego QA-PRO + skill correspondiente
 3. Leer el SKILL.md completo y seguir sus fases en orden.
 4. Aplicar las reglas del subagente (PRECOND, story points, evidencia, etc.).
-5. Reportar resultado final con IDs/URLs.
-6. Anexar la actividad a la bitácora del día (`activity-logger`, silencioso — AGENTS.md §8.10).
-7. Si algo salió mal → REGLA 1 (auto-aprendizaje).
+5. Sincronizar context/: screenshots recibidos en la sesión → ingestarlos (§8.12);
+   si cerré una US → checkpoint de pantallas tocadas (QA-PRO §5.4).
+6. Reportar resultado final con IDs/URLs (+ pantallas documentadas/actualizadas si hubo).
+7. Anexar la actividad a la bitácora del día (`activity-logger`, silencioso — AGENTS.md §8.10).
+8. Si algo salió mal → REGLA 1 (auto-aprendizaje).
 ```
