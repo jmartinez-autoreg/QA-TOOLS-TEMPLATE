@@ -26,3 +26,8 @@ TPlans/results/
 
 # Local scratch workspace (notes, drafts, temp analysis - never synced)
 .workspace/
+
+# Credentials — nunca versionar archivos de entorno
+.env
+.env.*
+!Template/.env.playwright.example

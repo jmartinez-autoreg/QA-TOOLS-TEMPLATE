@@ -70,7 +70,7 @@ export default defineConfig({
   retries: 0,
   reporter: 'html',
   use: {
-    baseURL: process.env.APP_URL || '<URL_DEL_AMBIENTE>',
+    baseURL: process.env.BASE_URL || '<URL_DEL_AMBIENTE>',
     headless: false,
     viewport: { width: 1280, height: 720 },
     actionTimeout: 15_000,

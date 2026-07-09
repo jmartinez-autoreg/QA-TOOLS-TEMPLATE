@@ -185,7 +185,7 @@ async function main() {
   const envExample = path.join(projectDest, '.env.playwright.example');
   if (!fs.existsSync(envDest) && fs.existsSync(envExample)) {
     fs.copyFileSync(envExample, envDest);
-    console.log('\n✅ .env.playwright creado — completa APP_URL, TEST_USER, TEST_PASS');
+    console.log('\n✅ .env.playwright creado — completa BASE_URL y las credenciales TEST_USER_* / TEST_PASS_*');
   } else if (fs.existsSync(envDest)) {
     console.log('\n   ⚠️  .env.playwright ya existe — no sobreescrito');
   }

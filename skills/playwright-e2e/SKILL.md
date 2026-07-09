@@ -155,7 +155,7 @@ Crear `playwright.config.ts` con baseURL de la app bajo prueba:
 ```ts
 import { defineConfig } from '@playwright/test';
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.playwright' });
 
 export default defineConfig({
   testDir: './tests',
@@ -210,7 +210,7 @@ npx playwright --version
 
 ### Paso 3.5 — Recopilar credenciales (BLOQUEANTE)
 
-> ⛔ **NUNCA inventar nombres de usuario, roles, ni keys de `.env`.**
+> ⛔ **NUNCA inventar nombres de usuario, roles, ni keys de `.env.playwright`.**
 > Si no fueron proporcionadas explícitamente junto al TC o la URL, preguntar ahora:
 
 ```
@@ -220,7 +220,7 @@ Antes de grabar el flujo necesito:
 Ejemplo: "usuario: jovidio / pass: Abc123"
 ```
 
-Con los datos recibidos, crear el `.env` inmediatamente:
+Con los datos recibidos, crear el `.env.playwright` inmediatamente:
 
 ```
 BASE_URL=<URL_DEL_AMBIENTE>
@@ -228,7 +228,7 @@ TEST_USER_<NOMBRE>=<valor exacto dado por el usuario>
 TEST_PASS_<NOMBRE>=<valor exacto dado por el usuario>
 ```
 
-> Las keys del `.env` usan el nombre LITERAL que dio el usuario, en mayúsculas con prefijo
+> Las keys del `.env.playwright` usan el nombre LITERAL que dio el usuario, en mayúsculas con prefijo
 > `TEST_USER_` / `TEST_PASS_`. Ej: usuario "jovidio" → `TEST_USER_JOVIDIO`.
 > ⛔ Prohibido asumir nombres como "jovidio", "distri2", "admin" sin que el usuario los dijera.
 
@@ -1208,7 +1208,7 @@ testInfo.annotations.push({
 | **Inventar selectores para el dominio destino de un SSO sin hacer discovery allí** | En un flujo SSO el destino es un dominio diferente (popup / nueva pestaña). Sus elementos son desconocidos — los selectores como `span.font-bold:has-text("VehicleDocs")` o `text=Dashboard` son inventados y fallarán. | Para verificar SSO exitoso usar SOLO URL + networkidle: `await page.waitForLoadState('networkidle')` + `expect(page).toHaveURL(/dominio-destino/)`. Los selectores de elementos del destino se agregan DESPUÉS de correr discovery allí. |
 | **Usar `button:has-text(...)` cuando el botón tiene `id`** | Texto puede cambiar; overlays de menú bloquean el click nativo causando timeout | Usar `#id` siempre (PRIORIDAD 1). Si botón está en nav con hover, usar `page.evaluate(() => btn.click())` |
 | **No inventariar locators antes de escribir el fixture** | Selectors frágiles → tests que rompen por cualquier cambio de UI | Ejecutar JS de REGLA 0 en CADA pantalla ANTES de codificar |
-| **Inventar nombres de usuario o keys de `.env` sin preguntar** | Las variables del `.env` no existen → `EnvHelper.getRequired()` lanza error antes de abrir el browser → ningún test llega a ejecutar una acción | Preguntar credenciales en Paso 3.5. Usar el nombre LITERAL que dio el usuario como sufijo de la key: `TEST_USER_JOVIDIO` solo si el usuario dijo "jovidio". |
+| **Inventar nombres de usuario o keys de `.env.playwright` sin preguntar** | Las variables del `.env.playwright` no existen → `EnvHelper.getRequired()` lanza error antes de abrir el browser → ningún test llega a ejecutar una acción | Preguntar credenciales en Paso 3.5. Usar el nombre LITERAL que dio el usuario como sufijo de la key: `TEST_USER_JOVIDIO` solo si el usuario dijo "jovidio". |
 | **Crear tests separados para un modal condicional ("con T&C" / "sin T&C")** | Duplica el test, confunde el reporte, y hace que el login parezca cubierto cuando solo una variante está verde | Usar `handleOptionalModal()` con try/catch + waitFor(timeout). UN test, lógica condicional inline en el fixture. |
 | **No documentar la prioridad del locator en el fixture** | Nadie sabe por qué se eligió ese selector; difícil de debuguear | Agregar comentario `// ID único ✅ PRIORITY 1` |
 | **Inferir URL de contexto de conversación anterior** | Cada sesión es independiente; URL incorrecta → fallos silenciosos | Pedir URL explícitamente si no está en el TC |
@@ -1251,8 +1251,8 @@ testInfo.annotations.push({
 >
 > **ANTES de escribir una sola línea de fixture, verificar TRES cosas:**
 >
-> 1. **Credenciales:** ¿Ya están en el `.env`? Si no → aplicar Paso 3.5 (pedir al usuario).
->    ⛔ Prohibido inventar usuarios, contraseñas o keys de `.env` aunque el codegen los muestre.
+> 1. **Credenciales:** ¿Ya están en el `.env.playwright`? Si no → aplicar Paso 3.5 (pedir al usuario).
+>    ⛔ Prohibido inventar usuarios, contraseñas o keys de `.env.playwright` aunque el codegen los muestre.
 >    El codegen puede haber grabado un usuario de sesión de codegen que NO existe en el proyecto.
 >
 > 2. **Selectores:** Navegar CADA pantalla del flujo con MCP Browser y ejecutar el JS inventory
@@ -1300,13 +1300,13 @@ funcional. Esto duplica el test, confunde el reporte y oculta la causa real de f
 
 ```
 0. ⛔ BLOQUEANTE — ANTES de tocar el fixture:
-   a. Verificar credenciales en .env → si faltan, aplicar Paso 3.5 (pedir al usuario)
+   a. Verificar credenciales en .env.playwright → si faltan, aplicar Paso 3.5 (pedir al usuario)
    b. Para cada pantalla del flujo codegen:
         → Navegar con MCP Browser
         → Ejecutar JS inventory (ver REGLA 0)
         → Anotar id real de cada elemento interactivo
    c. Identificar flujos condicionales (modales opcionales) → consolidar en try/catch
-   d. Solo continuar cuando TODOS los IDs estén confirmados y credenciales estén en .env
+   d. Solo continuar cuando TODOS los IDs estén confirmados y credenciales estén en .env.playwright
    ↓
 1. Leer TODO el fixture y el spec existentes
    ↓
@@ -1505,7 +1505,7 @@ Extraer y mapear:
 > ⛔ **PROHIBIDO** inferir URL de sesiones anteriores, inventar usuarios o asumir nombres
 > de variables de entorno. Cada sesión es independiente. Si el TC o el contexto del proyecto
 > tiene credenciales documentadas en `context/CONTEXT.md`, usar esas — pero verificar que
-> sean válidas antes de crear el `.env`.
+> sean válidas antes de crear el `.env.playwright`.
 
 > ⚡ **Recopilación paralela para batch de TCs:**
 > Si se reciben múltiples TCs a la vez, obtener todos con `mcp_ado_wit_get_work_items_batch_by_ids`
