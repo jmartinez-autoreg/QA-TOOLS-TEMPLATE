@@ -14,7 +14,6 @@ description: |
   - Registrar ceremoniales (Planning, Daily, Refinamiento, Tasking, Review)
 disable-model-invocation: false
 user-invocable: true
-allowed-tools: Read, mcp_zoho-mcp_ZohoProjects_add_time_log, mcp_zoho-mcp_ZohoProjects_update_single_time_log, mcp_zoho-mcp_ZohoProjects_get_time_logs_by_project, mcp_zoho-mcp_ZohoProjects_get_tasks_by_project, mcp_zoho-mcp_ZohoProjects_add_bulk_time_logs, mcp_zoho-mcp_ZohoProjects_get_time_logs_by_portal, mcp_zoho-mcp_ZohoProjects_get_time_logs_by_time_log_id
 ---
 
 # Zoho Time Log — Registro de Horas QA

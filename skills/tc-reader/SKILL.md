@@ -81,17 +81,27 @@ Si algún paso menciona "Excel", "PDF", "archivo", "adjunta" → agregar a `file
 
 ---
 
-## PASO 3 — Detectar PRECOND 0 / 1 / 3
+## PASO 3 — Detectar PRECONDs (numeración secuencial desde 0)
 
-Los pasos con prefijo `PRECOND` NO son pasos de ejecución. Son precondiciones:
-- `PRECOND 0` — Prerequisito del sistema (sin acción de usuario)
-- `PRECOND 1` — Configuración previa
-- `PRECOND 3` — Login con usuario/rol específico → extraer usuario y rol
+Los pasos con prefijo `PRECOND` NO son pasos de ejecución. Son precondiciones **numeradas
+secuencialmente desde 0** — el número es la POSICIÓN en la secuencia, no una categoría fija
+(regla de `.claude/agents/QA-PRO.agent.md` §1; puede haber letras `1A`/`1B` para PRECONDs del
+mismo tipo en la misma posición). Identificar cada una por su **contenido**, nunca por su número:
 
-Separar en `plan-output.json`:
+| Contenido | `type` en el plan |
+|---|---|
+| "TC Ejecutado" / dependencia de otro TC | `tc_dependency` |
+| Datos/archivos/configuración del sistema | `data` |
+| Rol o condición del usuario | `user_info` |
+| **Login** (normalmente la última de la secuencia) | `login` → extraer usuario, rol, portal, módulo |
+
+⚠️ La PRECOND de Login **NUNCA contiene contraseña** — la contraseña viene de `.env.playwright`
+o la proporciona el usuario. No buscarla en el TC.
+
+Separar en el plan JSON:
 ```json
 "preconditions": [
-  { "type": "PRECOND_3", "user": "graciagc", "role": "CASE CREATOR", "portal": "AutoReg", "module": "Preventas" }
+  { "type": "login", "position": 1, "user": "graciagc", "role": "CASE CREATOR", "portal": "AutoReg", "module": "Preventas" }
 ],
 "steps": [
   { "id": 1, "action": "Navegar a...", "expected": "Se muestra...", "type": "action" }
@@ -100,9 +110,9 @@ Separar en `plan-output.json`:
 
 ---
 
-## PASO 4 — Escribir plan-output.json
+## PASO 4 — Escribir el plan JSON
 
-Crear `.agent-state/plan-output.json`:
+Crear `.agent-state/plan-<TC_ID>.json` (siempre un archivo por TC — mismo nombre con uno o varios TCs):
 
 ```json
 {
@@ -114,7 +124,7 @@ Crear `.agent-state/plan-output.json`:
   "priority": 2,
   "url": "https://tu-app.com/preventas",
   "preconditions": [
-    { "type": "PRECOND_3", "user": "graciagc", "role": "CASE CREATOR", "portal": "AutoReg", "module": "Preventas" }
+    { "type": "login", "position": 0, "user": "graciagc", "role": "CASE CREATOR", "portal": "AutoReg", "module": "Preventas" }
   ],
   "steps": [
     { "id": 1, "action": "Hacer click en 'Procesamiento Preventas Excel'", "expected": "Se abre la pantalla de carga", "type": "action" },
@@ -135,8 +145,8 @@ Crear `.agent-state/plan-output.json`:
 
 ### Si hay múltiples TCs
 
-Escribir un archivo por TC: `.agent-state/plan-<TC_ID>.json`  
-Y actualizar `.agent-state/session.json` con todos (ver PASO 5).
+Un archivo `.agent-state/plan-<TC_ID>.json` por cada TC,
+y actualizar `.agent-state/session.json` con todos (ver PASO 5).
 
 ---
 
@@ -191,4 +201,4 @@ Si algún TC no se encontró en ADO → reportar el ID fallido y continuar con l
 - ⛔ NO ejecutar comandos de terminal
 - ⛔ NO pedir al usuario que copie pasos manualmente
 - ✅ Si `url` no está en el TC → marcar como `null` y notificar al orquestador
-- ✅ Si hay PRECOND 3 con credenciales → extraerlas, nunca pedirlas de nuevo al usuario
+- ✅ Si la PRECOND de Login trae usuario/rol/portal/módulo → extraerlos; la contraseña NUNCA está en el TC (viene de `.env.playwright` o del usuario)

@@ -13,7 +13,6 @@ description: |
   - Gestionar el ciclo completo de estados TC y de historias
 disable-model-invocation: false
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Write, Edit
 ---
 
 # QA Analista — Estándar de Calidad Empresarial
@@ -151,8 +150,10 @@ Recibir US → Analizar criterios de aceptación
       > automáticamente hacia la Tabla 10 (REGLA 1 de AGENTS.md).
 → [ADO] Cerrar tarea "QA - Preparar Test Plan" (System.State = Closed)
 → Generar tabla tareas ADO (Preparar TP + Ejecutar TP + QA Demo con horas y estados)
-→ ⚠️ ANTES de generar Daily y tabla de tiempo: si no está claro qué tareas realizó el usuario hoy,
-   PREGUNTAR explícitamente. Ejemplos: "¿Ya realizaste la demo para US-XXXX?", "¿Ejecutaste el Test Plan hoy?"
+→ ⚠️ ANTES de generar Daily y tabla de tiempo: detectar el trabajo del día AUTOMÁTICAMENTE
+   (WIQL + historial de revisiones + CompletedWork — AGENTS.md §8.6 y bitácora de activity-logger).
+   ⛔ NUNCA preguntar genéricamente "¿qué hiciste hoy?". Preguntar SOLO por lo que no deja rastro
+   en ADO (ej. "¿Ya realizaste la demo para US-XXXX?" si la tarea Demo sigue abierta).
    NO asumir que todas las tareas creadas fueron ejecutadas.
 → ⚠️ PREGUNTAR el número de orden [orden] de cada US en el sprint si no se conoce:
    "Para generar el Daily necesito el número de orden de cada US en el sprint (ej. '1-9893, 3-9511'). ¿Cuáles son?"
@@ -171,20 +172,8 @@ Recibir US → Analizar criterios de aceptación
 > ⚠️ **ANTES de cualquier acción de ejecución:** preguntar siempre A o B. NUNCA asumir.
 
 ```
-⚠️ PRIMER PASO OBLIGATORIO: preguntar al usuario:
-
-  ¿Cómo quieres ejecutar?
-
-  A — Proyecto Playwright completo
-      Genera archivos .spec.ts y .fixture.ts reutilizables
-      Los tests quedan como código para regresión futura
-
-  B — Ejecución directa (sin código)
-      Navego la app vía MCP Browser
-      Ejecuto los pasos del TC manualmente, capturo screenshots
-      Documento resultados en la US sin generar código TypeScript
-
-  Responde A o B para continuar.
+⚠️ PRIMER PASO OBLIGATORIO: hacer la pregunta A/B EXACTAMENTE como está definida en
+   AGENTS.md § "PASO 0" (4.1) — texto único, no lo dupliques ni parafrasees aquí.
 
 → Si A: cargar skill playwright-e2e
 → Si B: cargar skill qa-execution-reporter
@@ -194,7 +183,8 @@ Recibir US → Analizar criterios de aceptación
 ### Fase 3 — Daily y Registro de Tiempo
 
 ```
-⚠️ Preguntar qué tareas realizó el usuario hoy si no está claro
+⚠️ Detectar automáticamente el trabajo del día (WIQL + revisiones + CompletedWork + bitácora —
+   AGENTS.md §8.6). Preguntar SOLO lo que no deja rastro en ADO (ej. demo realizada con tarea abierta)
 → Generar Daily con formato "Tareas realizadas — DD/MM/AAAA" (ver sección Formato del Daily)
 → Generar tabla de tiempo propuesta y mostrarla al usuario
 → Preguntar: "¿Estos registros son correctos? Confirma con ✅ o indícame qué cambiar."
@@ -729,8 +719,9 @@ WHERE [System.WorkItemType] = 'User Story'
   AND [System.ChangedDate] < '{mañana}T04:00:00Z'
 ```
 
-> ⚠️ **Zona horaria:** UTC-4 (República Dominicana/AST). El día empieza a las 04:00 UTC.
-> `{hoy}` = fecha actual en formato `YYYY-MM-DD`, `{mañana}` = día calendario siguiente.
+> ⚠️ **Zona horaria:** usar la de `context/CONTEXT.md` § "Configuración del Agente" (ej. UTC-4 →
+> el día local empieza a las 04:00 UTC — ajustar el offset del WIQL a la zona configurada).
+> `{hoy}` = fecha actual local en formato `YYYY-MM-DD`, `{mañana}` = día calendario siguiente.
 > **Sin filtro AssignedTo** — trae TODOS los WIs cambiados en el sprint. El usuario revisa y corrige si falta algo.
 
 Presentar los resultados al usuario como **Tabla 1**:
@@ -814,7 +805,7 @@ Total: 6
 
 ### Reglas del Daily
 
-1. **Si el agente no tiene certeza** de qué tareas realizó el usuario hoy, DEBE preguntar antes de generar el Daily
+1. **Detección automática primero** (AGENTS.md §8.6): WIQL + revisiones + CompletedWork + bitácora. Si tras eso queda una actividad sin rastro en ADO (ej. demo con tarea abierta), preguntar SOLO por esa actividad puntual — nunca "¿qué hiciste hoy?"
 2. **No asumir** qué tareas del día se completaron basándose solo en las tareas creadas en ADO — pueden estar en estado New sin ejecutarse
 3. El formato `[orden]-[número]` usa el número de orden de la US en el sprint y el ID de ADO (ej. `1-65436`)
 4. **El `[orden]` ES OBLIGATORIO** — si el agente no conoce el número de orden de cada US en el sprint, DEBE preguntar explícitamente ANTES de generar el Daily. **NUNCA omitir el `[orden]` ni inventar un número**
@@ -842,7 +833,7 @@ Total: 6
 | Setear RemainingWork en tarea Closed | Omitir RemainingWork para tareas en estado Closed; solo usar CompletedWork |
 | Crear un TC separado para validar el estado inicial de un elemento (ej. botón deshabilitado sin selección) | Incluir esa verificación como un paso de verificación al inicio del TC del flujo feliz |
 | Generar tabla de tiempo y registrar en Zoho sin confirmación del usuario | Mostrar tabla propuesta y preguntar "¿Estos registros son correctos? ✅" antes de registrar |
-| Asumir qué tareas del día completó el usuario (ej. asumir que hizo Demo solo porque la tarea existe) | Preguntar explícitamente qué tareas realizó antes de armar el Daily y la tabla de tiempo |
+| Asumir qué tareas del día completó el usuario (ej. asumir que hizo Demo solo porque la tarea existe) | Detectar automáticamente vía ADO/bitácora (AGENTS.md §8.6); preguntar solo por lo sin rastro en ADO |
 
 ---
 
@@ -856,7 +847,7 @@ Total: 6
 □ Tareas QA creadas (add_child_work_items) + AssignedTo/horas seteadas (update_work_items_batch)
 □ Tarea "QA - Preparar Test Plan" cerrada
 □ Tabla de tareas ADO generada (Preparar TP / Ejecutar TP / QA Demo)
-□ Preguntado al usuario qué tareas realizó hoy antes de armar el Daily
+□ Trabajo del día detectado automáticamente (ADO/bitácora); preguntado solo lo sin rastro en ADO
 □ [orden] de cada US en el sprint confirmado con el usuario antes de generar el Daily
 □ Daily generado con formato "Tareas realizadas — DD/MM/AAAA" con [orden]-[número] correcto en cada ítem
 □ Tabla de tiempo propuesta mostrada al usuario para confirmación
