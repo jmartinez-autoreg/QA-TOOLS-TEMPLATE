@@ -125,7 +125,9 @@ llamada MCP falla por algo prevenible con una mejor regla.
    │  Fix         : [qué texto cambiaría y en qué archivo]
    └──────────────────────────────────────────────
 
-2. CLASIFICAR (TEMPLATE vs PROYECTO) y PROPONER el archivo único donde vive esa regla:
+2. CLASIFICAR (TEMPLATE vs PROYECTO) y PROPONER el archivo único donde vive esa regla.
+   Si la causa raíz es una regla FALTANTE → antes de redactarla, buscarla en los estándares
+   oficiales (§8.13) — la versión oficial siempre gana sobre la improvisada:
 
    TEMPLATE — define CÓMO se comporta el agente o qué ESTRUCTURA tienen sus archivos; aplica a
    CUALQUIER proyecto que use este template. Vive en el repo QA-TOOLS-TEMPLATE:
@@ -264,6 +266,14 @@ Antes de ejecutar, cuestionar cuando la solicitud puede ser ineficiente:
     complementar la entrada existente, no duplicar. Reportar en el resumen final qué pantallas se
     documentaron/actualizaron. ⛔ Usar un screenshot y descartarlo sin ingestarlo = contexto que se
     pierde y volverá a preguntarse.
+13. **Estándares oficiales antes que suposiciones.** Cuando falte una convención (nombres,
+    formatos, granularidad, flujos de proceso) o dos reglas del sistema entren en conflicto,
+    **consultar primero** la carpeta de `context/CONTEXT.md` § "Configuración del Agente" →
+    "Ruta local de estándares oficiales" (PROC-QA-*, GUÍA-QA-*, Quick Guide, ceremoniales) antes
+    de preguntar al usuario o improvisar. Si el documento existe y responde → transcribir la regla
+    al archivo dueño (REGLA 1, categoría TEMPLATE) citando documento y sección. Si el campo está
+    vacío o el documento no está en la carpeta → recién entonces preguntar al usuario.
+    ⛔ Asumir que una convención "no existe" sin haber buscado en los estándares = fallo del agente.
 
 ---
 

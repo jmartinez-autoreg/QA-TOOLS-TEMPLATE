@@ -18,8 +18,13 @@
 | Zona horaria | `[Ej: America/Caracas (UTC-4)]` |
 | Sprint actual | `[Ej: Sprint 24]` |
 | Ruta local de QA-TOOLS-TEMPLATE | `[Ej: C:\Users\Usuario\Documents\IA\QA-TOOLS-TEMPLATE]` |
+| Ruta local de estándares oficiales | `[Ej: C:\Users\Usuario\Documents\IA\QA Informaciones\Estándares y Procesos]` |
 
 > Actualiza "Sprint actual" al iniciar cada sprint nuevo — define el nombre de carpeta de la bitácora.
+> "Ruta local de estándares oficiales" apunta a la carpeta con los documentos de la empresa
+> (PROC-QA-*, GUÍA-QA-*, ceremoniales) — usada por AGENTS.md §8.13 para verificar convenciones
+> antes de asumir que no existen. Si hay subcarpeta `markdown_output/`, preferirla (búsqueda por
+> texto); ante extracción incompleta, ir al PDF original.
 
 ---
 

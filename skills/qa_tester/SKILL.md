@@ -309,6 +309,22 @@ Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realm
 > Estos 3 criterios corresponden a los criterios C/D/E de la Tabla 9 (GUÍA-QA-Redacción de casos
 > de pruebas v1.00, §6 — división de Test Cases).
 
+#### 📏 Límite de tamaño — atomizar TCs de 15+ pasos (PROC-QA-Generales de calidad v1.07 §10.3)
+
+> *"Atomizados — Dividir casos grandes (15 pasos o más) en múltiples para ser mantenibles y
+> reutilizables."* — normativa oficial.
+
+Este límite convive con la regla de agrupar: **agrupar por pantalla ES el default, pero si el TC
+resultante supera ~15 pasos de ejecución** (las PRECONDs no cuentan), dividirlo en partes
+secuenciales del mismo flujo:
+
+- Dividir por **bloques funcionales** del flujo (ej. `[Parte 1 - Configuración]` / `[Parte 2 - Importación]`),
+  manteniendo la nomenclatura y usando `PRECOND 0: TC Ejecutado` para encadenar la parte 2 con la parte 1.
+- Antes de dividir por tamaño, **optimizar**: si varios criterios se cubren con los mismos pasos,
+  no repetir pasos por criterio (regla de oro de agrupación). Dividir solo si tras optimizar sigue en 15+.
+- Esta división por tamaño **no requiere** los criterios C/D/E — es un límite de mantenibilidad,
+  y también aplica la regla de confirmación de abajo (avisar al usuario antes de crear N TCs).
+
 > ⚠️ **Los criterios de división NO son multiplicadores.** Si un criterio justifica dividir, aplica
 > ese criterio **una sola vez**. No combines dos criterios para obtener más TCs (ej. rol × pantalla
 > = 4 TCs es incorrecto). Ver patrón de permisos abajo.
@@ -371,7 +387,7 @@ Distribuidor es completamente independiente y no parte del mismo estado que el f
 | Validar que un botón/acción aparece visible | Paso dentro del TC principal, no TC separado |
 | Validar estado inicial de un elemento (ej. botón deshabilitado) | Paso de verificación al inicio del TC del flujo feliz |
 | Escenarios que comparten las mismas precondiciones | Un solo TC — las precondiciones son las mismas |
-| "Hay muchos criterios" sin que ninguno cambie de pantalla o rol | Agrupar todos, optimizar los pasos para cubrir solo lo necesario |
+| "Hay muchos criterios" sin que ninguno cambie de pantalla o rol | Agrupar todos, optimizar los pasos para cubrir solo lo necesario — pero si tras optimizar el TC queda en 15+ pasos, dividir en partes (§ Límite de tamaño) |
 | Configurar algo en una pantalla y usar esa configuración como entrada del siguiente paso en otra pantalla del mismo flujo (ej. configurar mapeo de columnas → importar archivo usando ese mapeo) | Un solo TC — pasos secuenciales: configurar en la 1ª pantalla, luego usar/verificar el resultado en la 2ª |
 | US de permisos: rol A no ve algo, rol B sí lo ve y lo usa | 1 TC con cambio de sesión: primero verificar restricción del rol A (corto), cerrar sesión como STEP, login rol B como STEP, flujo completo del rol B |
 | Aplicar dos criterios de división a la vez (ej. rol × pantalla) | Aplicar solo el criterio más relevante — los criterios no se multiplican |
