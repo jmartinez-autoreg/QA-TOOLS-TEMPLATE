@@ -41,6 +41,12 @@ US 10801 - Discussion - UN comentario:
 - ✅ **1 screenshot por CADA STEP con Expected Result** (PRECONDs NO necesitan screenshots)
 - ✅ SOLO: Resultado + Línea de link + Imágenes apiladas
 
+> ⚠️ **Divergencia intencional vs PROC-QA-Generales de calidad v1.07 §16:** el documento oficial
+> describe **hilos separados por escenario** (con `[Escenario]` en la línea siguiente al resultado)
+> cuando hay 2+ casos/escenarios. La práctica vigente del equipo (confirmada 2026-07-09) es
+> **UN comentario consolidado por ejecución** — NO "corregir" automáticamente hacia el formato
+> por hilo (misma lógica que la divergencia de horas de la Tabla 10 — REGLA 1, AGENTS.md §6).
+
 ### Sin Test Plan (pruebas exploratorias, ≤2 SP):
 
 ```
@@ -60,7 +66,7 @@ US 10801 - Discussion - UN comentario:
 - ✅ SÍ PRECONDs (no hay TC formal)
 - ❌ SIN URL de Test Run (no existe)
 - ❌ SIN labels en imágenes
-- ⚠️ Resultado con fallo sin TP → `QA FAILED` (no `QA NOT PASSED`)
+- ⚠️ Resultado con fallo sin TP → `QA FAILED` (PROC §16.2; nota: cuando hay escenarios nombrados `[Escenario]`, el oficial usa `QA NOT PASSED` incluso sin TP)
 
 ---
 
@@ -91,6 +97,12 @@ Ciclo de vida oficial de un Test Case durante su ejecución en ADO Test Plans:
 4. `Save` y `Create bug` — usar los formatos de `.claude/skills/qa_tester/SKILL.md` § Registrar Bug / Defecto
    (Tipo de desviación + Formato 1/2 + mensaje a DEV).
 5. Marcar el **caso de pruebas** como `Failed`.
+
+> **Desviaciones en corridas de regresión automatizada** (Escenario A sobre funcionalidades SIN
+> US en el sprint actual — ej. certificación de ambientes): el proceso oficial es crear una
+> historia llamada **"Pruebas automatizadas"** en el sprint, registrar el bug dentro de esa
+> historia, y dejar que el PO evalúe/agrupe/priorice (PROC-QA-Pruebas automatizadas v1.00 §2,
+> actividad 9). No vincular esos bugs a USs cerradas de sprints anteriores sin pasar por el PO.
 
 > El ciclo de estados de **historias** (US) es independiente — Tabla 3: `New` / `Active` /
 > `Resolved` / `Closed` / `On Hold` (ver `.claude/agents/QA-PRO.agent.md` § Documentación de US

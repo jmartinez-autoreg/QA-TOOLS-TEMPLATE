@@ -308,6 +308,11 @@ Si hay muchos pasos, optimizar incluyendo solo los pasos que los criterios realm
 
 > Estos 3 criterios corresponden a los criterios C/D/E de la Tabla 9 (GUÍA-QA-Redacción de casos
 > de pruebas v1.00, §6 — división de Test Cases).
+>
+> **Alternativas oficiales ANTES de dividir** (Tabla 9, filas 2-3): si los escenarios son
+> reutilizables, usar **shared steps** (agrupar los pasos comunes y reutilizarlos en otros TCs);
+> si solo cambian los datos/requerimientos, usar **parámetros** en un único TC parametrizado.
+> Dividir es el último recurso, no el primero.
 
 #### 📏 Límite de tamaño — atomizar TCs de 15+ pasos (PROC-QA-Generales de calidad v1.07 §10.3)
 
@@ -481,6 +486,11 @@ Señales de Cobertura DEV a nivel de US:
 | **Sin SP** | Tratar como caso especial: evaluar si los criterios son verificables por QA. Si sí → proponer al usuario si crear TP o exploratoria. Si no → Cobertura DEV o Requiere refinamiento PO. |
 
 > ⚠️ Si la US tiene ≤ 2 SP y el usuario pide crear un TP formal → advertir y proponer exploratoria directa. No bloquear si el usuario insiste, pero **siempre avisar**.
+
+> **Nota de fuente:** el umbral "≤ 2 SP → exploratoria" es la convención del equipo. El criterio
+> oficial (PROC-QA-Generales v1.07 §14) define "Ejecutar Pruebas" como **modalidad de excepción**
+> cuando el tiempo apremia y el backlog acumula muchas historias en `Resolved` — ambos criterios
+> conviven: SP bajos O presión de cola de Resolved justifican la exploratoria.
 
 ---
 
