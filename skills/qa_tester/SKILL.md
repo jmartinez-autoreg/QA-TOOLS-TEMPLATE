@@ -113,7 +113,8 @@ Recibir US → Analizar criterios de aceptación
 → Preguntar si falta info → Definir cuántos TC
 → Redactar TC completos
 → [ADO] Crear TC (mcp_ado_testplan_create_test_case) — PRECONDs + pasos juntos en steps
-→ [ADO] Verificar/crear Test Plan y Suite (mcp_ado_testplan_create_test_plan si no existe)
+→ [ADO] Verificar/crear Test Plan y Suite según § "Estructura del Test Plan en ADO":
+      plan del Equipo-Sprint (uno por sprint, NUNCA por US) + suite requirement-based por US
 → [ADO] Agregar TC al Suite (mcp_ado_testplan_add_test_cases_to_suite)
 → [ADO] TC state = Ready (mcp_ado_wit_update_work_item: System.State = Ready)
 → [ADO] US: TestPlanCompleted = True (mcp_ado_wit_update_work_item: Custom.TestPlanCompleted = True)
@@ -193,6 +194,31 @@ Recibir US → Analizar criterios de aceptación
 ```
 
 ---
+
+## Estructura del Test Plan en ADO — Plan por Sprint, Suite por US
+
+> Fuente oficial: Quick Guide QA § "Preparación – Crear Test Plan" + PROC-QA-Generales de
+> calidad v1.07 §10. Jerarquía ADO: **Test Plan → Test Suite → Test Cases**.
+
+| Nivel | Granularidad | Nombre |
+|---|---|---|
+| **Test Plan** | **Uno por Equipo-Sprint** — ⛔ NUNCA crear un plan por US | El de la iteración del equipo: `{Team} - Sprint {N}` (seleccionar la iteración actual al crearlo) |
+| **Test Suite** | **Una por US** (requirement-based — vinculada a la historia) | `{US_ID}: {Título de la US}` — ADO la nombra así al crearla desde la story |
+| **Test Case** | Los que la US necesite, dentro de su suite | `{Portal}-{Módulo}-{Pantalla}-{Funcionalidad} [{Escenario}]` (ver Nomenclatura abajo) |
+
+**Flujo con MCP (equivalente al "Add Test desde el Board" de la guía):**
+```
+1. Buscar el plan del sprint actual: testplan_list_test_plans → nombre = iteración del equipo
+   → Si NO existe → crearlo (testplan_create_test_plan) apuntando a la iteración actual
+   → Si existe → usarlo. ⛔ No crear un segundo plan para el mismo sprint.
+2. Buscar dentro del plan la suite de la US ({US_ID}: ...):
+   → Si NO existe → crearla como requirement-based suite vinculada a la US
+   → Si existe → usarla (los TCs nuevos van ahí)
+3. Crear los TCs y agregarlos a esa suite (testplan_add_test_cases_to_suite)
+```
+
+> Si el nombre del sprint/equipo no se conoce → leerlo de `context/CONTEXT.md` § "Configuración
+> del Agente" → "Sprint actual"; si está vacío, preguntar UNA vez (nunca inventar — AGENTS.md §8.1).
 
 ## Estructura de Test Cases
 
@@ -373,8 +399,9 @@ NO crear 4 TCs separados.
 ### FILTRO 1 — ¿Ya tiene Test Plan en ADO?
 
 ```
-→ Consultar: testplan_list_test_plans (project, planName o buscar por US ID en el título/descripción)
-→ Si ya existe un TP vinculado a la US → clasificar como "Ya tiene TP" — NO proponer crear uno nuevo
+→ Consultar: testplan_list_test_plans → localizar el plan del Equipo-Sprint actual
+  → dentro del plan, buscar la suite de la US ({US_ID}: ...) — la suite es lo que indica cobertura
+→ Si ya existe la suite de la US con TCs → clasificar como "Ya tiene TP" — NO crear duplicados
 → No saltar este filtro aunque el usuario no lo mencione — verificar siempre
 ```
 

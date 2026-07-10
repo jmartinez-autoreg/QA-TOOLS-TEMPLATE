@@ -18,8 +18,8 @@ Antes de crear cualquier TC, necesitas estos datos. **Pregunta todo lo que falte
 |------|---------|-------------|
 | **Organización ADO** | `MiOrg` | No — viene de `context/CONTEXT.md` § "Organización ADO" (AGENTS.md §2). Preguntar solo si falta o el usuario indica otra. |
 | **Proyecto ADO** | `MiProyecto` | No — viene de `context/CONTEXT.md` § "Organización ADO" (AGENTS.md §2). Preguntar solo si falta o el usuario indica otro. |
-| **Test Plan ID** | `9361` | Sí (para agregar al suite) |
-| **Test Suite ID** | `9363` | Sí (para agregar al suite) |
+| **Test Plan ID** | `9361` | No — si falta, resolver con la convención oficial: plan del **Equipo-Sprint** actual (ver `qa_tester` § "Estructura del Test Plan en ADO"). Preguntar solo si no se puede resolver. |
+| **Test Suite ID** | `9363` | No — si falta, buscar/crear la suite de la US (`{US_ID}: {Título}`) dentro del plan del sprint. Preguntar solo si no hay US vinculada. |
 | **User Story / Work Item** | `US 9313` | Recomendado |
 | **Portal / Aplicación** | `AutoReg`, `MiPortal` | Sí (para el título) |
 | **Módulo** | `Preventas`, `Ventas` | Sí (para el título) |
