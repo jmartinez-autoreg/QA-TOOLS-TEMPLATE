@@ -72,14 +72,17 @@ tiers:
       - "create-test-cases"
       - "activity-logger"
 
-# Sin tier: find-skills (utilidad genérica del ecosistema de skills — no participa del pipeline QA/PO)
-
 # ============================================================
-# Referencia de modelos disponibles (Anthropic — Junio 2026):
+# Referencia de modelos (asignados en los tiers de arriba):
 #
 #  claude-opus-4-8          → $5/$25 MTok  | Más potente  | Extended thinking: adaptive
 #  claude-sonnet-4-6        → $3/$15 MTok  | Equilibrado  | Extended thinking: sí
 #  claude-haiku-4-5-20251001→ $1/$5 MTok   | Más rápido   | Extended thinking: no
 #
-# Fuente: https://platform.claude.com/docs/en/docs/about-claude/models/all-models
+# ⚠️ Existen modelos más recientes (familia Claude 5: claude-sonnet-5, claude-fable-5).
+#    Antes de cambiar un tier a uno de ellos, VERIFICAR precio y disponibilidad en la fuente —
+#    no asumir que "más nuevo" = mejor costo/beneficio para tareas mecánicas (T3/T4/TOps).
+#
+# Fuente (precios y modelos vigentes):
+# https://platform.claude.com/docs/en/docs/about-claude/models/all-models
 # ============================================================

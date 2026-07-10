@@ -7,7 +7,8 @@
 
 ## ¿Qué hace este agente?
 
-Es un asistente de IA para equipos de QA que trabaja directamente en VS Code con GitHub Copilot.
+Es un asistente de IA para equipos de QA que funciona con **GitHub Copilot** (VS Code) o con
+**Claude Code** (terminal / app de escritorio) — las mismas reglas y skills sirven para ambos.
 Puedes pedirle cosas en lenguaje natural, por ejemplo:
 
 - *"Analiza la US 9884 y prepara el test plan"*
@@ -80,10 +81,15 @@ code .
 
 O desde VS Code: `Archivo → Abrir Carpeta` → selecciona la carpeta que creaste.
 
-### Paso 4 — Abre GitHub Copilot en modo Agent
+### Paso 4 — Abre tu agente
 
+**Opción Copilot (VS Code):**
 - Presiona `Ctrl+Shift+I` (Windows/Linux) o `Cmd+Shift+I` (Mac)
 - Asegúrate de que aparezca **"Agent"** en la parte superior del panel de chat
+
+**Opción Claude Code:**
+- En la terminal, dentro de la carpeta del proyecto, escribe `claude`
+- El agente carga automáticamente `CLAUDE.md` → `AGENTS.md` → tu `context/`
 
 ### Paso 5 — ¡Listo! Escríbele al agente
 
@@ -239,7 +245,8 @@ mi-proyecto/
 │   ├── UI-UX.md                   ← Mapa de pantallas reales (labels, estados)
 │   └── screenshots/               ← Imágenes referenciadas desde UI-UX.md
 ├── .agent-state/                  ← Estado interno del agente — NO editar
-├── TPlans/                        ← Aquí van los tests generados (Escenario A)
+├── TPlans/                        ← Tests generados por el pipeline multi-agente (lotes)
+├── .env.playwright                ← Credenciales de la app bajo prueba (gitignored — NUNCA subir)
 ├── playwright.config.ts           ← Configuración de velocidad, video, screenshots
 ├── playwright-guide.md            ← Referencia técnica para desarrolladores
 ├── execution-rules.md             ← Reglas para escribir tests
@@ -259,15 +266,23 @@ mi-proyecto/
 
 ```
 Para TCs / Test Plans (Azure DevOps):
-  Test Plan ID  →  Número del plan en ADO       (ej: 10716)  [OBLIGATORIO]
-  Suite ID      →  Número de la suite en ADO    (ej: 10717)  [opcional]
+  Test Plan ID  →  Número del plan en ADO       (ej: 10716)  [opcional — sin él, el agente usa
+                                                 el plan del Equipo-Sprint actual]
+  Suite ID      →  Número de la suite en ADO    (ej: 10717)  [opcional — sin él, usa/crea la
+                                                 suite de la US: "{US_ID}: {Título}"]
   TC IDs        →  Números de TCs específicos   (ej: 10712)  [opcional]
 
 Para la aplicación bajo prueba:
   URL           →  Dirección web de la app      (ej: https://mi-app.com)  [OBLIGATORIO]
   Usuario       →  Si la app tiene login
-  Contraseña    →  Si la app tiene login  [nunca guardar esto en archivos del repo]
+  Contraseña    →  Si la app tiene login
+```
 
+> 🔐 **Credenciales para automatización (Escenario A):** el agente las guarda en `.env.playwright`
+> (`BASE_URL`, `TEST_USER_<NOMBRE>`, `TEST_PASS_<NOMBRE>`), que está **gitignored** — nunca las
+> pegues en archivos versionados del repo.
+
+```
 Para Zoho (registro de horas):
   US IDs        →  Números de US trabajadas     (ej: 9884)
   Horas         →  Horas por actividad          (ej: 1.5h Preparar TP)
@@ -291,8 +306,8 @@ Los skills son las "capacidades" del agente. Se instalan automáticamente en `.c
 | `tc-reader` | Leer y analizar TCs desde ADO | "leer TCs", "mostrar pasos del TC" |
 | `activity-logger` | Bitácora automática de lo que hace el agente (QA/PO), lista para alimentar el registro en Zoho | "qué hice hoy", "mi bitácora", "pendientes del sprint" |
 | `debugger` | Diagnosticar y corregir tests fallidos | "el test falla", "debug este test" |
-| `create-test-cases` | Crear TCs básicos en ADO | "crear test case rápido en ADO" |
-| `find-skills` | Descubrir capacidades disponibles | "¿qué puedes hacer?", "¿tienes skill para X?" |
+| `create-test-cases` | Crear TCs sueltos/genéricos en ADO (sin US de origen) | "crear test case rápido en ADO" |
+| `discovery` / `code-builder` / `executor` | Pipeline multi-agente para automatizar **lotes** de TCs (variante del Escenario A — ver `agent-architecture.md`) | El agente los propone cuando pides automatizar varios TCs a la vez |
 
 ---
 
