@@ -2,63 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
----
-
-## CODEBASE — DEVELOPER REFERENCE
-
-### Install & run the template installer
-
-```powershell
-node index.js                   # install/update skills, agents and context/ scaffold in this project
-node index.js --force           # also overwrite existing workspace files (never overwrites context/)
-```
-
-To publish a new version: `npm publish` (package name: `playwright-agent-template`).  
-End users install via: `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE`.
-
-### Repository layout
-
-| Path | What it is |
-|------|-----------|
-| `Template/` | Workspace files copied to the user's project dir on install (skipped if already exist, unless `--force`) |
-| `AGENTS.md` | **The single brain** — all global agent rules. `CLAUDE.md` and `copilot-instructions.md` are thin entrypoints that point here. Mirrored to `Template/AGENTS.md`. |
-| `Template/context/*.template.md` | Seed files for `<project>/context/CONTEXT.md` and `<project>/context/UI-UX.md` — created once, never overwritten by `--force` |
-| `skills/` | SKILL.md files — always overwritten to `<project>/.claude/skills/` on every install/update |
-| `agents/` | Sub-agent definitions (`QA-PRO.agent.md`, `PO-PRO.agent.md`) — copied to `<project>/.claude/agents/` (Claude Code) and `<project>/.github/agents/` (Copilot). Single source of each role's rules. |
-| `models.config.yml` | Single source of truth for model-per-tier assignments (installer reads and displays this) |
-| `.agent-state/*.schema.json` | JSON schemas for pipeline contracts — version these |
-| `copilot-instructions.md` | Thin Copilot entrypoint → points to `AGENTS.md` + Copilot MCP tool-name map. Not a rule mirror. |
-
-### Single-brain rule (replaces the old dual-platform sync rule)
-
-Every rule lives in **exactly one file** — there are no copies to keep in sync:
-
-| Rule type | Its only home |
-|-----------|---------------|
-| Global behaviour, routing, prohibitions | `AGENTS.md` |
-| Role rules (QA / PO) | `agents/QA-PRO.agent.md` / `agents/PO-PRO.agent.md` |
-| Task mechanics | `skills/<name>/SKILL.md` |
-| Platform entry + MCP tool names | `CLAUDE.md` / `copilot-instructions.md` |
-
-The **only** thing still mirrored is each sub-agent across the two platform dirs (`.claude/agents/` ↔ `.github/agents/`, same content) and the `Template/` copies the installer ships. Never put a behaviour rule in `CLAUDE.md`/`copilot-instructions.md` — they hold only the `@AGENTS.md` pointer, platform notes, and the tool-name map.
-
-### Adding a new skill
-
-1. Create `skills/<name>/SKILL.md` (installer always overwrites to `.claude/skills/<name>/SKILL.md` in the user's project)
-2. Add a keyword → skill row to the PASO 0 routing table in **`AGENTS.md`** (the only routing table)
-3. Add the skill under the appropriate tier in `models.config.yml`
-
-### Changing model assignments
-
-Edit `models.config.yml` — the installer reads it at runtime and prints the tier table. Tier structure:
-
-| Tier | Rol | Default model |
-|------|-----|---------------|
-| T1 | PO / Backlog Planner | `claude-sonnet-4-6` + extended thinking |
-| T2 | QA Planner | `claude-sonnet-4-6` + extended thinking |
-| T3 | Code Builder | `claude-haiku-4-5-20251001` |
-| T4 | Browser Executor | `claude-haiku-4-5-20251001` |
-| TOps | Operations (Zoho/ADO) | `claude-haiku-4-5-20251001` |
+> **Developer reference** (repo layout, install commands, adding skills, model tiers) → see `README.md § Developer Reference`.
 
 ---
 
@@ -66,7 +10,7 @@ Edit `models.config.yml` — the installer reads it at runtime and prints the ti
 
 > ⚠️ **Este archivo se lee automáticamente en cada sesión.**
 > Las reglas del agente **no viven aquí** — viven en `AGENTS.md` (el cerebro, fuente única).
-> Aquí solo está: el puntero al cerebro, el contexto del proyecto, y el mapeo de tools MCP de Claude Code.
+> Aquí solo está: el puntero al cerebro y el mapeo de tools MCP de Claude Code.
 
 ---
 
@@ -85,7 +29,7 @@ Edit `models.config.yml` — the installer reads it at runtime and prints the ti
 
 - **Subagentes:** se despachan desde `.claude/agents/` — `QA-PRO.agent.md` (QA) y `PO-PRO.agent.md` (PO).
   `QA-PRO.agent.md` es además la capa de autoridad: si un skill contradice una regla de rol, gana el subagente.
-- **Skills:** se leen con la herramienta `Read` desde `.claude/skills/<skill>/SKILL.md`.
+- **Skills:** se leen con la herramienta `Read` desde `skills/<skill>/SKILL.md`.
 - **Reglas globales, routing y prohibiciones:** todas en `AGENTS.md`. No repetirlas aquí.
 
 ---

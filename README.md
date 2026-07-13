@@ -67,7 +67,7 @@ npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE
 
 Esto descarga e instala automáticamente, **todo dentro de la carpeta de tu proyecto** (ya no en carpetas globales del sistema):
 - Los archivos de configuración del agente (`CLAUDE.md`, `copilot-instructions.md`, reglas)
-- Los skills (capacidades del agente) en `.claude/skills/`
+- Los skills (capacidades del agente) en `skills/`
 - Los agentes en `.claude/agents/` (Claude Code) y `.github/agents/` (GitHub Copilot)
 - La carpeta `context/` (`CONTEXT.md`, `UI-UX.md`, `screenshots/`) para el contexto de TU proyecto
 
@@ -131,7 +131,7 @@ del proyecto en `context/`:
 
 ### Si usas Zoho Projects para registrar horas
 
-Abre el archivo: `.claude/skills/zoho_timelog/SKILL.md`
+Abre el archivo: `skills/zoho_timelog/SKILL.md`
 
 Busca la sección **"Contexto del Proyecto"** y reemplaza los valores entre `{{}}` con los de tu empresa:
 
@@ -293,7 +293,7 @@ Para Zoho (registro de horas):
 
 ## 🧩 Skills disponibles
 
-Los skills son las "capacidades" del agente. Se instalan automáticamente en `.claude/skills/` dentro de tu proyecto.
+Los skills son las "capacidades" del agente. Se instalan automáticamente en `skills/` dentro de tu proyecto.
 
 | Skill | ¿Para qué sirve? | El agente lo usa cuando dices... |
 |-------|-----------------|----------------------------------|
@@ -319,7 +319,7 @@ Si hay una nueva versión disponible:
 npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE --force
 ```
 
-Esto actualiza los archivos del workspace, los skills (`.claude/skills/`) y los agentes
+Esto actualiza los archivos del workspace, los skills (`skills/`) y los agentes
 (`.claude/agents/`, `.github/agents/`). Tu carpeta `context/` **nunca se sobreescribe** —
 tu conocimiento del proyecto está a salvo aunque uses `--force`.
 
@@ -356,4 +356,54 @@ Luego, en la carpeta de tu proyecto: `npx github:jmartinez-autoreg/QA-TOOLS-TEMP
 ---
 
 *Generado por [QA-TOOLS-TEMPLATE](https://github.com/jmartinez-autoreg/QA-TOOLS-TEMPLATE)*
+
+---
+
+## 🛠️ Developer Reference (contribuidores del template)
+
+### Install & run the template installer
+
+```powershell
+node index.js                   # instala/actualiza skills, agentes y scaffold context/ en el proyecto
+node index.js --force           # además sobreescribe archivos del workspace existentes (nunca sobreescribe context/)
+```
+
+To publish a new version: `npm publish` (package name: `playwright-agent-template`).  
+End users install via: `npx github:jmartinez-autoreg/QA-TOOLS-TEMPLATE`.
+
+### Repository layout
+
+| Path | What it is |
+|------|-----------|
+| `Template/` | Archivos del workspace copiados al proyecto del usuario al instalar (se saltan si ya existen, salvo `--force`) |
+| `AGENTS.md` | **El cerebro único** — todas las reglas globales del agente. `CLAUDE.md` y `copilot-instructions.md` son entrypoints thin que apuntan aquí. |
+| `Template/context/*.template.md` | Seeds para `<project>/context/CONTEXT.md` y `<project>/context/UI-UX.md` — se crean una vez, nunca se sobreescriben con `--force` |
+| `skills/` | SKILL.md files — siempre sobreescritos a `<project>/skills/` en cada install/update |
+| `agents/` | Sub-agent definitions (`QA-PRO.agent.md`, `PO-PRO.agent.md`) — copiados a `<project>/.claude/agents/` (Claude Code) y `<project>/.github/agents/` (Copilot). Fuente única de las reglas de cada rol. |
+| `models.config.yml` | Fuente única de asignaciones modelo-por-tier (el instalador la lee y la muestra) |
+| `.agent-state/*.schema.json` | JSON schemas para contratos del pipeline — versionar estos |
+| `copilot-instructions.md` | Entrypoint thin de Copilot → apunta a `AGENTS.md` + tabla de tools MCP. No es un espejo de reglas. |
+
+### Single-brain rule
+
+Cada regla vive en **exactamente un archivo** — no hay copias que mantener en sync:
+
+| Tipo de regla | Su único hogar |
+|-----------|---------------|
+| Comportamiento global, routing, prohibiciones | `AGENTS.md` |
+| Reglas de rol (QA / PO) | `agents/QA-PRO.agent.md` / `agents/PO-PRO.agent.md` |
+| Mecánica de una tarea | `skills/<name>/SKILL.md` |
+| Entrypoint de plataforma + nombres de tools MCP | `CLAUDE.md` / `copilot-instructions.md` |
+
+Lo único que se espeja son los sub-agentes entre las dos carpetas de plataforma (`.claude/agents/` ↔ `.github/agents/`, mismo contenido) y las copias `Template/` que distribuye el instalador.
+
+### Adding a new skill
+
+1. Crear `skills/<name>/SKILL.md` (el instalador siempre lo sobreescribe a `<project>/skills/<name>/SKILL.md`)
+2. Agregar la fila keyword → skill en la tabla PASO 0 de **`AGENTS.md`** (la única tabla de routing)
+3. Agregar el skill al tier correspondiente en `models.config.yml`
+
+### Changing model assignments
+
+Editar `models.config.yml` — el instalador lo lee en runtime y muestra la tabla de tiers.
 

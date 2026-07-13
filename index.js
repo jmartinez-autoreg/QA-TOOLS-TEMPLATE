@@ -138,16 +138,16 @@ async function main() {
   setupContext(templateSrc, projectDest);
   console.log('✅ context/ listo — usa el skill "project-onboarding" para completarlo (CONTEXT.md, UI-UX.md)');
 
-  // 3. Instalar skills en .claude/skills/ (SIEMPRE actualiza)
+  // 3. Instalar skills en skills/ (raíz del proyecto — plataforma-agnóstico, SIEMPRE actualiza)
   const skillsSrc  = path.join(__dirname, 'skills');
-  const skillsDest = path.join(projectDest, '.claude', 'skills');
+  const skillsDest = path.join(projectDest, 'skills');
   if (fs.existsSync(skillsSrc)) {
     copyDirAlways(skillsSrc, skillsDest);
     console.log('\n✅ Skills instalados/actualizados en ' + path.relative(projectDest, skillsDest) + ':');
     fs.readdirSync(skillsSrc).forEach(s => console.log('   📦 ' + s));
     console.log('\n   ⚙️  CONFIGURACIÓN REQUERIDA:');
-    console.log('      .claude/skills/zoho_timelog/SKILL.md → Actualiza Portal ID, Project ID y mapeo de US');
-    console.log('      .claude/skills/qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
+    console.log('      skills/zoho_timelog/SKILL.md → Actualiza Portal ID, Project ID y mapeo de US');
+    console.log('      skills/qa_tester/SKILL.md    → Ajusta referencias a tu documentación interna');
   }
 
   // 4. Instalar agentes (SIEMPRE actualiza) — Claude Code (.claude/agents/) y Copilot (.github/agents/)
