@@ -76,6 +76,65 @@ Al recibir una US el agente DEBE seguir este orden:
 
 ---
 
+## Estados de Work Items y Actividades QA Asociadas
+
+> **Fuente:** PROC-QA-Generales de calidad v1.07 §6.1 (Tabla 3)
+
+| Estado | Descripción | Actividades QA | Responsables |
+|--------|-------------|----------------|--------------|
+| **New** | Desarrollo no comenzado | Work item creado, pendiente de inicio | PO crea la US |
+| **Active** | Desarrollo comenzado | DEV comienza desarrollo<br/>DEV/QA realizan Demo de avances | DEV trabaja la US<br/>QA puede preparar TP mientras DEV desarrolla |
+| **Resolved** | Desarrollo completado, listo para QA | TL/DEV: Code Review completo<br/>DEV: PR enviado<br/>TL: PR aprobado<br/>QA: **INICIAR EJECUCIÓN DE PRUEBAS** | QA ejecuta Test Plan o pruebas manuales |
+| **Closed** | Desarrollo y QA completados | **QA: Test Plan ejecutado y Passed**<br/>**QA: Pruebas ejecutadas y Passed**<br/>Comentario "QA PASSED" registrado en Discussion | QA cierra la US después de verificar DoD completa |
+| **On Hold** | Impedimentos | **Tipos de impedimento:**<br/>• Requerimientos: criterios ambiguos/incompletos<br/>• Ambientes: servidor caído, BD no disponible<br/>• Desarrollo: bug bloqueante pendiente<br/>• Pruebas: datos de prueba no disponibles | QA notifica al TL/PO el impedimento<br/>TL gestiona la resolución |
+
+**Flujo típico de estados para QA:**
+```
+New → Active (DEV trabaja) → Resolved (QA ejecuta) → Closed (QA aprueba)
+                                  ↓
+                            On Hold (si hay impedimento)
+                                  ↓
+                            Resolved (al resolver impedimento)
+```
+
+**Reglas importantes:**
+- **NO ejecutar pruebas** sobre US en estado `New` o `Active` — esperar a `Resolved`
+- Si una US pasa a `On Hold` durante ejecución → pausar testing, documentar el impedimento en comentario, notificar al TL
+- Al cerrar (`Closed`), verificar **Definition of Done completa** (ver `po-user-story/references/definition-of-done.md`)
+
+---
+
+## Priorización de Tareas QA del Día
+
+> **Fuente:** PROC-QA-Generales de calidad v1.07 §4.2 (Tabla 2)
+
+Al planificar o consultar qué tareas QA trabajar hoy, aplicar los siguientes 6 criterios en orden:
+
+| # | Criterio | Descripción | Ejemplo |
+|---|----------|-------------|---------|
+| **1** | **Información del Daily Scrum** | Priorizar lo comprometido en el Daily del día. Lo comprometido siempre se trabaja primero. | PO/TL dijeron "hoy cerrar US 12345" → esa US se prioriza sobre el resto |
+| **2** | **Estado del Ítem** | Orden: `Resolved` → `Active` → `New`<br/>- `Resolved`: Listo para QA, alta prioridad<br/>- `Active`: En progreso, mediana<br/>- `New`: Sin iniciar, baja | 2 US: una en `Resolved` (se terminó de programar) y otra en `New` (aún en backlog) → primero la Resolved |
+| **3** | **Fechas FIFO** | Las US más antiguas primero (campo `CreatedDate`). Evitar que se queden estancadas. | US 12300 creada el 01/05, US 12350 creada el 05/05 → primero la 12300 |
+| **4** | **Horas restantes** | Orden ascendente por `Microsoft.VSTS.Scheduling.RemainingWork`.<br/>Cerrar primero las US con pocas horas pendientes para avanzar el sprint. | US con 2h restantes vs US con 8h restantes → primero la de 2h |
+| **5** | **Dependencias** | Work items padre (Parent) tienen prioridad sobre sus hijos. Verificar relación `System.LinkTypes.Hierarchy-Reverse` en ADO. | US padre 12300 con child 12301 → primero QA sobre la 12300 |
+| **6** | **Orden en el Backlog** | Orden de los ítems en el backlog del sprint (`Microsoft.VSTS.Common.BacklogPriority`). Respetar la priorización de negocio del PO. | Ítem con prioridad 1000 vs prioridad 2000 → primero el 1000 |
+
+**Cómo usar:**
+1. Al inicio del día (o cuando el usuario pregunte "qué hago hoy"):
+   - Consultar WIQL en ADO: todas las US del sprint actual del proyecto activo, campos relevantes (State, CreatedDate, RemainingWork, BacklogPriority, etc.)
+   - Aplicar los 6 criterios en orden (1 → 2 → 3 → 4 → 5 → 6)
+   - Mostrar tabla ordenada con las top 5-10 US priorizadas
+2. Si el usuario menciona un Daily o compromiso explícito (criterio 1) → sobrescribir todo lo demás
+
+**Modalidades de trabajo QA:**
+- **Estándar:** QA trabaja lo que aparece en el backlog del sprint según estos criterios
+- **Excepción:** Cuando la carga de trabajo del día supera la capacidad del QA:
+  - El QA analista debe **notificar al Team Lead** de inmediato
+  - El TL decide qué US se pasan al siguiente sprint (re-priorización)
+  - Documentar en el Daily la razón de la excepción
+
+---
+
 ## Fases de Trabajo
 
 ### Fase 0 — Verificar estado del Test Plan (obligatorio antes de cualquier acción)
@@ -266,7 +325,7 @@ Las PRECONDs se numeran **secuencialmente desde 0**. Incluir **solo** las catego
 > - ❌ Adivinar `Acceso portal` cuando no está documentado (ej. dejarlo con `?`) — si `context/UI-UX.md` no lo tiene, preguntar al usuario (AGENTS.md §8.1 y §8.2)
 > - ✅ Un solo row con Shift+Enter entre cada campo
 >
-> ⚠️ **EXPECTED RESULT VACÍO VISUAL:** Las filas de PRECOND en ADO llevan únicamente el campo **Action** con el texto de la precondición. El campo **Expected Result debe contener solo `<BR/>` (o `&lt;BR/&gt;` en XML)** para que aparezca visualmente vacío en ADO. Solo los pasos de ejecución (ValidateStep/ActionStep) llevan Expected Result con contenido descriptivo.
+> ⚠️ **SIN EXPECTED RESULT:** Las filas de PRECOND en ADO llevan únicamente el campo **Action** con el texto de la precondición. El campo **Expected Result debe quedar vacío** en todas las filas de PRECOND. Solo los pasos de ejecución llevan Expected Result.
 
 > **Notación adicional** (detalle completo en `create-test-cases/SKILL.md` §3.1, fuente: GUÍA-QA-Redacción de casos de pruebas v1.00 §3.3):
 > - Letras (`1A`, `1B`...) cuando hay más de una PRECOND del mismo tipo en la misma posición.

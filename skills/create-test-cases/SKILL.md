@@ -33,7 +33,26 @@ Antes de crear cualquier TC, necesitas estos datos. **Pregunta todo lo que falte
 
 ---
 
-## 2. Nomenclatura del título (estándar empresa)
+## 2. Estilos y Formatos (estándar oficial)
+
+> **Fuente:** GUÍA-QA-Redacción de casos de pruebas v1.00 §2 (Tabla 1)
+
+### 2.1 Reglas de formato en pasos de TC
+
+| Elemento | Cómo usarlo | Ejemplo válido | Ejemplo NO válido |
+|----------|-------------|----------------|-------------------|
+| **Bold en nombres UI** | Usar **bold** para títulos de pantallas, nombres de campos, botones con >1 palabra. Ser consistente en todo el TC. | `Clic en el botón **Enviar solicitud**` | `Clic en el botón Enviar solicitud` (sin bold) |
+| **Comillas dobles** | Alternativa al bold para títulos/nombres UI. Mantener consistencia: si usas comillas en un elemento, usarlas en todos los del mismo tipo. | `Ir a pantalla "Ingresar factura"` | Mezclar: `"Ingresar factura"` y `Ingresar usuarios` sin comillas |
+| **Comillas simples** | Otra alternativa al bold. Mismo criterio de consistencia. | `Ir a pantalla 'Ingresar factura'` | Mezclar comillas dobles y simples |
+| **`botón (seleccionado)`** | Al describir alertas/modales con varios botones, indicar cuál tiene foco por defecto con `(seleccionado)` después del nombre. | `Presenta alerta con botones 'Sí' y 'No (seleccionado)'` | No especificar cuál botón tiene foco |
+| **Listas con viñetas en acciones** | Al listar varios valores para ingresar (acción tipo General-Compleja):<br/>1. Shift+Enter (nueva línea sin crear paso nuevo)<br/>2. Ingresar `-` + espacio<br/>3. Ingresar valor | `Ingresar valores en campos (PRECOND 2) y oprimir Enviar.`<br/>`- Primer Nombre`<br/>`- Apellido Paterno` | Lista en línea plana: `Ingresar Primer Nombre, Apellido Paterno` |
+| **Listas con viñetas en resultados** | Al listar >2-3 elementos observables en resultado esperado, usar listas. Mismo formato: Shift+Enter + `-` + espacio | `Presenta los siguientes valores:`<br/>`- Información de valor 1`<br/>`- Información de valor 2` | Texto corrido: `Presenta: Información de valor 1, Información de valor 2` |
+
+**Importante:** En ADO, las listas dentro de un paso se crean con Shift+Enter (nueva línea dentro del mismo step), **NO** con Enter normal (que crearía un step nuevo). Al usar la tool MCP, usar `<br/>` en el texto del action para representar Shift+Enter.
+
+---
+
+## 3. Nomenclatura del título (estándar empresa)
 
 **Formato obligatorio:**
 ```
@@ -84,8 +103,6 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 4. Clic en el botón 'Guardar'|Se presenta mensaje de éxito 'Pedido creado correctamente' y se redirige a la lista de pedidos
 ```
 
-> ⚠️ **EXPECTED RESULT de PRECOND:** Todas las filas PRECOND deben tener Expected Result vacío visual — en formato texto plano (como arriba) se escribe solo `|` sin contenido después, y en XML se escribe `<BR/>` o `&lt;BR/&gt;`. Solo los pasos de validación/ejecución llevan Expected Result con contenido.
-
 **Ejemplo — TC deps + Datos + Login (tres PRECONDs):**
 ```
 1. PRECOND 0: TC-A (ID XXXX) ejecutado hasta el paso 10; el sistema muestra la pantalla de resultados|
@@ -94,7 +111,24 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 4. Clic en el botón 'Crear Pedido'|Se presenta el formulario de creación con los campos Nombre, Cantidad y Fecha habilitados
 ```
 
-### 3.1 Notación de letras, `PRECOND 0` "TC Ejecutado" y referencias inline
+### 3.1 Niveles de detalle de las acciones
+
+> **Fuente:** GUÍA-QA-Redacción de casos de pruebas v1.00 §4.3 (Tabla 5)
+
+Al decidir si mantener una acción en un solo paso o dividirla en múltiples pasos, considerar los siguientes niveles:
+
+| Nivel | Acciones detalladas | Resultados detallados | Cuándo usar | Ejemplo |
+|-------|---------------------|----------------------|-------------|----------|
+| **Resumido** | NO | NO | Navegación básica sin validaciones específicas requeridas por criterios | `Ingresar al portal Académico.` → `Presenta pantalla de inicio.` |
+| **Compuesto** (General-Compleja) | NO (múltiples acciones agrupadas) | NO (resultado único del grupo) | Varias acciones en la misma pantalla forman parte del mismo paso lógico. Se agrupan con "y", "luego". Criterios no requieren validar cada acción por separado. | `Ir a módulo PEI y tarjeta 'Crear/Modificar PEI'. En búsqueda rápida ingresar SIE (PRECOND 1), oprimir Buscar y luego Seleccionar.` |
+| **Separado** (Detallado) | SÍ | SÍ | Cada acción requiere verificar su propio resultado específico. Criterios de aceptación lo requieren explícitamente. | Paso 1: `Ingresar nombre en 'Primer Nombre'` → `Campo muestra el texto sin errores`<br/>Paso 2: `Ingresar apellido en 'Apellido Paterno'` → `Campo muestra el texto sin errores` |
+
+**Regla de decisión:**
+- Si los **criterios de aceptación** no detallan el resultado de cada acción intermedia → usar **Resumido o Compuesto**
+- Si los **criterios de aceptación** requieren validar el resultado de cada acción → usar **Separado**
+- Un mismo TC puede combinar niveles: pasos Resumidos/Compuestos para navegación + pasos Separados para el flujo crítico
+
+### 3.2 Notación de letras, `PRECOND 0` "TC Ejecutado" y referencias inline
 
 (Fuente: GUÍA-QA-Redacción de casos de pruebas v1.00, §3.3)
 
@@ -119,6 +153,14 @@ de la que provienen los datos usados en ese paso: `(PRECOND 2)`, `(PRECOND 1A)`,
 Ejemplos reales:
 - "Ingresar portal Finanzas (PRECOND 3)"
 - "En búsqueda ingresar filtros (PRECOND 1A) y oprimir Buscar"
+
+**Espaciado preciso en PRECONDs (formato oficial):**
+El estándar oficial requiere **2 espacios** después de los dos puntos en una PRECOND:
+- ✅ Correcto: `PRECOND 0:  Login` (2 espacios entre `:` y `Login`)
+- ❌ Incorrecto: `PRECOND 0: Login` (1 espacio)
+
+Este detalle asegura consistencia con los documentos oficiales de Quisit. Al generar TCs, aplicar
+este formato automáticamente.
 
 ---
 
@@ -213,10 +255,46 @@ Al redactar el resultado esperado de un paso, considerar estos aspectos (no todo
 
 ### Nivel de detalle del resultado (Tabla 7, GUÍA-QA-Redacción de casos de pruebas v1.00 §5.2)
 
-| Nivel | Descripción | Ejemplo |
-|---|---|---|
-| **Resumen** | Sin detalle del mensaje/alerta | "Presenta pantalla de inicio" |
-| **Detallado** | Mensaje de validación + alerta con botón seleccionado, texto literal completo | "Presenta alerta 'Tiene cambios sin guardar. ¿Desea cancelar?' con botones 'Sí' y 'No (seleccionado)'" |
+| Nivel | Cuándo usar | Descripción | Ejemplo |
+|---|---|---|---|
+| **Resumen** | Los requerimientos/criterios NO lo piden explícitamente | Sin detalle del mensaje/alerta, solo el estado general | "Presenta pantalla de inicio" |
+| **Detallado** | Los requerimientos/criterios SÍ lo requieren, o hay alertas/validaciones críticas | Mensaje completo + botón con foco, color del mensaje, texto literal entre comillas | "Presenta alerta con ícono de condición crítica en rojo, botón OK (seleccionado) y mensaje: 'Favor de ingresar todos los valores requeridos.'" |
+
+**Regla de decisión:**
+- Si el criterio de aceptación menciona el mensaje específico → usar **Detallado**
+- Si el criterio solo dice "debe validar" sin especificar el texto → usar **Resumen**
+- Para resultados de seguridad, validaciones críticas, o alertas con múltiples botones → siempre **Detallado**
+
+---
+
+### 4.3 Verbos estándar en acciones (referencia rápida)
+
+> **Fuente:** GUÍA-QA-Redacción de casos de pruebas v1.00 §4.2
+
+Usar verbos consistentes y precisos para describir acciones del usuario:
+
+| Verbo | Cuándo usar | Ejemplo |
+|-------|-------------|----------|
+| **Ingresar** | Teclear texto en un campo | "Ingresar 'Juan Pérez' en el campo 'Nombre'" |
+| **Seleccionar** | Elegir de dropdown, radio button, checkbox | "Seleccionar 'México' en el dropdown 'País'" |
+| **Oprimir** / **Clic** | Hacer clic en botón o enlace | "Oprimir el botón 'Guardar'" / "Clic en el enlace 'Ver detalles'" |
+| **Marcar** / **Desmarcar** | Checkbox específicamente | "Marcar el checkbox 'Acepto términos y condiciones'" |
+| **Arrastrar** | Drag & drop | "Arrastrar el archivo desde el explorador al área de carga" |
+| **Navegar a** / **Ir a** | Cambiar de pantalla/módulo | "Navegar a la pantalla 'Gestión de Usuarios'" |
+| **Abrir** | Menú, modal, sección colapsable | "Abrir el menú 'Configuración'" |
+| **Cerrar** | Modal, diálogo, ventana | "Cerrar el diálogo de confirmación" |
+| **Cargar** / **Subir** | Upload de archivos | "Cargar el archivo 'documento.pdf'" |
+| **Descargar** | Download de archivos | "Descargar el reporte en formato Excel" |
+| **Expandir** / **Colapsar** | Secciones accordion | "Expandir la sección 'Datos Adicionales'" |
+| **Editar** | Modificar un registro existente | "Editar el pedido con ID 12345" |
+| **Eliminar** | Borrar un registro | "Eliminar el usuario 'test01' de la lista" |
+| **Filtrar** / **Buscar** | Aplicar filtros o búsqueda | "Filtrar por estado 'Activo'" / "Buscar por nombre 'Juan'" |
+| **Ordenar** | Cambiar orden de tabla/lista | "Ordenar por fecha de creación descendente" |
+
+**Reglas de uso:**
+- Mantener consistencia: si usas "Oprimir" para botones, no alternar con "Clic" en el mismo TC
+- Ser específico: "Seleccionar 'Opción A'" es mejor que "Elegir una opción"
+- Evitar verbos ambiguos como "acceder", "ejecutar", "realizar" — ser concreto
 
 ---
 
@@ -266,7 +344,61 @@ mcp_ado_testplan_add_test_cases_to_suite(
 
 ---
 
-## 6. Escenarios típicos a cubrir
+## 6. Tipos de Escenarios (clasificación oficial)
+
+> **Fuente:** GUÍA-QA-Redacción de casos de pruebas v1.00 §6.1 (Tabla 8)
+
+Al diseñar los Test Cases, clasificar los escenarios según estos 5 tipos:
+
+| Tipo | Descripción | Ejemplos oficiales |
+|------|-------------|-------------------|
+| **Positivos** | Verifican funcionamiento correcto bajo condiciones esperadas | • Al ingresar valores requeridos y guardar, no presenta errores<br/>• Información almacenada exitosamente se presenta en búsquedas<br/>• Al subir archivo formato PDF correcto, no presenta error |
+| **Negativos** | Evalúan cómo maneja entradas no válidas o condiciones inesperadas | • Al no ingresar valor en campo requerido → mensaje de error<br/>• En campo de teléfono al ingresar letras → mensaje de error<br/>• Al subir archivo no en formato adecuado → mensaje de error |
+| **Usabilidad** | Evalúan facilidad de uso para usuarios finales | • Mascarilla en campo de teléfono: `(###) ###-####`<br/>• No presenta errores ortográficos o gramaticales<br/>• No presenta formatos de archivos no adecuados en selector |
+| **Límite** | Prueban valores mínimos y máximos permitidos | • Al ingresar parcialmente números de teléfono → mensaje requiere 7 dígitos<br/>• Al subir archivo >5 MB → mensaje de error<br/>• Al subir archivo de 0 MB → mensaje de error |
+| **Seguridad** | Examina resistencia a acceso no autorizado | • Intentar acceder sin credenciales → deniega acceso<br/>• Intentar acceder funcionalidad sin permisos → no se presenta |
+
+**Cómo usar:**
+- Al recibir una US, identificar qué tipos de escenarios requieren los criterios de aceptación
+- Priorizar escenarios **Positivos** (happy path) siempre
+- Agregar escenarios **Negativos** para validaciones críticas
+- Incluir **Seguridad** si la funcionalidad tiene roles/permisos
+- Considerar **Límite** para campos con restricciones numéricas o de tamaño
+- Considerar **Usabilidad** para flujos complejos o formularios extensos
+
+---
+
+## 7. Criterios para Crear Múltiples TCs (decisión de división)
+
+> **Fuente:** GUÍA-QA-Redacción de casos de pruebas v1.00 §6.2 (Tabla 9)
+
+Al decidir si crear 1 TC o varios TCs para una funcionalidad, aplicar estos 6 criterios:
+
+| # | Criterio | ¿Cuándo dividir en TCs separados? | Ejemplo |
+|---|----------|----------------------------------|----------|
+| **A** | **Número de precondiciones** | Si hay >3-4 PRECONDs, o si hay PRECONDs incompatibles entre sí (ej. usuario con permiso vs sin permiso) | TC-A: Con permiso de edición<br/>TC-B: Sin permiso de edición |
+| **B** | **Número de pasos de ejecución** | Si el flujo completo requiere >15-20 pasos, dividir en TCs lógicos | TC-A: Crear registro (pasos 1-10)<br/>TC-B: Editar registro (pasos 1-8, usa PRECOND 0: TC-A) |
+| **C** | **Cambio de módulo/pantalla principal** | Si la funcionalidad navega a otro módulo o portal, crear TC separado | TC-A: Portal Ventas → Crear pedido<br/>TC-B: Portal Inventario → Consultar stock |
+| **D** | **Tipo de escenario** | Escenarios **Positivos** vs **Negativos** pueden ir en el mismo TC si comparten flujo. **Seguridad** y **Límite** suelen requerir TCs separados. | TC-A: Crear pedido [Happy Path + Validaciones]<br/>TC-B: Crear pedido [Sin permisos] |
+| **E** | **Complejidad de resultados esperados** | Si cada escenario tiene >3 resultados complejos/detallados, considerar TC separado | TC-A: Validaciones de campos (paso 3: valida Nombre, paso 4: valida Email, paso 5: valida Teléfono)<br/>TC-B: Validaciones de fechas |
+| **F** | **Dependencias entre escenarios** | Si un escenario DEBE ejecutarse después de otro, usar `PRECOND 0: TC Ejecutado`. Si son independientes, TCs separados. | TC-A: Registro de usuario<br/>TC-B (depende de TC-A): Login con usuario registrado |
+
+**Regla general:**
+- **AGRUPAR** cuando los escenarios:
+  - Comparten el mismo flujo de navegación
+  - Ocurren en la misma pantalla/popup
+  - Tienen precondiciones compatibles
+  - Juntos suman <15 pasos
+
+- **DIVIDIR** cuando:
+  - Cambian de módulo/portal
+  - Tienen precondiciones incompatibles (ej. roles diferentes)
+  - El TC resultante supera 20 pasos
+  - Los criterios de aceptación los separan explícitamente
+
+---
+
+## 8. Escenarios típicos a cubrir (referencia rápida)
 
 Para cualquier funcionalidad, considerar al menos estos escenarios:
 
@@ -289,7 +421,7 @@ Para cualquier funcionalidad, considerar al menos estos escenarios:
 
 ---
 
-## 7. Flujo de trabajo completo
+## 9. Flujo de trabajo completo
 
 ```
 1. Recolectar contexto (sección 1)
@@ -320,7 +452,7 @@ Esperar confirmación ("dale", "sí", "ok") antes de crear en ADO.
 
 ---
 
-## 8. Ejemplo completo de TC bien escrito
+## 10. Ejemplo completo de TC bien escrito
 
 **Título:** `MiPortal-Ventas-Gestión Pedidos-Creación de Pedido [Cancelar a mitad del proceso]`
 
@@ -336,9 +468,69 @@ Esperar confirmación ("dale", "sí", "ok") antes de crear en ADO.
 
 ---
 
+## 10.2 Ejemplos adicionales de TCs (casos avanzados)
+
+### Ejemplo A: TC con dependencia (`PRECOND 0: TC Ejecutado`)
+
+**Título:** `Autoreg-Gestión Usuarios-Login-Autenticación [Usuario previamente registrado]`
+
+**Contexto:** Este TC depende de que el TC anterior (registro de usuario) se haya ejecutado exitosamente.
+
+**Pasos:**
+```
+1. PRECOND 0:  TC Ejecutado<br/>- 12345: Autoreg-Gestión Usuarios-Registro-Crear usuario [Happy Path]|
+2. PRECOND 1:  Usuario registrado en PRECOND 0|
+3. Navegar a la pantalla de Login de Autoreg|Presenta pantalla de Login con:<br/>- Campo 'Usuario'<br/>- Campo 'Contraseña'<br/>- Botón 'Iniciar Sesión'
+4. Ingresar credenciales del usuario (PRECOND 1)|Campos muestran los valores ingresados sin errores
+5. Oprimir el botón 'Iniciar Sesión'|Se presenta el estado final con:<br/>- Redirección a Dashboard de Autoreg<br/>- Barra superior muestra: Usuario (nombre del PRECOND 1), Rol (Distribuidor)<br/>- Menú lateral visible con opciones del rol
+```
+
+### Ejemplo B: TC con múltiples PRECONDs del mismo tipo (notación de letras)
+
+**Título:** `MiPortal-Ventas-Comparación Productos-Comparar [Dos productos diferentes]`
+
+**Pasos:**
+```
+1. PRECOND 0:  Login<br/>- Usuario: vendedor01<br/>- Rol: VENDEDOR<br/>- Acceso portal: MiPortal<br/>- Acceso módulo: Ventas|
+2. PRECOND 1A:  Producto A existente<br/>- ID: PROD-001<br/>- Nombre: Laptop Dell<br/>- Precio: $1200|
+3. PRECOND 1B:  Producto B existente<br/>- ID: PROD-002<br/>- Nombre: Laptop HP<br/>- Precio: $1100|
+4. Ir al módulo Ventas y tarjeta 'Comparación de Productos'|Presenta pantalla de comparación con:<br/>- Campo de búsqueda 'Producto 1'<br/>- Campo de búsqueda 'Producto 2'<br/>- Botón 'Comparar'
+5. En 'Producto 1' ingresar ID (PRECOND 1A) y seleccionar|Campo muestra: PROD-001 - Laptop Dell
+6. En 'Producto 2' ingresar ID (PRECOND 1B) y seleccionar|Campo muestra: PROD-002 - Laptop HP
+7. Oprimir el botón 'Comparar'|Se presenta tabla comparativa con:<br/>- Columna 1: Laptop Dell - $1200<br/>- Columna 2: Laptop HP - $1100<br/>- Filas: Características, Precio, Disponibilidad
+```
+
+### Ejemplo C: TC de tipo Límite (validación de tamaño de archivo)
+
+**Título:** `PortalDoc-Documentos-Subir Archivo-Validación [Tamaño excede límite]`
+
+**Pasos:**
+```
+1. PRECOND 0:  Login<br/>- Usuario: admin01<br/>- Rol: ADMINISTRADOR<br/>- Acceso portal: PortalDoc|
+2. PRECOND 1:  Archivo de prueba preparado<br/>- Nombre: reporte_grande.pdf<br/>- Tamaño: 12 MB (excede límite de 5 MB)|
+3. Navegar al módulo Documentos y oprimir 'Subir Archivo'|Presenta modal de carga con:<br/>- Área de arrastre de archivos<br/>- Botón 'Seleccionar archivo'<br/>- Texto: 'Tamaño máximo: 5 MB'
+4. Arrastrar el archivo (PRECOND 1) al área de carga|Se presenta mensaje de validación en rojo:<br/>"El archivo excede el tamaño máximo permitido (5 MB). Tamaño actual: 12 MB."
+5. Intentar oprimir el botón 'Subir'|Botón 'Subir' permanece deshabilitado (gris). No se ejecuta la carga.
+```
+
+### Ejemplo D: TC de tipo Seguridad (acceso denegado por permisos)
+
+**Título:** `Autoreg-Admin-Gestión Roles-Eliminar Rol [Sin permisos]`
+
+**Pasos:**
+```
+1. PRECOND 0:  Login<br/>- Usuario: user_readonly<br/>- Rol: CONSULTOR (sin permisos de escritura)<br/>- Acceso portal: Autoreg|
+2. PRECOND 1:  Rol existente en el sistema<br/>- ID: ROL-005<br/>- Nombre: Vendedor Junior|
+3. Navegar al módulo Admin, sección 'Gestión de Roles'|Presenta lista de roles con:<br/>- Rol 'Vendedor Junior' visible en la tabla<br/>- Botón 'Eliminar' NO visible (permiso denegado)
+4. Intentar acceder directamente a la URL de eliminación: `/admin/roles/delete/ROL-005`|Se presenta alerta de seguridad con:<br/>- Ícono de error en rojo<br/>- Mensaje: "Acceso denegado. No tiene permisos para realizar esta acción."<br/>- Botón 'Aceptar (seleccionado)'<br/>- Redirección automática a lista de roles (no ejecuta eliminación)
+```
+
+---
+
 ## Notas técnicas
 
 - Los TCs se crean con estado `Design` por defecto
 - El campo `steps` en ADO usa formato XML interno (`<steps>` con `<step>` tags)
 - La tool `update_test_case_steps` convierte el formato `N. acción|resultado` a XML automáticamente
 - Si un PRECOND no tiene resultado esperado, ADO agrega "Verify step completes successfully" — esto es aceptable para precondiciones
+- **Espaciado oficial:** 2 espacios después de `:` en PRECONDs (ej. `PRECOND 0:  Login`)
