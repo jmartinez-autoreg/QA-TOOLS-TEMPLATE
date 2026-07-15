@@ -47,9 +47,14 @@ Al recibir una US el agente DEBE seguir este orden:
 
 1. **Leer** los criterios de aceptación y UX/UI de la historia
 2. **Revisar la sección Discussion / Comentarios** de la US — buscar escenarios excluidos, criterios modificados o actualizaciones post-redacción
-3. **Identificar** portal, módulo, pantalla para el nombre del TC
-4. **Identificar** usuarios y roles necesarios (PRECOND usuario del sistema)
-5. **Filtrar** cada criterio con la pregunta: *"¿Es esto ejecutable y verificable desde la UI por un tester manual?"*
+3. **Evaluar Story Points** — verificar el campo `Microsoft.VSTS.Scheduling.StoryPoints`:
+   - Si **SP ≤ 2** → proponer al usuario: *"Esta US tiene {SP} story points. ¿Prefieres ejecutar prueba exploratoria directa (sin TC formal) o crear Test Plan completo?"*
+   - Si el usuario elige exploratoria → NO crear TC ni TP formal. Documentar en comentario de la US: `Prueba exploratoria — no requiere Test Plan formal debido a la baja complejidad ({SP} SP).` + descripción breve de qué se validará manualmente
+   - Si el usuario elige TP completo → continuar con el flujo normal
+   - Si **SP > 2** o SP no está definido → continuar con el flujo normal (crear TP formal)
+4. **Identificar** portal, módulo, pantalla para el nombre del TC
+5. **Identificar** usuarios y roles necesarios (PRECOND usuario del sistema)
+6. **Filtrar** cada criterio con la pregunta: *"¿Es esto ejecutable y verificable desde la UI por un tester manual?"*
    - Si **todos** responden NO → US es **Cobertura DEV**: NO crear TC ni TP formal. Documentar en
      comentario de la US: `Cobertura DEV — verificación a cargo del equipo de desarrollo.` + una
      justificación breve **en términos de la aplicación/UI** (ej. "la aplicación no cuenta con
@@ -58,13 +63,12 @@ Al recibir una US el agente DEBE seguir este orden:
      tiene acceso a esa carpeta.
    - Si **algunos** responden NO → excluir esos criterios del TC, incluir solo pasos UI verificables
    - **Señales de Cobertura DEV:** "query en BD", "estructura de tablas", "acceso a base de datos", "código/programación", "appsettings", "worker/Service Bus", "infraestructura", "tabla de settings", "script SQL"
-6. **Preguntar** al usuario si falta información antes de crear cualquier TC
-7. **Aplicar** la regla de división para determinar cuántos TC se necesitan
-8. **Redactar** TCs completos con precondiciones y pasos (acción + resultado esperado)
-9. **Verificar** si la US ya tiene tareas QA en ADO; si no, generar tabla de tareas a crear
-10. **Generar** tabla de tiempo lista para registrar al final del día
-
-11. **Validar formato ADO de pasos** antes de publicar: `N. accion|resultado` con `\n` entre pasos
+7. **Preguntar** al usuario si falta información antes de crear cualquier TC
+8. **Aplicar** la regla de división para determinar cuántos TC se necesitan
+9. **Redactar** TCs completos con precondiciones y pasos (acción + resultado esperado)
+10. **Verificar** si la US ya tiene tareas QA en ADO; si no, generar tabla de tareas a crear
+11. **Generar** tabla de tiempo lista para registrar al final del día
+12. **Validar formato ADO de pasos** antes de publicar: `N. accion|resultado` con `\n` entre pasos
   - PRECOND debe llevar prefijo literal `PRECOND X:` dentro del texto de accion
   - PRECOND sin Expected Result se envía como `...|<BR/>` (tag `<BR/>` queda invisible en ADO pero evita que aparezca texto automático)
   - **Saltos de línea dentro de un PRECOND (Shift+Enter):** usar `<br/>` en el texto del action — NO `\n` (que crea un step nuevo separado). Ejemplo: `PRECOND 0: Login<br/>- Usuario: X<br/>- Rol: Y<br/>- Acceso portal: Z<br/>- Acceso módulo: W`
@@ -72,65 +76,6 @@ Al recibir una US el agente DEBE seguir este orden:
 > **Regla de oro:** NO crear un TC por cada criterio de aceptación.
 > Cubrir todos los criterios posibles en un solo TC cuando comparten el mismo flujo.
 > Solo dividir cuando hay razón concreta.
-
----
-
-## Estados de Work Items y Actividades QA Asociadas
-
-> **Fuente:** PROC-QA-Generales de calidad v1.07 §6.1 (Tabla 3)
-
-| Estado | Descripción | Actividades QA | Responsables |
-|--------|-------------|----------------|--------------|
-| **New** | Desarrollo no comenzado | Work item creado, pendiente de inicio | PO crea la US |
-| **Active** | Desarrollo comenzado | DEV comienza desarrollo<br/>DEV/QA realizan Demo de avances | DEV trabaja la US<br/>QA puede preparar TP mientras DEV desarrolla |
-| **Resolved** | Desarrollo completado, listo para QA | TL/DEV: Code Review completo<br/>DEV: PR enviado<br/>TL: PR aprobado<br/>QA: **INICIAR EJECUCIÓN DE PRUEBAS** | QA ejecuta Test Plan o pruebas manuales |
-| **Closed** | Desarrollo y QA completados | **QA: Test Plan ejecutado y Passed**<br/>**QA: Pruebas ejecutadas y Passed**<br/>Comentario "QA PASSED" registrado en Discussion | QA cierra la US después de verificar DoD completa |
-| **On Hold** | Impedimentos | **Tipos de impedimento:**<br/>• Requerimientos: criterios ambiguos/incompletos<br/>• Ambientes: servidor caído, BD no disponible<br/>• Desarrollo: bug bloqueante pendiente<br/>• Pruebas: datos de prueba no disponibles | QA notifica al TL/PO el impedimento<br/>TL gestiona la resolución |
-
-**Flujo típico de estados para QA:**
-```
-New → Active (DEV trabaja) → Resolved (QA ejecuta) → Closed (QA aprueba)
-                                  ↓
-                            On Hold (si hay impedimento)
-                                  ↓
-                            Resolved (al resolver impedimento)
-```
-
-**Reglas importantes:**
-- **NO ejecutar pruebas** sobre US en estado `New` o `Active` — esperar a `Resolved`
-- Si una US pasa a `On Hold` durante ejecución → pausar testing, documentar el impedimento en comentario, notificar al TL
-- Al cerrar (`Closed`), verificar **Definition of Done completa** (ver `po-user-story/references/definition-of-done.md`)
-
----
-
-## Priorización de Tareas QA del Día
-
-> **Fuente:** PROC-QA-Generales de calidad v1.07 §4.2 (Tabla 2)
-
-Al planificar o consultar qué tareas QA trabajar hoy, aplicar los siguientes 6 criterios en orden:
-
-| # | Criterio | Descripción | Ejemplo |
-|---|----------|-------------|---------|
-| **1** | **Información del Daily Scrum** | Priorizar lo comprometido en el Daily del día. Lo comprometido siempre se trabaja primero. | PO/TL dijeron "hoy cerrar US 12345" → esa US se prioriza sobre el resto |
-| **2** | **Estado del Ítem** | Orden: `Resolved` → `Active` → `New`<br/>- `Resolved`: Listo para QA, alta prioridad<br/>- `Active`: En progreso, mediana<br/>- `New`: Sin iniciar, baja | 2 US: una en `Resolved` (se terminó de programar) y otra en `New` (aún en backlog) → primero la Resolved |
-| **3** | **Fechas FIFO** | Las US más antiguas primero (campo `CreatedDate`). Evitar que se queden estancadas. | US 12300 creada el 01/05, US 12350 creada el 05/05 → primero la 12300 |
-| **4** | **Horas restantes** | Orden ascendente por `Microsoft.VSTS.Scheduling.RemainingWork`.<br/>Cerrar primero las US con pocas horas pendientes para avanzar el sprint. | US con 2h restantes vs US con 8h restantes → primero la de 2h |
-| **5** | **Dependencias** | Work items padre (Parent) tienen prioridad sobre sus hijos. Verificar relación `System.LinkTypes.Hierarchy-Reverse` en ADO. | US padre 12300 con child 12301 → primero QA sobre la 12300 |
-| **6** | **Orden en el Backlog** | Orden de los ítems en el backlog del sprint (`Microsoft.VSTS.Common.BacklogPriority`). Respetar la priorización de negocio del PO. | Ítem con prioridad 1000 vs prioridad 2000 → primero el 1000 |
-
-**Cómo usar:**
-1. Al inicio del día (o cuando el usuario pregunte "qué hago hoy"):
-   - Consultar WIQL en ADO: todas las US del sprint actual del proyecto activo, campos relevantes (State, CreatedDate, RemainingWork, BacklogPriority, etc.)
-   - Aplicar los 6 criterios en orden (1 → 2 → 3 → 4 → 5 → 6)
-   - Mostrar tabla ordenada con las top 5-10 US priorizadas
-2. Si el usuario menciona un Daily o compromiso explícito (criterio 1) → sobrescribir todo lo demás
-
-**Modalidades de trabajo QA:**
-- **Estándar:** QA trabaja lo que aparece en el backlog del sprint según estos criterios
-- **Excepción:** Cuando la carga de trabajo del día supera la capacidad del QA:
-  - El QA analista debe **notificar al Team Lead** de inmediato
-  - El TL decide qué US se pasan al siguiente sprint (re-priorización)
-  - Documentar en el Daily la razón de la excepción
 
 ---
 
@@ -969,6 +914,40 @@ Total: 6
 | Crear un TC separado para validar el estado inicial de un elemento (ej. botón deshabilitado sin selección) | Incluir esa verificación como un paso de verificación al inicio del TC del flujo feliz |
 | Generar tabla de tiempo y registrar en Zoho sin confirmación del usuario | Mostrar tabla propuesta y preguntar "¿Estos registros son correctos? ✅" antes de registrar |
 | Asumir qué tareas del día completó el usuario (ej. asumir que hizo Demo solo porque la tarea existe) | Detectar automáticamente vía ADO/bitácora (AGENTS.md §8.6); preguntar solo por lo sin rastro en ADO |
+
+---
+
+---
+
+## Cuándo NO crear Test Plan formal
+
+Hay 2 situaciones donde NO se debe crear TC ni TP formal:
+
+### 1. Story Points ≤ 2 (baja complejidad)
+
+Si la US tiene **2 o menos story points**:
+- **Proponer** al usuario: *"Esta US tiene {SP} story points. ¿Prefieres ejecutar prueba exploratoria directa (sin TC formal) o crear Test Plan completo?"*
+- Si elige **exploratoria** → NO crear TC ni TP. Documentar en comentario de la US:
+  ```
+  Prueba exploratoria — no requiere Test Plan formal debido a la baja complejidad ({SP} SP).
+  
+  Validación manual:
+  - [Describir qué se validará manualmente, basado en los criterios de aceptación]
+  ```
+- Si elige **TP completo** → proceder normalmente con Fase 1
+
+### 2. Cobertura DEV (no testeable desde UI)
+
+Si **todos** los criterios de aceptación son verificaciones de backend/infraestructura sin interfaz de usuario:
+- **Señales:** "query en BD", "estructura de tablas", "acceso a base de datos", "código/programación", "appsettings", "worker/Service Bus", "infraestructura", "tabla de settings", "script SQL"
+- NO crear TC ni TP. Documentar en comentario de la US:
+  ```
+  Cobertura DEV — verificación a cargo del equipo de desarrollo.
+  
+  Justificación: [Explicar por qué no es testeable desde UI, en términos de la aplicación — sin citar rutas internas del repo]
+  ```
+
+> ⚠️ Si **algunos** criterios son UI y otros son backend → crear TC solo para los criterios UI verificables.
 
 ---
 
