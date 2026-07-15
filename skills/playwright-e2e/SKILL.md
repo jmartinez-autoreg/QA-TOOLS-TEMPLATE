@@ -346,6 +346,53 @@ Usuario dice "sigue sin codegen" →  Continuar con FASE 1 (Descubrimiento)
 >    - SysAdmin → `SEL.adminPage.title`
 > ⛔ Asumir que todos los roles aterrizan en Dashboard = fallo garantizado para SysAdmin.
 
+### FIX #7 — Post-Codegen: discovery obligatorio antes de escribir assertions
+> El Codegen confirma QUÉ flujo seguir y QUÉ acciones realizar. **No confirma:**
+> - Qué pantalla exacta ve cada rol al finalizar el flujo
+> - Si los selectores de confirmación (`text=X`) son únicos en esa pantalla
+>
+> ⛔ **REGLA:** Después de recibir el Codegen del usuario y ANTES de escribir el fixture/spec:
+>
+> **Paso A — Confirmar pantalla destino por rol (multi-rol flows)**
+> ```
+> Para cada rol del test:
+>   1. Navegar la app con ese usuario hasta la pantalla destino (MCP Browser o Codegen grabado)
+>   2. Anotar: ¿Qué heading / elemento único identifica que aterrizó donde debe?
+>   3. Documentar en UI-UX.md si no estaba registrado
+>   4. Solo entonces escribir el selector de confirmación en el fixture
+> ```
+>
+> **Paso B — Verificar unicidad de cada selector de confirmación**
+> ```js
+> // Ejecutar en MCP Browser en la pantalla destino
+> document.querySelectorAll('TU_SELECTOR').length  // debe ser === 1
+> // Si > 1 → usar selector más específico antes de escribir el expect()
+> ```
+>
+> **Paso C — Verificar comportamiento de navegación**
+> ```
+> ¿El link/botón abre en la misma pestaña o en popup?
+>   Misma pestaña → waitForURL o waitFor(element)
+>   Popup → page.waitForEvent('popup') ANTES del click
+> ```
+> El Codegen lo indica cuando escribe `const page1Promise = page.waitForEvent('popup')`.
+> Si el Codegen NO incluye ese patrón para un link externo, verificar en MCP si tiene `target="_blank"`.
+>
+> **Resumen del flujo post-Codegen correcto:**
+> ```
+> Usuario pega Codegen
+>   ↓
+> Leer flujo (pantallas, acciones, usuarios) — el Codegen es el MAPA
+>   ↓
+> Para cada pantalla destino del flujo:
+>   ↓
+>   Navegar con MCP Browser + ejecutar JS inventory (IDs reales)
+>   Confirmar heading/selector único de la pantalla — verificar .length === 1
+>   Si multi-rol: repetir por cada rol (pueden aterrizar en pantallas distintas)
+>   ↓
+> Con IDs reales + pantallas confirmadas → escribir fixture y spec
+> ```
+
 ---
 
 ## FASE 1 — Descubrimiento de la Aplicación
@@ -1380,8 +1427,15 @@ funcional. Esto duplica el test, confunde el reporte y oculta la causa real de f
         → Navegar con MCP Browser
         → Ejecutar JS inventory (ver REGLA 0)
         → Anotar id real de cada elemento interactivo
+        → **Verificar pantalla destino por ROL**: si el flujo involucra más de un rol,
+          navegar con cada usuario y confirmar qué heading/elemento aparece tras la acción.
+          ⛔ NUNCA asumir que todos los roles aterrizan en la misma pantalla.
+        → **Verificar unicidad de cada selector de confirmación (assertions)**:
+          `document.querySelectorAll('SELECTOR').length` debe ser === 1.
+          Si > 1 → buscar selector más específico `:is(h1,h2):has-text("X")` o `#id` antes de continuar.
    c. Identificar flujos condicionales (modales opcionales) → consolidar en try/catch
-   d. Solo continuar cuando TODOS los IDs estén confirmados y credenciales estén en .env.playwright
+   d. Solo continuar cuando TODOS los IDs estén confirmados, pantallas destino por rol verificadas,
+      y credenciales en .env.playwright
    ↓
 1. Leer TODO el fixture y el spec existentes
    ↓
